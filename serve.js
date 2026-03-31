@@ -39,8 +39,8 @@ const MIME = {
 const server = http.createServer((req, res) => {
   let urlPath = req.url.split('?')[0]; // Strip query string
 
-  // Default to emulator.html for root
-  if (urlPath === '/' || urlPath === '') urlPath = '/emulator.html';
+  // Default to index.html for root
+  if (urlPath === '/' || urlPath === '') urlPath = '/index.html';
 
   const filePath = path.join(ROOT, urlPath.replace(/\//g, path.sep));
 

@@ -133,7 +133,7 @@ Its still not working as I envisioned it, but its getting there.
     npm start
     ```
 
-2.  Open your browser and navigate to `http://localhost:3000`.
+2.  Open your browser and navigate to `http://localhost:3141`.
 
 3.  Select a Lua script to load and interact with the grid.
 
@@ -146,6 +146,18 @@ To add a new Lua script, simply place it in the `scripts/` directory. The script
 ### Development Server
 
 The development server includes hot-reload, so any changes to the Lua scripts or the emulator code will be reflected immediately in the browser.
+
+## Deployment (GitHub Pages)
+
+This project is compatible with GitHub Pages. To host it yourself:
+
+1.  Go to your repository **Settings** > **Pages**.
+2.  Under **Build and deployment**, set **Source** to `Deploy from a branch`.
+3.  Select the `main` branch and the `/ (root)` folder, then click **Save**.
+4.  Your emulator will be available at `https://<your-username>.github.io/diii-neotrellis-emulator/`.
+
+> [!TIP]
+> The application uses relative paths, so it will work correctly even in a repository subfolder.
 
 ## License
 
