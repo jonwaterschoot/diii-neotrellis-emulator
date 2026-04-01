@@ -38,6 +38,7 @@ export class MonomeAPI {
 
     // MIDI
     this.midiOut = null;
+    this.midiIn = null;
     this._activeNodes = new Map();
     this._audioCtx = null;
     this._masterGain = null;
@@ -106,6 +107,41 @@ export class MonomeAPI {
 
   setMidiOut(midiOut) {
     this.midiOut = midiOut;
+  }
+
+  setMidiIn(midiIn) {
+    if (this.midiIn) {
+      this.midiIn.onmidimessage = null;
+    }
+    this.midiIn = midiIn;
+    if (this.midiIn) {
+      this.midiIn.onmidimessage = (msg) => this._handleMidiInput(msg);
+    }
+  }
+
+  _handleMidiInput(msg) {
+    const [status, data1, data2] = msg.data;
+    const type = status & 0xF0;
+    
+    // Simplistic mapping: MIDI notes to grid coordinates
+    // This is often script-specific, but we can provide a default mapping
+    // for a 16x8 grid (e.g. Note 36-99)
+    if (type === 0x90 || type === 0x80) {
+      const isPress = (type === 0x90 && data2 > 0);
+      // Map MIDI note to X,Y (this is a guess, but common for Launchpad/etc)
+      // Assuming 8x8 or 16x8. Let's do a basic chromatic mapping for now or 
+      // just forward it if the script handles it.
+      // Better: if script has grid_event, call it.
+      // But we need X,Y.
+      // Let's assume the user might want a specific mapping later.
+      // For now, let's just log it and maybe map Note 0-127 to some coordinates.
+      // X = note % 16 + 1, Y = floor(note / 16) + 1
+      const x = (data1 % 16) + 1;
+      const y = Math.floor(data1 / 16) + 1;
+      if (x <= this.cols && y <= this.rows) {
+        this.handlePadEvent(x, y, isPress ? 1 : 0);
+      }
+    }
   }
 
   _ensureAudio() {

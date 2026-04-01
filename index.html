@@ -368,7 +368,8 @@
     }
 
     .pad.lit {
-      /* set via inline style from JS */
+      /* Dynamic brightness set via JS */
+      filter: brightness(1.5);
     }
 
     /* ── STATE BAR below grid ────────────────────────────────────────── */
@@ -763,7 +764,7 @@
       transition: opacity 0.3s;
     }
 
-    #fs-controls .btn, 
+    #fs-controls .btn,
     #fs-controls .fs-zoom-group {
       background: transparent;
       backdrop-filter: none;
@@ -783,6 +784,7 @@
     /* Style the range slider - Amber Gray Theme */
     input[type=range] {
       -webkit-appearance: none;
+      appearance: none;
       background: transparent;
     }
 
@@ -798,6 +800,7 @@
       background: rgba(255, 255, 255, 0.1);
       border-radius: 2px;
     }
+
     input[type=range]::-moz-range-track {
       width: 100%;
       height: 4px;
@@ -817,13 +820,16 @@
       height: 14px;
       width: 14px;
       border-radius: 50%;
-      background: #968971; /* Amber Gray */
+      background: #968971;
+      /* Amber Gray */
       cursor: pointer;
       -webkit-appearance: none;
-      margin-top: -5px; /* Centers thumb on track */
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      margin-top: -5px;
+      /* Centers thumb on track */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
       transition: background 0.2s, transform 0.2s;
     }
+
     input[type=range]::-moz-range-thumb {
       height: 14px;
       width: 14px;
@@ -831,7 +837,7 @@
       background: #968971;
       cursor: pointer;
       border: none;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
       transition: background 0.2s, transform 0.2s;
     }
 
@@ -839,6 +845,7 @@
       background: #b0a48e;
       transform: scale(1.15);
     }
+
     input[type=range]:active::-moz-range-thumb {
       background: #b0a48e;
       transform: scale(1.15);
@@ -923,7 +930,7 @@
     <button class="btn sm" id="btn-exit-fs" title="Exit Fullscreen">✕ Close</button>
     <div class="fs-zoom-group">
       <label style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Zoom</label>
-      <input type="range" id="zoom-slider-fs" min="8" max="100" value="32" style="width: 20px;">
+      <input type="range" id="zoom-slider-fs" min="8" max="100" value="32" style="width: 70px;">
       <button class="btn sm" id="btn-fit-fs" title="Fit to window">⤢ Fit</button>
     </div>
   </div>
@@ -974,16 +981,21 @@
 
       <div class="topbar-controls" style="gap: 12px;">
         <div class="bottombar-midi"
-          style="border-right: 1px solid var(--border); padding-right: 12px; margin-right: 4px;">
-          <select id="midi-select" style="min-width:130px; background: var(--surface); height: 28px;">
-            <option value="">— MIDI Output —</option>
+          style="border-right: 1px solid var(--border); padding-right: 12px; margin-right: 4px; gap: 8px;">
+          <select id="midi-in-select"
+            style="min-width:110px; background: var(--surface); height: 28px; font-size: 11px;">
+            <option value="">— MIDI In —</option>
           </select>
+          <select id="midi-select" style="min-width:110px; background: var(--surface); height: 28px; font-size: 11px;">
+            <option value="">— MIDI Out —</option>
+          </select>
+          <button class="btn sm" id="btn-midi-refresh" title="Refresh MIDI devices" style="padding: 2px 6px;">↻</button>
         </div>
 
         <div class="script-row" style="gap: 8px;">
           <label
             style="font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;">Zoom</label>
-          <input type="range" id="zoom-slider" min="12" max="80" value="32" style="width: 20px;">
+          <input type="range" id="zoom-slider" min="12" max="80" value="32" style="width: 70px;">
           <button class="btn sm" id="btn-fit" title="Fit grid to window">⤢ Fit</button>
         </div>
         <button class="btn" id="btn-fullscreen" title="Toggle Fullscreen (F)">
@@ -1184,7 +1196,7 @@
     // ─── SCRIPT BROWSER ────────────────────────────────────────────────────────
     const scriptSelect = document.getElementById('script-select');
     // Using relative path for BASE_URL to support GitHub Pages subfolders
-    const BASE_URL = '.'; 
+    const BASE_URL = '.';
 
     async function populateScriptSelect() {
       const manifest = await loader.fetchManifest(BASE_URL);
@@ -1242,30 +1254,87 @@
     }
 
     // ─── MIDI ──────────────────────────────────────────────────────────────────
+    const midiInSelect = document.getElementById('midi-in-select');
     const midiSelect = document.getElementById('midi-select');
     const midiDot = document.getElementById('midi-dot');
     const midiStatus = document.getElementById('midi-status');
+    const btnMidiRefresh = document.getElementById('btn-midi-refresh');
 
     if (navigator.requestMIDIAccess) {
-      navigator.requestMIDIAccess().then(access => {
-        function populateMidi() {
-          midiSelect.innerHTML = '<option value="">— MIDI Output —</option>';
-          access.outputs.forEach((out, id) => {
-            const opt = document.createElement('option');
-            opt.value = id;
-            opt.textContent = out.name;
-            midiSelect.appendChild(opt);
+      async function initMidi() {
+        logLine('Initializing Web MIDI...', 'info');
+        try {
+          const access = await navigator.requestMIDIAccess({ sysex: true });
+          logLine('✓ MIDI Access Granted', 'ok');
+
+          function populateMidi() {
+            const currentIn = midiInSelect.value;
+            const currentOut = midiSelect.value;
+
+            midiInSelect.innerHTML = '<option value="">— MIDI In —</option>';
+            midiSelect.innerHTML = '<option value="">— MIDI Out —</option>';
+
+            let inCount = 0;
+            access.inputs.forEach((input, id) => {
+              const opt = document.createElement('option');
+              opt.value = id;
+              opt.textContent = input.name;
+              midiInSelect.appendChild(opt);
+              inCount++;
+            });
+
+            let outCount = 0;
+            access.outputs.forEach((out, id) => {
+              const opt = document.createElement('option');
+              opt.value = id;
+              opt.textContent = out.name;
+              midiSelect.appendChild(opt);
+              outCount++;
+            });
+
+            if (inCount + outCount > 0) {
+              logLine(`MIDI: ${inCount} in, ${outCount} out found`, 'info');
+            } else {
+              logLine('MIDI: No devices detected', 'warn');
+            }
+
+            // Restore selections
+            if (currentIn && access.inputs.has(currentIn)) midiInSelect.value = currentIn;
+            if (currentOut && access.outputs.has(currentOut)) midiSelect.value = currentOut;
+          }
+
+          populateMidi();
+          access.onstatechange = (e) => {
+            logLine(`MIDI: Device ${e.port.name} ${e.port.state}`, 'info');
+            populateMidi();
+          };
+
+          midiInSelect.addEventListener('change', () => {
+            const input = access.inputs.get(midiInSelect.value) || null;
+            api.setMidiIn(input);
+            if (input) logLine(`✓ MIDI Input: ${input.name}`, 'ok');
           });
+
+          midiSelect.addEventListener('change', () => {
+            const out = access.outputs.get(midiSelect.value) || null;
+            api.setMidiOut(out);
+            midiDot.className = 'midi-dot' + (out ? ' connected' : '');
+            midiStatus.textContent = out ? out.name : 'No MIDI';
+            if (out) logLine(`✓ MIDI Output: ${out.name}`, 'ok');
+          });
+
+          btnMidiRefresh.addEventListener('click', populateMidi);
+
+        } catch (err) {
+          logLine(`✗ MIDI Error: ${err.message || 'Permission Denied'}`, 'err');
+          midiStatus.textContent = 'MIDI Blocked';
+          midiStatus.style.color = 'var(--red)';
         }
-        populateMidi();
-        access.onstatechange = populateMidi;
-        midiSelect.addEventListener('change', () => {
-          const out = access.outputs.get(midiSelect.value) || null;
-          api.setMidiOut(out);
-          midiDot.className = 'midi-dot' + (out ? ' connected' : '');
-          midiStatus.textContent = out ? out.name : 'No MIDI';
-        });
-      }).catch(() => { });
+      }
+      initMidi();
+    } else {
+      logLine('✗ Web MIDI not supported in this browser', 'err');
+      midiStatus.textContent = 'MIDI Unsupported';
     }
 
     // ─── KEYBOARD ──────────────────────────────────────────────────────────────
@@ -1529,7 +1598,7 @@
     window.addEventListener('resize', () => {
       handleOrientation();
       updateSliderLimits(); // Ensure precision matches new window size
-      
+
       // Responsively downscale if current size exceeds new window bounds
       const currentSize = parseFloat(zoomSlider.value);
       const maxNow = getMaxFitSize();
