@@ -8,6 +8,14 @@
     "gridSize": [16, 8]
   },
   {
+    "name": "Serpentine v1.3",
+    "file": "serpentine_v1-3.lua",
+    "description": "Snake sequencer game — v1.3 (panic button, humanize)",
+    "author": "jonwaterschoot",
+    "version": "1.3",
+    "gridSize": [16, 8]
+  },
+  {
     "name": "Serpentine v1.2",
     "file": "serpentine_v1-2.lua",
     "description": "Snake sequencer game — v1.2",

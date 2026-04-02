@@ -165,6 +165,16 @@ export class MonomeAPI {
     this._synthOff(note);
   }
 
+  midi_panic() {
+    if (this.midiOut) {
+      this.midiOut.send([0xB0, 120, 0]); // All Sound Off, ch1
+      this.midiOut.send([0xB0, 123, 0]); // All Notes Off, ch1
+    }
+    for (const note of [...this._activeNodes.keys()]) {
+      this._synthOff(note);
+    }
+  }
+
   _synthOn(note, vel) {
     this._ensureAudio();
     this._synthOff(note);

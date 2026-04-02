@@ -262,6 +262,11 @@ export class LuaLoader {
       api.midi_note_off(getInt(L2, 1)); return 0;
     });
 
+    // midi_panic()
+    setGlobal('midi_panic', (L2) => {
+      api.midi_panic(); return 0;
+    });
+
     // get_time() → number
     setGlobal('get_time', (L2) => {
       lua.lua_pushnumber(L2, api.get_time()); return 1;
