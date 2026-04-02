@@ -1,18 +1,50 @@
 [
   {
     "name": "Serpentine Dev",
-    "file": "serpentine_dev.lua",
+    "file": "serpentineSeqr/serpentine_dev.lua",
     "description": "Snake sequencer game — development version with all latest features",
     "author": "jonwaterschoot",
-    "version": "dev",
+    "version": "1.1.0-dev",
     "gridSize": [16, 8]
   },
   {
-    "name": "Serpentine Stable",
+    "name": "Serpentine v1.2",
+    "file": "serpentine_v1-2.lua",
+    "description": "Snake sequencer game — v1.2",
+    "author": "jonwaterschoot",
+    "version": "1.2",
+    "gridSize": [16, 8]
+  },
+  {
+    "name": "Serpentine v1.1",
+    "file": "serpentine_v1-1.lua",
+    "description": "Snake sequencer game — v1.1",
+    "author": "jonwaterschoot",
+    "version": "1.1",
+    "gridSize": [16, 8]
+  },
+  {
+    "name": "Serpentine v1.0",
     "file": "serpentine.lua",
-    "description": "Snake sequencer game — stable release",
+    "description": "Snake sequencer game — stable v1.0",
     "author": "jonwaterschoot",
     "version": "1.0",
+    "gridSize": [16, 8]
+  },
+  {
+    "name": "Power Test",
+    "file": "power_test.lua",
+    "description": "Tests the Power Limiter and grid_color_intensity() function",
+    "author": "jonwaterschoot",
+    "version": "",
+    "gridSize": [16, 8]
+  },
+  {
+    "name": "Monochrome Fallback",
+    "file": "monochrome_fallback.lua",
+    "description": "Brightness slider demo — monochrome fallback example",
+    "author": "jonwaterschoot",
+    "version": "",
     "gridSize": [16, 8]
   }
 ]
