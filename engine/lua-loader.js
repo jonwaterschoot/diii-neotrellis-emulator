@@ -219,6 +219,14 @@ export class LuaLoader {
     const getNum = (L2, idx) => lua.lua_tonumber(L2, idx);
     const getInt = (L2, idx) => Math.round(lua.lua_tonumber(L2, idx));
 
+    // grid_size_x() → number, grid_size_y() → number
+    setGlobal('grid_size_x', (L2) => {
+      lua.lua_pushnumber(L2, api.cols); return 1;
+    });
+    setGlobal('grid_size_y', (L2) => {
+      lua.lua_pushnumber(L2, api.rows); return 1;
+    });
+
     // grid_led(x, y, lum)
     setGlobal('grid_led', (L2) => {
       api.grid_led(getInt(L2, 1), getInt(L2, 2), getInt(L2, 3)); return 0;

@@ -809,12 +809,6 @@
       border-radius: 2px;
     }
 
-    /* Vertical Track */
-    #zoom-slider-fs[style*="slider-vertical"]::-webkit-slider-runnable-track {
-      width: 4px;
-      height: 100%;
-    }
-
     /* Thumb */
     input[type=range]::-webkit-slider-thumb {
       height: 14px;
@@ -896,7 +890,8 @@
       }
 
       #zoom-slider-fs {
-        appearance: slider-vertical;
+        writing-mode: vertical-lr;
+        direction: rtl;
         width: 14px !important;
         height: 100px;
       }
@@ -1237,7 +1232,7 @@
     btnDownload.addEventListener('click', () => {
       const val = scriptSelect.value;
       if (!val) return;
-      const url = `${BASE_URL}/${val}`;
+      const url = `${BASE_URL}/scripts/${val}`;
       const a = document.createElement('a');
       a.href = url;
       a.download = val.split('/').pop();
@@ -1633,6 +1628,10 @@
       }
     });
     window.addEventListener('orientationchange', handleOrientation);
+
+    function handleOrientation() {
+      fitToWindow();
+    }
 
     function handleResponsiveFit() {
       // Auto-fit if the window gets smaller than the current grid
