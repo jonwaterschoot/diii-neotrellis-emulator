@@ -1,7 +1,7 @@
 -- scriptname: Serpentine Sequencer
 -- v1.1.0-dev
 -- @author: jonwaterschoot
--- llllllll.co/t/serpentine-sequencer
+-- No link yet
 --
 -- A snake sequencer game for the NeoTrellis / Monome-compatible 16x8 grid.
 -- The snake eats fruit to collect notes into an arpeggiator pool.

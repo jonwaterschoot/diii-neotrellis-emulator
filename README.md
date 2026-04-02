@@ -67,6 +67,10 @@ So far my goal is to make an emulator that can be used as a manual guide for my 
 
 I have put my uf2 files in the `uf2s/` directory. in that directory also: a copy of the readme's that were created while building the neotrellis compatible firmware for the diii.  
 
+> [!NOTE]
+> **Nuke uf2** tool - Done some stupid thing like making a device crashing luascript the default to load on start? Bricking you out of using the webapp diii? Asking for friend 😉
+> [You'll need to nuke the Flash](https://github.com/Gadgetoid/pico-universal-flash-nuke/releases)
+
 ## Official diii pages:
 
 - Webapp to upload lua files: https://monome.org/diii/ 

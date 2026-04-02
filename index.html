@@ -897,8 +897,15 @@
 
       #zoom-slider-fs {
         appearance: slider-vertical;
-        width: 14px;
+        width: 14px !important;
         height: 100px;
+      }
+
+      .fs-zoom-group {
+        border-left: none;
+        border-top: 1px solid var(--border);
+        padding-left: 0;
+        padding-top: 12px;
       }
     }
 
@@ -961,6 +968,7 @@
           <option value="">— Select preloaded script —</option>
         </select>
         <button class="btn primary" id="btn-load" title="Load selected script">▶ Load</button>
+        <button class="btn" id="btn-download" title="Download selected script" disabled>↓ Download</button>
       </div>
       <label class="file-pick-label" title="Open a .lua file from disk">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1171,10 +1179,10 @@
       if (api._masterGain) api._masterGain.gain.value = api.volume;
     });
     document.getElementById('atk-slider').addEventListener('input', e => {
-      api.attack = e.target.value / 1000 * 0.2 + 0.002;
+      api.attack = e.target.value / 1000;
     });
     document.getElementById('rel-slider').addEventListener('input', e => {
-      api.release = e.target.value / 1000 * 0.3 + 0.04;
+      api.release = e.target.value / 1000;
     });
 
     // ─── LUA LOADER ────────────────────────────────────────────────────────────
@@ -1208,9 +1216,10 @@
         opt.title = entry.description || '';
         scriptSelect.appendChild(opt);
       });
-      // Auto-select first  
+      // Auto-select first
       if (manifest.length > 0 && !scriptSelect.value) {
         scriptSelect.value = manifest[0].file;
+        document.getElementById('btn-download').disabled = false;
       }
     }
 
@@ -1218,6 +1227,23 @@
     document.getElementById('btn-load').addEventListener('click', () => {
       const val = scriptSelect.value;
       if (val) loader.loadFromServer(val, BASE_URL);
+    });
+
+    // Download button
+    const btnDownload = document.getElementById('btn-download');
+    scriptSelect.addEventListener('change', () => {
+      btnDownload.disabled = !scriptSelect.value;
+    });
+    btnDownload.addEventListener('click', () => {
+      const val = scriptSelect.value;
+      if (!val) return;
+      const url = `${BASE_URL}/${val}`;
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = val.split('/').pop();
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     });
 
     // File picker
