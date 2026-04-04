@@ -4,45 +4,29 @@
     "file": "serpentineSeqr/serpentine_dev.lua",
     "description": "Snake sequencer game — development version with all latest features",
     "author": "jonwaterschoot",
-    "version": "1.1.0-dev",
+    "version": "1.30-dev",
     "gridSize": [16, 8]
   },
   {
-    "name": "Serpentine v1.3",
-    "file": "serpentine_v1-3.lua",
-    "description": "Snake sequencer game — v1.3 (panic button, humanize)",
+    "name": "Serpentine minified",
+    "file": "serpentine_v1-30.lua",
+    "description": "Snake sequencer game — development version with all latest features",
     "author": "jonwaterschoot",
-    "version": "1.3",
+    "version": "1.30-minified",
     "gridSize": [16, 8]
-  },
-  {
-    "name": "Serpentine v1.2",
-    "file": "serpentine_v1-2.lua",
-    "description": "Snake sequencer game — v1.2",
+  },  
+   {
+    "name": "Color Fallback Demo",
+    "file": "color_fallback_demo.lua",
+    "description": "Made to test the color_fallback() function, shows how you can use it to make a monochrome version of your script that still looks good on a monochrome grid, more info in the github folder uf2s",
     "author": "jonwaterschoot",
-    "version": "1.2",
+    "version": "",
     "gridSize": [16, 8]
   },
-  {
-    "name": "Serpentine v1.1",
-    "file": "serpentine_v1-1.lua",
-    "description": "Snake sequencer game — v1.1",
-    "author": "jonwaterschoot",
-    "version": "1.1",
-    "gridSize": [16, 8]
-  },
-  {
-    "name": "Serpentine v1.0",
-    "file": "serpentine.lua",
-    "description": "Snake sequencer game — stable v1.0",
-    "author": "jonwaterschoot",
-    "version": "1.0",
-    "gridSize": [16, 8]
-  },
-  {
+   {
     "name": "Power Test",
     "file": "power_test.lua",
-    "description": "Tests the Power Limiter and grid_color_intensity() function",
+    "description": "Tests the Power Limiter and grid_color_intensity() function, was made to test brownout of the leds.",
     "author": "jonwaterschoot",
     "version": "",
     "gridSize": [16, 8]
@@ -50,7 +34,7 @@
   {
     "name": "Monochrome Fallback",
     "file": "monochrome_fallback.lua",
-    "description": "Brightness slider demo — monochrome fallback example",
+    "description": "Brightness slider demo —  my first monochrome fallback example, color_fallback_demo is a better example of this but I wanted to keep this one around for testing purposes",
     "author": "jonwaterschoot",
     "version": "",
     "gridSize": [16, 8]

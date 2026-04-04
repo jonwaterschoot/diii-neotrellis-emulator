@@ -1,8 +1,22 @@
 # diii-neotrellis-emulator
 
-A browser-based emulator for loading Lua scripts designed for Monome and NeoTrellis grids. This project aims to provide a high-fidelity development and play environment for physical grid instruments.
+A browser-based emulator for loading Lua scripts designed for Monome and NeoTrellis grids. This project was born from my first tests of making an interactive manual for my serpentine script. I soon started implementing sound and thought i might as well build a full webapp to also emulate other scripts.
+
+This is a vibecoded project, but none the less I have spent many hours building this and learning about the eco system.
+
+I have a few diy projects from okyeron,  and it was through that discord server that I got intruiged by the new diii possibilities.
+
+I built my own version of the firmware looking to create compatibility with og monome grid. I do not own any original monome geaar unfortunately.
+
+I also hope I'm not breaking any licensing things, if so please let me know. I thought it be best if I also shared under the gpl license.
 
 ## Scripting & Hardware Compatibility
+
+![neotrellis diii color fallback viii](img/neotrellis_diii_color_fallback_viii.gif)
+
+![neotrellis diii color](img/neotrellis_diii_color.gif)
+
+I wrote a quick [readme guide](uf2s/readme.md)in the uf2s directory with some quick tips to get the custom firmware for pico neotrellis up and running.
 
 The emulator supports scripts written for both the original **Monome Grid** (monochrome) and the **Adafruit NeoTrellis** (RGB). To ensure your scripts are portable across different hardware targets, the following compatibility patterns are recommended.
 

@@ -384,6 +384,10 @@ function bfsRun(useTgt,tx,ty){
 }
 
 // ─── RENDERING ───────────────────────────────────────────────────────────────
+// Physical LEDs are emissive — a 20%-power LED looks much brighter in a dark
+// room than rgb(51,51,51) on screen. Apply a gamma curve so dim LEDs read
+// correctly in the emulator (gamma 0.55: 20% → ~70, 100% → 255).
+function ledG(v){ return v===0 ? 0 : Math.round(Math.pow(v/255,0.55)*255); }
 const simFrame=new Uint8Array(W*H*3);
 function clr(){simFrame.fill(0);}
 function spx(x,y,r,g,b){
@@ -399,12 +403,13 @@ function gridRefresh(){
   const bs=master_bright/12;
   for(let y=1;y<=H;y++) for(let x=1;x<=W;x++){
     const i=((y-1)*W+(x-1))*3;
-    const r=Math.min(255,Math.floor(simFrame[i]*bs));
-    const g=Math.min(255,Math.floor(simFrame[i+1]*bs));
-    const b=Math.min(255,Math.floor(simFrame[i+2]*bs));
+    let r=Math.min(255,Math.floor(simFrame[i]*bs));
+    let g=Math.min(255,Math.floor(simFrame[i+1]*bs));
+    let b=Math.min(255,Math.floor(simFrame[i+2]*bs));
     const p=simPads[y][x]; if(!p) continue;
     if(r===0&&g===0&&b===0){p.style.background='#1a1a1a';p.style.boxShadow='none';p.style.borderColor='#2a2a2a';}
     else{
+      r=ledG(r); g=ledG(g); b=ledG(b);
       p.style.background=`rgb(${r},${g},${b})`;
       const lum=r*0.21+g*0.72+b*0.07;
       p.style.boxShadow=lum>15?`0 0 ${Math.min(14,lum/8)}px rgba(${r},${g},${b},0.55)`:'none';
@@ -421,6 +426,7 @@ function spxA(x,y,r,g,b){
   p.innerText='';
   if(r===0&&g===0&&b===0){p.style.background='#1a1a1a';p.style.boxShadow='none';p.style.borderColor='#2a2a2a';}
   else{
+    r=ledG(r); g=ledG(g); b=ledG(b);
     p.style.background=`rgb(${r},${g},${b})`;
     const lum=r*0.21+g*0.72+b*0.07;
     p.style.boxShadow=lum>15?`0 0 ${Math.min(14,lum/8)}px rgba(${r},${g},${b},0.55)`:'none';

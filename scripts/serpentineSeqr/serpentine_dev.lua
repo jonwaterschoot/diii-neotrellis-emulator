@@ -10,7 +10,10 @@
 
 -- @section Grid Layout
 -- x=1..16, y=1..8: Full 16x8 play grid
--- x=1, y=8: ALT toggle — momentary press opens Settings, double-tap = sticky
+-- x=1, y=8: ALT toggle — momentary press opens Settings, double-tap = sticky; sequencer keeps running
+-- x=2, y=8: Play/Stop toggle — green=running, red=stopped; stop sends MIDI panic (all notes off)
+-- x=3, y=8: Base octave cycle (Settings only) — OC1–OC6
+-- x=4, y=8: Octave range cycle (Settings only) — RA1–RA6
 -- x=15, y=7: D-PAD UP
 -- x=14, y=8: D-PAD LEFT
 -- x=15, y=8: D-PAD DOWN
@@ -19,14 +22,14 @@
 -- @section Settings View (hold ALT)
 -- x=1..8, y=1: Fruit spawn quantity slider (each step = 2 fruits, max 16)
 -- x=11..16, y=1: Fruit type toggles — Red, Blue, Yellow, Cyan, Orange, Purple
--- x=1..8, y=2: Arpeggio lifespan slider — x=1: ∞ loop mode (cyan), x=2..8: 8–56 ticks
+-- x=1..8, y=2: Accent interval slider (1–8 steps; shows lit beats in 8-step window)
 -- x=9..16, y=2: Arpeggio pool max capacity (1–8 notes)
--- x=1, y=3: Autopilot mode cycle — NON / SEM / AUT
+-- x=1, y=3: Autopilot toggle — dim=manual, bright green=auto (BFS to fruits)
 -- x=3, y=3: Arpeggio playback order — ORD / RND / UP / DWN
 -- x=5, y=3: Arp on/off toggle — green=on (arp plays), dim red=off (eat notes only)
--- x=7, y=3: Humanize toggle — cyan=on (±vel + duration drift), dim=off
--- x=3, y=8: Octave up (green) — shifts all note output up one octave, display: OCn
--- x=4, y=8: Octave down (orange) — shifts all note output down one octave
+-- x=7, y=3: Humanize toggle — cyan=on (±vel + duration drift), dim=off; shows HU1/HU0
+-- x=3, y=8: Base octave cycle (green) — OC1–OC6, shifts all note output
+-- x=4, y=8: Octave range cycle (blue) — RA1–RA6, spreads notes across octaves
 -- x=10, y=3: BPM −10
 -- x=11, y=3: BPM −1
 -- x=12, y=3: BPM +1
@@ -52,8 +55,7 @@ local PANIC_X, PANIC_Y = 2, 8
 local DPAD = {{x=15,y=7,dx=0,dy=-1},{x=14,y=8,dx=-1,dy=0},{x=15,y=8,dx=0,dy=1},{x=16,y=8,dx=1,dy=0}}
 local num_fruits = 3
 local auto_mode = 0
-local auto_target = {x=0, y=0}
-local auto_has_target = false
+
 local bpm = 120
 local temp_slow_steps = 0
 
@@ -65,6 +67,7 @@ local function get_interval()
   return 60 / current_bpm / 4
 end
 
+
 local ECHO_MAX = 4
 local ECHO_BUF = {}
 for i=1,ECHO_MAX do ECHO_BUF[i] = {active=false, note=0, vel=0, ticks_left=0, current_interval=0, bounces=0} end
@@ -75,10 +78,10 @@ local arp_pool_len = 0
 local arp_pool_max = 8
 local arp_mode = 1
 local arp_enabled = true
-local humanize_on = false
+local accent_div = 4
+local humanize_level = 0
 local humanize_hold = false
-local arp_lifespan = 32
-local arp_steps_remaining = 0
+local hum_flash = 0
 local arp_labels = {"ORD","RND","UP","DWN"}
 local SORT_BUF = {}
 for i=1,8 do SORT_BUF[i]={note=0,x=0,y=0,kind=0,prob=1.0} end
@@ -87,7 +90,7 @@ for i=1,8 do SORT_BUF[i]={note=0,x=0,y=0,kind=0,prob=1.0} end
 local FRUIT_COL = {{r=220,g=40,b=20},{r=80,g=120,b=240},{r=240,g=200,b=20},{r=40,g=220,b=200},{r=255,g=140,b=0},{r=200,g=40,b=240}}
 local FRUIT_W = {20, 40, 20, 20, 15, 10}
 local fruit_enabled = {true, true, true, true, true, true}
-local arp_first_note = false
+
 local halos = {}
 for i=1,W*H do halos[i]={state=0,life=0} end
 
@@ -100,8 +103,9 @@ local root_note = 0
 local custom_scale = {true,false,true,false,true,false,false,true,false,true,false,false}
 local SCALE = {0,2,4,7,9,0,0,0,0,0,0,0}
 local SCALE_LEN = 5
-local BASE = 48
-local oct_offset = -1  -- default one octave lower; display = 3+oct_offset → "OC2"
+local BASE = 24
+local oct_base = 1   -- 1–6, cycles; OC1 = C2 (MIDI 36), OC2 = C3, etc.
+local oct_range = 2  -- 1–6, cycles; RA1 = mono-octave, RA2 = 2-oct spread, etc.
 local KB_MAP = { [7] = {[1]=0, [2]=2, [3]=4, [4]=5, [5]=7, [6]=9, [7]=11}, [6] = {[2]=1, [3]=3, [5]=6, [6]=8, [7]=10} }
 
 -- @section Music System
@@ -146,6 +150,7 @@ local on_chord = false
 local chord_hold_ticks = 0  -- seq_ticks remaining before chord notes are silenced
 local chord_notes = {0,0,0}
 
+local seq_running = true
 local alt_held = false
 local menu_sticky = false
 local last_alt_tap = 0
@@ -174,7 +179,7 @@ local DIR_DY = {0, 0, 1, -1}
 -- @section Autopilot (BFS)
 
 --- Breadth-first search for the nearest target.
--- Used by AUT mode (any fruit) and SEM mode (user-set target).
+-- Used by AUT mode to BFS toward any fruit.
 -- @tparam boolean use_tgt_flags true = seek any BFS_T flagged cell, false = seek (tx,ty)
 -- @tparam number tx target x (1-based)
 -- @tparam number ty target y (1-based)
@@ -225,7 +230,11 @@ local function spx(x,y,r,g,b)
     r,g,b = math.floor(lum*t.r), math.floor(lum*t.g), math.floor(lum*t.b)
   end
   if grid_led_rgb then grid_led_rgb(x,y,r,g,b)
-  else grid_led(x,y,math.floor(math.max(r,g,b)/17)) end
+  else
+    local lv = math.floor(math.max(r,g,b)/17)
+    if lv < 4 and (r > 0 or g > 0 or b > 0) then lv = 4 end
+    grid_led(x,y,lv)
+  end
 end
 
 local function clr() grid_led_all(0) end
@@ -233,7 +242,7 @@ local function clr() grid_led_all(0) end
 local function degree_note(deg, oct)
   local _d = ((deg-1)%SCALE_LEN)+1
   local deg_oct = math.floor((deg-1)/SCALE_LEN)
-  local note = BASE + oct_offset*12 + SCALE[_d] + (oct+deg_oct)*12
+  local note = BASE + oct_base*12 + SCALE[_d] + math.min(oct+deg_oct, oct_range-1)*12
   return math.max(24,math.min(108,note))
 end
 
@@ -242,7 +251,7 @@ local function note_for(x,y)
   return degree_note(x, oct)
 end
 
-local FONT={["0"]=0x75557,["1"]=0x22222,["2"]=0x71747,["3"]=0x71717,["4"]=0x55711,["5"]=0x74717,["6"]=0x74757,["7"]=0x71111,["8"]=0x75757,["9"]=0x75711,["A"]=0x75755,["C"]=0x74447,["D"]=0x65556,["E"]=0x74747,["I"]=0x72227,["J"]=0x71153,["L"]=0x44447,["M"]=0x57555,["N"]=0x75555,["O"]=0x75557,["P"]=0x75744,["R"]=0x75765,["S"]=0x74717,["T"]=0x72222,["U"]=0x55557,["W"]=0x55575,["Y"]=0x55222}
+local FONT={["0"]=0x75557,["1"]=0x22222,["2"]=0x71747,["3"]=0x71717,["4"]=0x55711,["5"]=0x74717,["6"]=0x74757,["7"]=0x71111,["8"]=0x75757,["9"]=0x75711,["A"]=0x75755,["C"]=0x74447,["D"]=0x65556,["E"]=0x74747,["F"]=0x74744,["H"]=0x55755,["I"]=0x72227,["J"]=0x71153,["L"]=0x44447,["M"]=0x57555,["N"]=0x75555,["O"]=0x75557,["P"]=0x75744,["R"]=0x75765,["S"]=0x74717,["T"]=0x72222,["U"]=0x55557,["W"]=0x55575,["Y"]=0x55222}
 
 local function draw_char(x,y,char,r,g,b,bm)
   local f = FONT[tostring(char)]
@@ -279,13 +288,13 @@ local function draw_scene_raw()
       spx(hx,hy,5,20,25)
     end
   end
-  if auto_has_target then spx(auto_target.x, auto_target.y, 200, 100, 15) end
+
   for i=1,#fruits do
     local f=fruits[i]; local c=FRUIT_COL[f.kind]
     spx(f.x, f.y, c.r, c.g, c.b)
   end
   spx(ALT_X, ALT_Y, alt_held and 232 or 50, alt_held and 112 or 18, alt_held and 18 or 5)
-  spx(PANIC_X, PANIC_Y, 80, 10, 10)
+  if seq_running then spx(PANIC_X,PANIC_Y,20,180,40) else spx(PANIC_X,PANIC_Y,200,20,20) end
   for i=1,#DPAD do local a=DPAD[i]; spx(a.x,a.y,12,12,28) end
   local n = snake_len
   for i=n,2,-1 do
@@ -314,24 +323,16 @@ local function draw_alt()
     else spx(x,1,math.floor(c.r*0.1),math.floor(c.g*0.1),math.floor(c.b*0.1)) end
   end
   for x=1,8 do
-    if x == 1 then
-      -- x=1 = infinity mode indicator (cyan when active)
-      if arp_lifespan == 0 then spx(1,2,20,200,200) else spx(1,2,40,10,35) end
-    else
-      -- x=2..8 represent 8..56 ticks; light if arp_lifespan >= (x-1)*8
-      if arp_lifespan > 0 and arp_lifespan >= (x-1)*8 then spx(x,2,200,40,180) else spx(x,2,40,10,35) end
-    end
+    if (x-1)%accent_div==0 then spx(x,2,180,40,220) else spx(x,2,10,5,15) end
   end
   for x=9,16 do
     if (x-8)<=arp_pool_max then spx(x,2,100,100,255) else spx(x,2,20,20,50) end
   end
   spx(10,3,180,20,10); spx(11,3,200,80,20); spx(12,3,20,200,80); spx(13,3,10,180,20)
-  if auto_mode == 0 then spx(1,3,30,8,4)
-  elseif auto_mode == 1 then spx(1,3,130,75,10)
-  else spx(1,3,20,240,50) end
+  if auto_mode == 0 then spx(1,3,30,8,4) else spx(1,3,20,240,50) end
   spx(3,3,240,150,20)
   if arp_enabled then spx(5,3,20,220,80) else spx(5,3,60,20,20) end
-  if humanize_on then spx(7,3,20,200,220) else spx(7,3,10,40,45) end
+  if humanize_level==0 then spx(7,3,10,40,45) else spx(7,3,10,40+humanize_level*45,45+humanize_level*45) end
   local b_r = math.floor(master_bright*17)
   spx(15,3,b_r,b_r,b_r)
   if mono_mode > 0 then
@@ -365,22 +366,26 @@ local function draw_alt()
     local label = arp_labels[arp_mode]
     if label == "UP" then label = " UP" end
     draw_label(8, 4, label, 200, 150, 10, 2)
-  elseif alt_disp_timer > 0 and alt_disp_mode == "AUTO" then
-    local auto_labels = {"NON", "SEM", "AUT"}
-    draw_label(8, 4, auto_labels[auto_mode + 1], 20, 200, 60, 2)
+  elseif alt_disp_timer>0 and alt_disp_mode=="ARPE" then draw_label(8,4,arp_enabled and"AON"or"AOF",arp_enabled and 20 or 200,arp_enabled and 220 or 40,arp_enabled and 80 or 40,2)
   elseif alt_disp_timer > 0 and alt_disp_mode == "SCA" then
     draw_label(8, 4, SCALE_NAMES[scale_mode], 100, 255, 100, 2)
   elseif alt_disp_timer > 0 and alt_disp_mode == "OCT" then
-    local oct_num = 3 + oct_offset
-    draw_label(8, 4, string.format("OC%d", oct_num), 80, 200, 255, 2)
+    draw_label(8, 4, string.format("OC%d", oct_base), 80, 200, 255, 2)
+  elseif alt_disp_timer > 0 and alt_disp_mode == "RAN" then
+    draw_label(8, 4, string.format("RA%d", oct_range), 80, 160, 255, 2)
   else
-    local s_bpm = string.format("%03d", bpm)
-    draw_label(8, 4, s_bpm, 180, 120, 20, 2)
+    if hum_flash > 0 then
+      hum_flash = hum_flash - 1
+      local g = humanize_level == 0 and 60 or 40 + humanize_level * 45
+      draw_label(8, 4, " H"..humanize_level, 10, g, g + 20, 2)
+    else
+      draw_label(8, 4, string.format("%03d", bpm), 180, 120, 20, 2)
+    end
   end
-  -- Octave down (x=4) / up (x=3) buttons on y=8
-  spx(4, 8, 180, 60, 20)
+  -- Base octave (x=3), range (x=4) on y=8
   spx(3, 8, 20, 180, 60)
-  spx(PANIC_X, PANIC_Y, 220, 20, 20)
+  spx(4, 8, 20, 80, 220)
+  if seq_running then spx(PANIC_X,PANIC_Y,20,180,40) else spx(PANIC_X,PANIC_Y,220,20,20) end
   spx(ALT_X, ALT_Y, 232, 112, 18)
   grid_refresh()
 end
@@ -438,7 +443,7 @@ local function reset_snake()
     s.x, s.y = 10-i, 4
   end
   dir.x, dir.y, queued.x, queued.y = 1,0,1,0
-  snk_len, auto_has_target = 4, false
+  snk_len = 4
 end
 
 -- @section Death Animation
@@ -460,8 +465,7 @@ local function death_tick()
   death_col = death_col + 1
   if death_col > W then
     if on_note then midi_note_off(on_note); on_note=nil end
-    arp_pool_len, arp_steps_remaining = 0, 0
-    arp_first_note = false
+    arp_pool_len = 0
     for hk=1,W*H do halos[hk].life=0; halos[hk].state=0 end
     for ei=1,ECHO_MAX do
       if ECHO_BUF[ei].active then midi_note_off(ECHO_BUF[ei].note) end
@@ -496,8 +500,6 @@ local function arp_add(note, x, y, kind)
   local target = arp_pool[arp_pool_len]
   target.note, target.x, target.y, target.kind = note, x, y, kind
   target.prob = (kind == 5) and 0.33 or 1.0
-  arp_steps_remaining = arp_lifespan
-  arp_first_note = true
 end
 
 
@@ -515,13 +517,6 @@ local function seq_tick()
   end
   if not arp_enabled then return end
   if arp_pool_len == 0 then return end
-  if arp_lifespan > 0 then
-    if arp_steps_remaining <= 0 then
-      arp_steps_remaining = arp_lifespan  -- loop instead of kill
-    end
-    arp_steps_remaining = arp_steps_remaining - 1
-  end
-  if arp_first_note then arp_first_note = false end
   if arp_pool_len == 0 then return end
 
   local n = arp_pool_len
@@ -560,12 +555,13 @@ local function seq_tick()
   beat_count = beat_count + 1
   local vel
   if beat_count % 16 == 1 then vel = 127
-  elseif beat_count % 4 == 1 then vel = 110
+  elseif beat_count % accent_div == 1 then vel = 110
   else vel = 80
   end
-  if humanize_on then
-    vel = math.max(1, math.min(127, vel + math.random(-15, 15)))
-    humanize_hold = (math.random(2) == 1)
+  if humanize_level > 0 then
+    local r = humanize_level * 10 + 5
+    vel = math.max(1, math.min(127, vel + math.random(-r, r)))
+    humanize_hold = humanize_level == 4 or math.random(humanize_level + 1) >= 2
   end
   midi_note_on(triggered_note_obj.note, vel); on_note = triggered_note_obj.note
 end
@@ -578,8 +574,6 @@ local fast_tick = 0
 -- Handles: echo decay, death phases, autopilot BFS, snake movement,
 -- collision detection, fruit collection effects, and arp sequencer trigger.
 local function game_tick()
-  if alt_held then return end
-
   fast_tick = fast_tick + 1
 
   for i=1,ECHO_MAX do
@@ -602,6 +596,8 @@ local function game_tick()
     end
   end
 
+  if not seq_running then return end
+
   if death_phase == 1 then
     if fast_tick % 8 == 0 then death_tick() end
     return
@@ -613,18 +609,11 @@ local function game_tick()
   if fast_tick % 8 ~= 0 then return end
   -- Turn off eat note from previous game tick
   if eat_note then midi_note_off(eat_note); eat_note = nil end
-  if auto_mode == 2 then
+  if auto_mode == 1 then
     for i=1,BFS_SZ do BFS_T[i] = false end
     for i=1,#fruits do local f=fruits[i]; BFS_T[(f.y-1)*W+f.x]=true end
     local d = bfs_run(true,0,0)
     if d>0 then queued.x=DIR_DX[d]; queued.y=DIR_DY[d] end
-  elseif auto_mode == 1 and auto_has_target then
-    local h = snk(1)
-    if h.x == auto_target.x and h.y == auto_target.y then auto_has_target = false
-    else
-      local d = bfs_run(false, auto_target.x, auto_target.y)
-      if d>0 then queued.x=DIR_DX[d]; queued.y=DIR_DY[d] end
-    end
   end
 
   if not (queued.x == -dir.x and dir.x ~= 0) and not (queued.y == -dir.y and dir.y ~= 0) then
@@ -709,7 +698,7 @@ local function game_tick()
   end
   while snake_len > snk_len do snake_len = snake_len - 1 end
   seq_tick()
-  draw_game()
+  if not alt_held then draw_game() end
 end
 
 --- Kill all active notes: clears Lua note state and sends CC 120 (All Sound Off).
@@ -736,13 +725,6 @@ function event_grid(x,y,z)
       local now = get_time()
       if (now-last_alt_tap)<0.3 then menu_sticky = not menu_sticky end
       last_alt_tap, alt_held = now, true
-      -- Silence everything before entering settings
-      if on_note then midi_note_off(on_note); on_note = nil end
-      if eat_note then midi_note_off(eat_note); eat_note = nil end
-      if on_chord then for ci=1,3 do midi_note_off(chord_notes[ci]) end; on_chord = false; chord_hold_ticks = 0 end
-      for ei=1,ECHO_MAX do
-        if ECHO_BUF[ei].active then midi_note_off(ECHO_BUF[ei].note); ECHO_BUF[ei].active = false end
-      end
       draw_alt()
     else
       if not menu_sticky then alt_held=false; draw_game() end
@@ -751,7 +733,8 @@ function event_grid(x,y,z)
   end
   if z==0 then return end
   if x==PANIC_X and y==PANIC_Y then
-    do_panic()
+    seq_running = not seq_running
+    if not seq_running then do_panic() end
     if alt_held then draw_alt() else draw_game() end
     return
   end
@@ -777,19 +760,15 @@ function event_grid(x,y,z)
         fruit_enabled[x-10] = not fruit_enabled[x-10]
       end
     elseif y==2 then
-      if x<=8 then
-        if x == 1 then arp_lifespan = 0 else arp_lifespan = (x-1)*8 end
-      else arp_pool_max=x-8 end
-      alt_disp_mode="ARP"; alt_disp_timer=15
+      if x<=8 then accent_div=x end
+      if x>=9 then arp_pool_max=x-8; alt_disp_mode="ARP"; alt_disp_timer=15 end
     elseif y==3 then
-      if x==10 then bpm=math.max(40,bpm-10); alt_disp_timer=0
-      elseif x==11 then bpm=math.max(40,bpm-1); alt_disp_timer=0
-      elseif x==12 then bpm=math.min(240,bpm+1); alt_disp_timer=0
-      elseif x==13 then bpm=math.min(240,bpm+10); alt_disp_timer=0
+      if x==10 then bpm=math.max(1,bpm-10); alt_disp_timer=0; hum_flash=0
+      elseif x==11 then bpm=math.max(1,bpm-1); alt_disp_timer=0; hum_flash=0
+      elseif x==12 then bpm=math.min(240,bpm+1); alt_disp_timer=0; hum_flash=0
+      elseif x==13 then bpm=math.min(240,bpm+10); alt_disp_timer=0; hum_flash=0
       elseif x==1 then
-        auto_mode = (auto_mode+1)%3
-        if auto_mode~=1 then auto_has_target=false end
-        alt_disp_mode="AUTO"; alt_disp_timer=15
+        auto_mode = (auto_mode+1)%2
       elseif x==3 then
         arp_mode=(arp_mode%#arp_labels)+1; alt_disp_mode="ARP"; alt_disp_timer=15
       elseif x==5 then
@@ -798,10 +777,11 @@ function event_grid(x,y,z)
           if on_note then midi_note_off(on_note); on_note=nil end
           if on_chord then for ci=1,3 do midi_note_off(chord_notes[ci]) end; on_chord=false; chord_hold_ticks=0 end
         end
-        alt_disp_mode="ARP"; alt_disp_timer=15
+        alt_disp_mode="ARPE"; alt_disp_timer=15
       elseif x==7 then
-        humanize_on = not humanize_on
-        if not humanize_on then humanize_hold = false end
+        humanize_level = (humanize_level + 1) % 5
+        if humanize_level == 0 then humanize_hold = false end
+        hum_flash = 15; alt_disp_timer = 0
       elseif x==15 then
         master_bright = master_bright+4
         if master_bright>15 then master_bright=4 end
@@ -811,12 +791,12 @@ function event_grid(x,y,z)
       end
       m_game:start(get_interval() / 4)
     elseif y==8 then
-      if x==4 then
-        oct_offset = math.max(-3, oct_offset - 1)
+      if x==3 then
+        oct_base = (oct_base % 6) + 1
         alt_disp_mode="OCT"; alt_disp_timer=15
-      elseif x==3 then
-        oct_offset = math.min(3, oct_offset + 1)
-        alt_disp_mode="OCT"; alt_disp_timer=15
+      elseif x==4 then
+        oct_range = (oct_range % 6) + 1
+        alt_disp_mode="RAN"; alt_disp_timer=15
       end
     end
     draw_alt()
@@ -827,16 +807,11 @@ function event_grid(x,y,z)
     local a = DPAD[i]
     if a.x==x and a.y==y then
       queued.x, queued.y = a.dx, a.dy
-      if auto_mode == 1 then auto_has_target = false end
       return
     end
   end
 
   if snake_len == 0 then return end
-  if auto_mode == 1 then
-    auto_target.x, auto_target.y = x, y; auto_has_target = true
-    return
-  end
   local h = snk(1)
   local dx, dy = x - h.x, y - h.y
   if dx == 0 and dy == 0 then return end
@@ -846,6 +821,7 @@ function event_grid(x,y,z)
     queued.x, queued.y = 0, (dy>0) and 1 or -1
   end
 end
+
 
 math.randomseed(math.floor(get_time()*1e6)%999983)
 if grid_color_intensity then grid_color_intensity(master_bright) end

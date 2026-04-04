@@ -285,6 +285,87 @@
       gap: 0;
       overflow: hidden;
       min-height: 0;
+      position: relative;
+    }
+
+    /* ── MAP OVERLAY ──────────────────────────────────────────────────── */
+    #map-col-left, #map-col-right {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      padding: 20px 8px;
+      overflow-y: auto;
+      min-width: 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border2) transparent;
+    }
+    body.map-mode .main {
+      grid-template-columns: 190px 1fr 190px;
+      overflow: visible;
+    }
+    body.map-mode #map-col-left  { display: flex; grid-column: 1; }
+    body.map-mode .emulator-pane { grid-column: 2; }
+    body.map-mode #map-col-right  { display: flex; grid-column: 3; }
+    body.map-mode .side-pane { display: none; }
+    body.map-mode #map-lines-svg { display: block; }
+
+    #map-lines-svg {
+      display: none;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      overflow: visible;
+      pointer-events: none;
+      z-index: 60;
+    }
+    .map-frame {
+      position: absolute;
+      border: 1.5px dashed;
+      border-radius: 5px;
+      pointer-events: none;
+      box-sizing: border-box;
+      opacity: 0.3;
+      transition: opacity 0.15s, box-shadow 0.15s, border-style 0.1s;
+      z-index: 55;
+    }
+    .map-frame.hl { opacity: 1; border-style: solid; }
+    .map-label {
+      background: rgba(8, 12, 20, 0.92);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 7px;
+      padding: 8px 10px;
+      font-size: 11px;
+      cursor: default;
+      transition: opacity 0.15s, border-color 0.15s, box-shadow 0.15s;
+      opacity: 0.45;
+      user-select: none;
+    }
+    .map-label:hover, .map-label.hl {
+      opacity: 1;
+      border-color: rgba(255,255,255,0.25);
+      box-shadow: 0 2px 16px rgba(0,0,0,0.6);
+    }
+    .map-lbl-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 3px;
+    }
+    .map-lbl-count {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--muted);
+    }
+    .map-connection {
+      fill: none;
+      stroke-width: 1.5;
+      opacity: 0.2;
+      transition: opacity 0.15s, stroke-width 0.15s;
+    }
+    .map-connection.hl {
+      opacity: 0.8;
+      stroke-width: 2;
+      filter: drop-shadow(0 0 3px currentColor);
     }
 
     .emulator-pane {
@@ -1001,6 +1082,10 @@
           <input type="range" id="zoom-slider" min="12" max="80" value="32" style="width: 70px;">
           <button class="btn sm" id="btn-fit" title="Fit grid to window">⤢ Fit</button>
         </div>
+        <label class="btn" id="map-toggle-btn" title="Toggle interactive control map overlay" style="gap:6px;cursor:pointer;">
+          <input type="checkbox" id="map-toggle" style="width:12px;height:12px;cursor:pointer;accent-color:var(--accent);">
+          Map
+        </label>
         <button class="btn" id="btn-fullscreen" title="Toggle Fullscreen (F)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
@@ -1013,6 +1098,8 @@
 
   <!-- ── MAIN ─────────────────────────────────────────────────────── -->
   <main class="main">
+    <svg id="map-lines-svg"></svg>
+    <div id="map-col-left"  class="map-col"></div>
 
     <!-- Emulator pane -->
     <div class="emulator-pane">
@@ -1083,6 +1170,7 @@
 
       </div>
     </aside>
+    <div id="map-col-right" class="map-col"></div>
 
   </main>
 
@@ -1144,12 +1232,17 @@
     }
 
     // ─── MONOME API ────────────────────────────────────────────────────────────
+    // Physical LEDs are emissive — a 20%-power LED looks much brighter in a dark
+    // room than rgb(51,51,51) on screen. Gamma 0.55 maps dim values up so the
+    // emulator matches real hardware appearance (20% → ~70, 100% → 255).
+    function ledG(v) { return v === 0 ? 0 : Math.round(Math.pow(v / 255, 0.55) * 255); }
+
     const api = new MonomeAPI({
       cols: COLS,
       rows: ROWS,
       onLedUpdate: (frame, cols, rows) => {
         for (let i = 0; i < frame.length; i++) {
-          const { r, g, b } = frame[i];
+          let { r, g, b } = frame[i];
           const pad = pads[i];
           if (!pad) continue;
           if (r === 0 && g === 0 && b === 0) {
@@ -1157,6 +1250,7 @@
             pad.style.boxShadow = 'none';
             pad.style.borderColor = 'var(--pad-border)';
           } else {
+            r = ledG(r); g = ledG(g); b = ledG(b);
             pad.style.background = `rgb(${r},${g},${b})`;
             const lum = r * 0.21 + g * 0.72 + b * 0.07;
             pad.style.boxShadow = lum > 15
@@ -1190,6 +1284,8 @@
         renderDocs(docs);
         renderState(docs);
         setStatus(`✓ ${name} running`, 'success');
+        _buildMapGroups(docs);
+        if (_mapMode) requestAnimationFrame(_buildMap);
       },
       onScriptError: (msg) => {
         setStatus(`Error: ${msg}`, 'error');
@@ -1644,6 +1740,168 @@
     handleOrientation();
     // Start with a fitted view
     setTimeout(fitToWindow, 100);
+
+    // ─── MAP OVERLAY ─────────────────────────────────────────────────────────
+    // Parses "x=1..8, y=1" or "x=1, y=8" → {xMin,xMax,yMin,yMax} or null
+    function _parseGridLoc(str) {
+      const xm = str.match(/x=(\d+)(?:\.\.(\d+))?/);
+      const ym = str.match(/y=(\d+)(?:\.\.(\d+))?/);
+      if (!xm || !ym) return null;
+      return { xMin:+xm[1], xMax:+(xm[2]||xm[1]), yMin:+ym[1], yMax:+(ym[2]||ym[1]) };
+    }
+
+    const _MAP_COLORS = [
+      '#14c896','#c428b4','#6464ff','#22d46e','#f09614',
+      '#ef4444','#c8c8c8','#06b6d4','#ff8c00','#5078f0',
+      '#f472b6','#a78bfa',
+    ];
+
+    let _mapGroups = []; // [{title, color, controls:[{loc, location, description}]}]
+    let _mapMode   = false;
+
+    function _buildMapGroups(docs) {
+      _mapGroups = [];
+      const sections = docs.sections.length > 0
+        ? docs.sections
+        : [{ title: 'Controls', controls: docs.controls }];
+      sections.forEach((sec, si) => {
+        const controls = (sec.controls || []).map(c => {
+          const loc = _parseGridLoc(c.location);
+          return loc ? { loc, location: c.location, description: c.description } : null;
+        }).filter(Boolean);
+        if (controls.length) {
+          _mapGroups.push({ title: sec.title, color: _MAP_COLORS[si % _MAP_COLORS.length], controls });
+        }
+      });
+    }
+
+    function _clearMap() {
+      document.querySelectorAll('.map-frame').forEach(el => el.remove());
+      document.getElementById('map-lines-svg').innerHTML = '';
+      document.getElementById('map-col-left').innerHTML  = '';
+      document.getElementById('map-col-right').innerHTML = '';
+    }
+
+    function _buildMap() {
+      _clearMap();
+      if (!_mapGroups.length) return;
+
+      const main      = document.querySelector('.main');
+      const mainRect  = main.getBoundingClientRect();
+      const padEls    = [...document.querySelectorAll('#grid-container .pad')];
+      const svg       = document.getElementById('map-lines-svg');
+      const leftCol   = document.getElementById('map-col-left');
+      const rightCol  = document.getElementById('map-col-right');
+
+      function getPad(x, y) { return padEls[(y - 1) * COLS + (x - 1)] || null; }
+
+      function getFrameRect(loc) {
+        const tl = getPad(loc.xMin, loc.yMin);
+        const br = getPad(loc.xMax, loc.yMax);
+        if (!tl || !br) return null;
+        const tlR = tl.getBoundingClientRect();
+        const brR = br.getBoundingClientRect();
+        return {
+          left:   tlR.left   - mainRect.left - 4,
+          top:    tlR.top    - mainRect.top  - 4,
+          right:  brR.right  - mainRect.left + 4,
+          bottom: brR.bottom - mainRect.top  + 4,
+        };
+      }
+
+      // Determine column side from average x of each group's controls
+      _mapGroups.forEach(g => {
+        const avgX = g.controls.reduce((s, c) => s + (c.loc.xMin + c.loc.xMax) / 2, 0) / g.controls.length;
+        g._side = avgX <= 8.5 ? 'left' : 'right';
+      });
+
+      _mapGroups.forEach(group => {
+        const col = group._side === 'left' ? leftCol : rightCol;
+
+        // Section label card (one per group/section)
+        const lbl = document.createElement('div');
+        lbl.className = 'map-label';
+        lbl.style.borderColor = group.color + '55';
+        lbl.innerHTML = `
+          <div class="map-lbl-title" style="color:${group.color}">${group.title}</div>
+          <div class="map-lbl-count">${group.controls.length} control${group.controls.length > 1 ? 's' : ''}</div>`;
+        col.appendChild(lbl);
+
+        // One frame + one SVG path per control location
+        const frames = [], paths = [];
+        group.controls.forEach(ctrl => {
+          const r = getFrameRect(ctrl.loc);
+          if (!r) return;
+
+          const frame = document.createElement('div');
+          frame.className = 'map-frame';
+          frame.style.cssText = `left:${r.left}px;top:${r.top}px;width:${r.right-r.left}px;height:${r.bottom-r.top}px;border-color:${group.color};`;
+          main.appendChild(frame);
+          frames.push({ frame, r });
+
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('class', 'map-connection');
+          path.setAttribute('stroke', group.color);
+          svg.appendChild(path);
+          paths.push({ path, r });
+        });
+
+        // Draw bezier lines after layout settles (label must be in DOM)
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          const lblR  = lbl.getBoundingClientRect();
+          const lblCy = lblR.top - mainRect.top + lblR.height / 2;
+
+          paths.forEach(({ path, r }) => {
+            const frameCy = (r.top + r.bottom) / 2;
+            let sx, ex, cp1x, cp2x;
+            if (group._side === 'left') {
+              sx = lblR.right - mainRect.left;
+              ex = r.left;
+            } else {
+              sx = lblR.left - mainRect.left;
+              ex = r.right;
+            }
+            cp1x = sx + (group._side === 'left' ?  50 : -50);
+            cp2x = ex + (group._side === 'left' ? -50 :  50);
+            path.setAttribute('d', `M${sx},${lblCy} C${cp1x},${lblCy} ${cp2x},${frameCy} ${ex},${frameCy}`);
+          });
+        }));
+
+        // Hover: highlight label + all frames + all lines together
+        const hl = () => {
+          lbl.classList.add('hl');
+          frames.forEach(({ frame }) => {
+            frame.classList.add('hl');
+            frame.style.boxShadow = `0 0 14px ${group.color}55`;
+          });
+          paths.forEach(({ path }) => path.classList.add('hl'));
+        };
+        const uhl = () => {
+          lbl.classList.remove('hl');
+          frames.forEach(({ frame }) => { frame.classList.remove('hl'); frame.style.boxShadow = ''; });
+          paths.forEach(({ path }) => path.classList.remove('hl'));
+        };
+        lbl.addEventListener('mouseenter', hl);
+        lbl.addEventListener('mouseleave', uhl);
+      });
+    }
+
+    document.getElementById('map-toggle').addEventListener('change', e => {
+      _mapMode = e.target.checked;
+      if (_mapMode) {
+        document.body.classList.add('map-mode');
+        requestAnimationFrame(() => requestAnimationFrame(_buildMap));
+      } else {
+        document.body.classList.remove('map-mode');
+        _clearMap();
+      }
+    });
+
+    // Rebuild frames/lines when zoom or window changes (pad positions shift)
+    zoomSlider.addEventListener('input',    () => { if (_mapMode) requestAnimationFrame(_buildMap); });
+    zoomSliderFs.addEventListener('input',  () => { if (_mapMode) requestAnimationFrame(_buildMap); });
+    window.addEventListener('resize',       () => { if (_mapMode) requestAnimationFrame(_buildMap); });
+
   </script>
 
 </body>
