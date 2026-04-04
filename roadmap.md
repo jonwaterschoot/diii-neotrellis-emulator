@@ -3,18 +3,39 @@
 [x]- allow BPM to go to 1
 [0]- make BPM able to sync in or out? - failed attempts
 
+- make the death animation faster or de/increment speed -actually would be cool if it went from fast to slow at the last 2-3 bars
 
 ## in the webapp:
+
+- disable interactive overlay on full screen? or adapt to fit better
+
+- disable on mobile? - fallback to a manual with a per pixel overlay
+
+- display the full readme below the grids (colllapsed?)
+
+- general overlay approach is getting better; though we need a better way to extract groups so there are less individual seperate blocks.
+
+- the full grid layout overlay just ssaying full 16*8 should be excluded by default.
+
+- we need a standard in our docs that embraces the main group - sub controls approach
+
+- on our overlay it becomes apparent that the two octave buttons are part of both grids, which isn't the case, or at least shouldn't be.
+
+- this makes it more needed to have a clear distinction on what lives on which view / screen
+
+- examples of ungrouped items:
+    - black keys and white keys are two groups, should be one
+    - Dpad 4 pixels are not grouped
+    - fruits are a question, should it be one group with different sub settings, ort kept seperate (i'd think a group with subs)
+
+
+
+---
+
 - add two sliders for a reverb and delay in the browser synth 
   - with basic settings for both a general slider for amount, and a expand button allows for fine control. 
 
-[x]- the dimmed buttons are rendered too dark, it does not fit the brightness of the actual device. e.g. the dimmed middle character in the 3 digit display. 
-
-- integrate the script that allows to autostrip / minimize the lua scripts, so that when downloading you could choose to optimize for use on device (github pages probably doesn't have a run python script option?)
-
-- somehow add an option to overlay the functions cfr the way we originally made a manual / graphic with the labeled groups.
-
-- the webapp seems to stop playing - partially - when not in focus? 
+- the webapp seems to stop playing - partially when not in focus? 
 
 - more clearly show when a custom script is loaded, disabling the download button / graying out the list , showing in the list, custom script = loaded
 
@@ -32,6 +53,35 @@ vvvv IGNORE BELOW vvvvv
 ----
 vvv -- DONE / scratchpad -- vvv
 ----
+[x]- the dimmed buttons are rendered too dark, it does not fit the brightness of the actual device. e.g. the dimmed middle character in the 3 digit display. 
+
+[x]- integrate the script that allows to autostrip / minimize the lua scripts, so that when downloading you could choose to optimize for use on device (github pages probably doesn't have a run python script option?)
+
+- somehow add an option to overlay the functions cfr the way we originally made a manual / graphic with the labeled groups.
+
+we have a first implementation of an mapping overview that overlays info onto the grid.
+ 
+- should be more detailed,
+    - e.g. using a label/title and then more optional info
+      - x=1, y=8  ALT toggle — momentary press opens Settings, double-tap = sticky; sequencer keeps running
+- should show two (or more grids per screen) beneath each other
+- avoid zooming conflict - a min and max zoom level?
+
+SCRIPT_STANDARD.md is written. Here's what it covers:
+
+Section 1 — Lua header format (what doc-extractor.js already parses), aligned with norns convention  
+Section 2 — Control map comment syntax for the grid overlay, including all supported location formats and @section grouping  
+Section 3 — README.md format, with the recognized H2 sections the UI can render specially; notes that serpentineseqr_docs.md is the reference implementation and should be renamed  
+Section 4 — manifest.json shape, deliberately mirroring the norns community catalog fields  
+Section 5 — The GitHub import flow, including the CORS confirmation that no proxy is needed  
+Section 6 — LDoc tag reference table, with explicit callout of what doc-extractor.js handles vs what's deferred  
+
+Next natural steps from here (none started yet, your call on order):
+
+- Rename serpentineseqr_docs.md → README.md to make it the first real conforming package
+- Build the GitHub import UI (paste URL → fetch → render)
+- Improve the overlay to show richer label + detail format per the roadmap notes
+- Add the docs panel below the grids that renders the README
 
 
 

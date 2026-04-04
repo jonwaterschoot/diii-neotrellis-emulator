@@ -2,6 +2,7 @@
   {
     "name": "Serpentine Dev",
     "file": "serpentineSeqr/serpentine_dev.lua",
+    "readme": "serpentineSeqr/README.md",
     "description": "Snake sequencer game — development version with all latest features",
     "author": "jonwaterschoot",
     "version": "1.30-dev",

@@ -12,6 +12,8 @@
 
   <!-- Fengari Lua 5.3 runtime -->
   <script src="https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js"></script>
+  <!-- Markdown renderer (for README guide panel) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
 
   <style>
     /* ── DESIGN TOKENS ───────────────────────────────────────────────── */
@@ -300,7 +302,7 @@
       scrollbar-color: var(--border2) transparent;
     }
     body.map-mode .main {
-      grid-template-columns: 190px 1fr 190px;
+      grid-template-columns: 220px 1fr 220px;
       overflow: visible;
     }
     body.map-mode #map-col-left  { display: flex; grid-column: 1; }
@@ -366,6 +368,163 @@
       opacity: 0.8;
       stroke-width: 2;
       filter: drop-shadow(0 0 3px currentColor);
+    }
+
+    /* ── MAP LABEL CONTROLS LIST ─────────────────────────────────────── */
+    .map-lbl-controls {
+      margin-top: 5px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.2s ease;
+    }
+    .map-label:hover .map-lbl-controls,
+    .map-label.hl .map-lbl-controls { max-height: 600px; }
+    .map-ctrl-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 5px;
+      align-items: baseline;
+    }
+    .map-ctrl-loc {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--cyan);
+      white-space: nowrap;
+    }
+    .map-ctrl-desc {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .map-label:hover .map-ctrl-desc,
+    .map-label.hl .map-ctrl-desc { color: var(--text); }
+
+    /* ── PER-CONTROL LABEL FORMAT ────────────────────────────────────── */
+    .map-lbl-loc {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+    .map-lbl-entry {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      margin-top: 3px;
+    }
+    .map-lbl-entry + .map-lbl-entry {
+      border-top: 1px solid var(--border);
+      padding-top: 3px;
+    }
+    .map-lbl-section-badge {
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
+    .map-lbl-desc {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .map-label:hover .map-lbl-desc,
+    .map-label.hl .map-lbl-desc { color: var(--text); }
+
+    /* ── GHOST GRID (Settings View) ──────────────────────────────────── */
+    .map-ghost-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+    .map-ghost-wrap:hover { opacity: 0.75; }
+    .map-ghost-grid {
+      display: grid;
+      grid-template-columns: repeat(16, var(--pad-size));
+      grid-template-rows: repeat(8, var(--pad-size));
+      gap: var(--pad-gap);
+    }
+    .map-ghost-grid .pad { pointer-events: none; }
+
+    /* ── GITHUB IMPORT ROW ───────────────────────────────────────────── */
+    .import-row {
+      display: none;
+      width: 100%;
+      flex-basis: 100%;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 0 2px;
+      border-top: 1px solid var(--border);
+    }
+    .import-row.active { display: flex; }
+    .import-row input[type=text] {
+      flex: 1;
+      max-width: 380px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 5px 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      outline: none;
+    }
+    .import-row input[type=text]:focus { border-color: var(--accent); }
+    .import-row input[type=text]::placeholder { color: var(--muted); }
+    .import-row label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+
+    /* ── GUIDE / MARKDOWN PANEL ──────────────────────────────────────── */
+    .guide-content {
+      padding: 12px 14px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .guide-content h1 { font-size: 14px; font-weight: 600; margin: 0 0 8px; }
+    .guide-content h2 {
+      font-size: 12px; font-weight: 600;
+      margin: 16px 0 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    .guide-content h3 { font-size: 11px; font-weight: 600; margin: 10px 0 4px; color: var(--text); }
+    .guide-content p { margin: 0 0 8px; }
+    .guide-content table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 8px 0; }
+    .guide-content th {
+      background: var(--surface2); color: var(--muted); font-weight: 500;
+      text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--border);
+    }
+    .guide-content td { padding: 4px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .guide-content tr:last-child td { border-bottom: none; }
+    .guide-content code {
+      font-family: var(--font-mono); font-size: 10px;
+      background: var(--surface2); padding: 1px 4px;
+      border-radius: 3px; color: var(--cyan);
+    }
+    .guide-content pre { background: var(--surface2); border-radius: 6px; padding: 10px; margin: 8px 0; overflow-x: auto; }
+    .guide-content pre code { background: none; padding: 0; color: var(--text); }
+    .guide-content ul, .guide-content ol { padding-left: 16px; margin: 0 0 8px; }
+    .guide-content li { margin: 2px 0; }
+    .guide-content a { color: var(--accent); text-decoration: none; }
+    .guide-content a:hover { text-decoration: underline; }
+    .guide-content strong { color: var(--text); font-weight: 600; }
+    .guide-content em { color: var(--muted); }
+    .guide-content hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+    .guide-content blockquote {
+      border-left: 3px solid var(--border2); margin: 8px 0;
+      padding: 4px 10px; color: var(--muted);
     }
 
     .emulator-pane {
@@ -1044,7 +1203,8 @@
           <option value="">— Select preloaded script —</option>
         </select>
         <button class="btn primary" id="btn-load" title="Load selected script">▶ Load</button>
-        <button class="btn" id="btn-download" title="Download selected script" disabled>↓ Download</button>
+        <button class="btn" id="btn-download-src" title="Download source file (with all comments)" disabled>↓ Source</button>
+        <button class="btn" id="btn-download-dev" title="Download minified for device (strips comments, checks Lua 5.1)" disabled>↓ Device</button>
       </div>
       <label class="file-pick-label" title="Open a .lua file from disk">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1055,6 +1215,7 @@
         <input type="file" id="file-input" accept=".lua">
       </label>
       <button class="btn" id="btn-reload" title="Reload current script (R)">↻ Reload</button>
+      <button class="btn" id="btn-github-toggle" title="Import script from a public GitHub repository">⇱ GitHub</button>
       <div class="status-pill">
         <div class="status-dot" id="status-dot"></div>
         <span id="status-text"
@@ -1093,6 +1254,15 @@
           Full View
         </button>
       </div>
+    </div>
+
+    <!-- GitHub import row (toggled by ⇱ GitHub button) -->
+    <div class="import-row" id="import-row">
+      <label>GitHub repo:</label>
+      <input type="text" id="github-url-input"
+        placeholder="github.com/owner/repo  or  owner/repo"
+        autocomplete="off" spellcheck="false">
+      <button class="btn primary sm" id="btn-github-import">Import</button>
     </div>
   </header>
 
@@ -1140,10 +1310,19 @@
     <aside class="side-pane">
       <div class="side-tabs">
         <div class="side-tab active" data-tab="docs" id="tab-docs">Docs</div>
+        <div class="side-tab" data-tab="guide" id="tab-guide">Guide</div>
         <div class="side-tab" data-tab="state" id="tab-state">State</div>
         <div class="side-tab" data-tab="console" id="tab-console">Console</div>
       </div>
       <div class="side-content">
+
+        <!-- Guide panel (README markdown) -->
+        <div class="side-panel" id="panel-guide">
+          <div class="empty-state">
+            <strong>No Guide Available</strong><br><br>
+            Import a script via ⇱ GitHub, or load a bundled script that includes a README.
+          </div>
+        </div>
 
         <!-- Docs panel -->
         <div class="side-panel active" id="panel-docs">
@@ -1190,6 +1369,12 @@
   <script type="module">
     import { MonomeAPI } from './engine/monome-api.js';
     import { LuaLoader } from './engine/lua-loader.js';
+    import { LuaMinifier } from './engine/lua-minifier.js';
+    import { GitHubImporter } from './engine/github-importer.js';
+
+    // ─── STATE ─────────────────────────────────────────────────────────────────
+    let _pendingReadme = null;   // set before _execute so onScriptLoad can pick it up
+    const _manifestMap = new Map(); // file → manifest entry (for readme lookup)
 
     // ─── GRID DOM ──────────────────────────────────────────────────────────────
     const COLS = 16, ROWS = 8;
@@ -1283,6 +1468,8 @@
         document.getElementById('grid-label').textContent = `${COLS} × ${ROWS} · ${name}`;
         renderDocs(docs);
         renderState(docs);
+        renderReadme(_pendingReadme);
+        _pendingReadme = null;
         setStatus(`✓ ${name} running`, 'success');
         _buildMapGroups(docs);
         if (_mapMode) requestAnimationFrame(_buildMap);
@@ -1301,6 +1488,7 @@
       const manifest = await loader.fetchManifest(BASE_URL);
       if (manifest.length === 0) return;
       manifest.forEach(entry => {
+        _manifestMap.set(entry.file, entry);
         const opt = document.createElement('option');
         opt.value = entry.file;
         opt.textContent = `${entry.name}${entry.version ? ' (' + entry.version + ')' : ''}`;
@@ -1310,22 +1498,44 @@
       // Auto-select first
       if (manifest.length > 0 && !scriptSelect.value) {
         scriptSelect.value = manifest[0].file;
-        document.getElementById('btn-download').disabled = false;
+        setDownloadEnabled(true);
       }
+    }
+
+    // Load a bundled script, auto-fetching its README if the manifest entry has one
+    async function loadBundledScript(file) {
+      const entry = _manifestMap.get(file);
+      if (entry?.readme) {
+        try {
+          const res = await fetch(`${BASE_URL}/scripts/${entry.readme}`);
+          if (res.ok) _pendingReadme = await res.text();
+        } catch { _pendingReadme = null; }
+      } else {
+        _pendingReadme = null;
+      }
+      loader.loadFromServer(file, BASE_URL);
     }
 
     // Load button
     document.getElementById('btn-load').addEventListener('click', () => {
       const val = scriptSelect.value;
-      if (val) loader.loadFromServer(val, BASE_URL);
+      if (val) loadBundledScript(val);
     });
 
-    // Download button
-    const btnDownload = document.getElementById('btn-download');
-    scriptSelect.addEventListener('change', () => {
-      btnDownload.disabled = !scriptSelect.value;
-    });
-    btnDownload.addEventListener('click', () => {
+    // Download buttons
+    const btnDownloadSrc = document.getElementById('btn-download-src');
+    const btnDownloadDev = document.getElementById('btn-download-dev');
+    const minifier = new LuaMinifier();
+
+    function setDownloadEnabled(enabled) {
+      btnDownloadSrc.disabled = !enabled;
+      btnDownloadDev.disabled = !enabled;
+    }
+
+    scriptSelect.addEventListener('change', () => setDownloadEnabled(!!scriptSelect.value));
+
+    // Source download — direct fetch, no transform
+    btnDownloadSrc.addEventListener('click', () => {
       const val = scriptSelect.value;
       if (!val) return;
       const url = `${BASE_URL}/scripts/${val}`;
@@ -1335,6 +1545,37 @@
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+    });
+
+    // Device download — fetch source, minify in browser, download as blob
+    btnDownloadDev.addEventListener('click', async () => {
+      const source = loader.currentSource;
+      const name = loader.currentScriptName;
+      if (!source || !name) {
+        setStatus('No script loaded — load a script first', 'warn');
+        return;
+      }
+
+      const { output, warnings } = minifier.minify(source);
+
+      if (warnings.length > 0) {
+        setStatus(`⚠ Lua 5.1 issues in minified output: ${warnings[0]}${warnings.length > 1 ? ` (+${warnings.length - 1} more)` : ''}`, 'warn');
+        console.warn('[lua-minifier] Lua 5.1 compatibility warnings:\n' + warnings.join('\n'));
+      } else {
+        const origLines = source.split('\n').length;
+        const newLines = output.split('\n').length;
+        setStatus(`↓ Device build ready — ${origLines} → ${newLines} lines`, 'success');
+      }
+
+      const blob = new Blob([output], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = name.split('/').pop().replace(/\.lua$/, '_min.lua');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     });
 
     // File picker
@@ -1586,12 +1827,69 @@
       panel.innerHTML = html;
     }
 
+    // ─── README / GUIDE RENDERER ─────────────────────────────────────────────
+    function renderReadme(markdown) {
+      const panel = document.getElementById('panel-guide');
+      const tab = document.getElementById('tab-guide');
+      if (!markdown) {
+        panel.innerHTML = `<div class="empty-state">
+          <strong>No Guide Available</strong><br><br>
+          Import a script via ⇱ GitHub, or load a bundled script that includes a README.
+        </div>`;
+        tab.style.color = '';
+        return;
+      }
+      const html = window.marked ? window.marked.parse(markdown) : `<pre>${markdown}</pre>`;
+      panel.innerHTML = `<div class="guide-content">${html}</div>`;
+      // Highlight the Guide tab to signal new content
+      tab.style.color = 'var(--cyan)';
+    }
+
+    // ─── GITHUB IMPORT ───────────────────────────────────────────────────────
+    const importer = new GitHubImporter();
+    const githubToggle = document.getElementById('btn-github-toggle');
+    const importRow = document.getElementById('import-row');
+    const githubInput = document.getElementById('github-url-input');
+    const btnGithubImport = document.getElementById('btn-github-import');
+
+    githubToggle.addEventListener('click', () => {
+      const active = importRow.classList.toggle('active');
+      if (active) githubInput.focus();
+    });
+
+    async function runGithubImport() {
+      const val = githubInput.value.trim();
+      if (!val) return;
+      btnGithubImport.disabled = true;
+      try {
+        const result = await importer.import(val, msg => setStatus(msg, 'info'));
+        _pendingReadme = result.readme;
+        // Load as if it came from a file (no server path — use source directly)
+        loader._currentScriptName = result.name;
+        await loader._execute(result.source, result.name);
+        setDownloadEnabled(true);
+        // Activate Guide tab automatically if README was found
+        if (result.readme) {
+          document.querySelectorAll('.side-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.side-panel').forEach(p => p.classList.remove('active'));
+          document.getElementById('tab-guide').classList.add('active');
+          document.getElementById('panel-guide').classList.add('active');
+        }
+        importRow.classList.remove('active');
+        githubInput.value = '';
+      } catch (e) {
+        setStatus(`Import failed: ${e.message}`, 'error');
+      } finally {
+        btnGithubImport.disabled = false;
+      }
+    }
+
+    btnGithubImport.addEventListener('click', runGithubImport);
+    githubInput.addEventListener('keydown', e => { if (e.key === 'Enter') runGithubImport(); });
+
     // ─── INIT ────────────────────────────────────────────────────────────────
     populateScriptSelect().then(() => {
-      // If a script is in the select, load it automatically
-      if (scriptSelect.value) {
-        loader.loadFromServer(scriptSelect.value, BASE_URL);
-      }
+      if (scriptSelect.value) loadBundledScript(scriptSelect.value);
     });
 
     // ─── ZOOM & FULLSCREEN ───────────────────────────────────────────────────
@@ -1764,14 +2062,39 @@
       const sections = docs.sections.length > 0
         ? docs.sections
         : [{ title: 'Controls', controls: docs.controls }];
+
       sections.forEach((sec, si) => {
-        const controls = (sec.controls || []).map(c => {
+        const color = _MAP_COLORS[si % _MAP_COLORS.length];
+        const groupAccum = new Map(); // key → {title, isNamed, screen, sectionTitle, color, controls[], order}
+        let orderIdx = 0;
+
+        (sec.controls || []).forEach(c => {
           const loc = _parseGridLoc(c.location);
-          return loc ? { loc, location: c.location, description: c.description } : null;
-        }).filter(Boolean);
-        if (controls.length) {
-          _mapGroups.push({ title: sec.title, color: _MAP_COLORS[si % _MAP_COLORS.length], controls });
-        }
+          if (!loc) return;
+          // Exclude full-grid spans (x=1..COLS, y=1..ROWS) — not a useful overlay target
+          if (loc.xMin === 1 && loc.xMax === COLS && loc.yMin === 1 && loc.yMax === ROWS) return;
+
+          const ctrl = { loc, location: c.location, description: c.description };
+          // Named groups share a key; ungrouped controls each get a unique singleton key
+          const key = c.group ? `g:${c.group}` : `s:${c.location}`;
+
+          if (!groupAccum.has(key)) {
+            groupAccum.set(key, {
+              title:        c.group || c.location,
+              isNamed:      !!c.group,
+              screen:       c.screen || null,
+              sectionTitle: sec.title,
+              color,
+              controls:     [],
+              order:        orderIdx++,
+            });
+          }
+          groupAccum.get(key).controls.push(ctrl);
+        });
+
+        [...groupAccum.values()]
+          .sort((a, b) => a.order - b.order)
+          .forEach(g => { if (g.controls.length) _mapGroups.push(g); });
       });
     }
 
@@ -1780,110 +2103,168 @@
       document.getElementById('map-lines-svg').innerHTML = '';
       document.getElementById('map-col-left').innerHTML  = '';
       document.getElementById('map-col-right').innerHTML = '';
+      const ghost = document.getElementById('map-ghost-wrap');
+      if (ghost) ghost.remove();
     }
 
     function _buildMap() {
       _clearMap();
       if (!_mapGroups.length) return;
 
-      const main      = document.querySelector('.main');
-      const mainRect  = main.getBoundingClientRect();
-      const padEls    = [...document.querySelectorAll('#grid-container .pad')];
-      const svg       = document.getElementById('map-lines-svg');
-      const leftCol   = document.getElementById('map-col-left');
-      const rightCol  = document.getElementById('map-col-right');
+      const emulatorPane = document.querySelector('.emulator-pane');
+      const main         = document.querySelector('.main');
+      const svg          = document.getElementById('map-lines-svg');
+      const leftCol      = document.getElementById('map-col-left');
+      const rightCol     = document.getElementById('map-col-right');
 
-      function getPad(x, y) { return padEls[(y - 1) * COLS + (x - 1)] || null; }
-
-      function getFrameRect(loc) {
-        const tl = getPad(loc.xMin, loc.yMin);
-        const br = getPad(loc.xMax, loc.yMax);
-        if (!tl || !br) return null;
-        const tlR = tl.getBoundingClientRect();
-        const brR = br.getBoundingClientRect();
-        return {
-          left:   tlR.left   - mainRect.left - 4,
-          top:    tlR.top    - mainRect.top  - 4,
-          right:  brR.right  - mainRect.left + 4,
-          bottom: brR.bottom - mainRect.top  + 4,
-        };
+      // Explicit @screen wins; fall back to section name heuristic only when unset
+      function isSettingsGroup(g) {
+        if (g.screen === 'live')     return false;
+        if (g.screen === 'settings') return true;
+        return /\b(settings|alt|fruit)\b/i.test(g.sectionTitle);
       }
 
-      // Determine column side from average x of each group's controls
-      _mapGroups.forEach(g => {
-        const avgX = g.controls.reduce((s, c) => s + (c.loc.xMin + c.loc.xMax) / 2, 0) / g.controls.length;
-        g._side = avgX <= 8.5 ? 'left' : 'right';
-      });
+      // ── Ghost grid (shown only when at least one group is settings-screen) ──
+      let ghostPadEls = [];
+      const needsGhost = _mapGroups.some(isSettingsGroup);
 
-      _mapGroups.forEach(group => {
-        const col = group._side === 'left' ? leftCol : rightCol;
+      if (needsGhost) {
+        const ghostWrap = document.createElement('div');
+        ghostWrap.id = 'map-ghost-wrap';
+        ghostWrap.className = 'map-ghost-wrap';
 
-        // Section label card (one per group/section)
-        const lbl = document.createElement('div');
-        lbl.className = 'map-label';
-        lbl.style.borderColor = group.color + '55';
-        lbl.innerHTML = `
-          <div class="map-lbl-title" style="color:${group.color}">${group.title}</div>
-          <div class="map-lbl-count">${group.controls.length} control${group.controls.length > 1 ? 's' : ''}</div>`;
-        col.appendChild(lbl);
+        const ghostLbl = document.createElement('div');
+        ghostLbl.className = 'grid-label';
+        // Use first settings-section title as the ghost grid label
+        const settingsSec = _mapGroups.find(isSettingsGroup);
+        ghostLbl.textContent = settingsSec ? settingsSec.sectionTitle : 'Settings View';
 
-        // One frame + one SVG path per control location
-        const frames = [], paths = [];
-        group.controls.forEach(ctrl => {
-          const r = getFrameRect(ctrl.loc);
-          if (!r) return;
+        const ghostPanel = document.createElement('div');
+        ghostPanel.className = 'grid-panel';
 
-          const frame = document.createElement('div');
-          frame.className = 'map-frame';
-          frame.style.cssText = `left:${r.left}px;top:${r.top}px;width:${r.right-r.left}px;height:${r.bottom-r.top}px;border-color:${group.color};`;
-          main.appendChild(frame);
-          frames.push({ frame, r });
+        const ghostGridEl = document.createElement('div');
+        ghostGridEl.id = 'map-ghost-grid';
+        ghostGridEl.className = 'map-ghost-grid';
+        for (let gy = 1; gy <= ROWS; gy++) {
+          for (let gx = 1; gx <= COLS; gx++) {
+            const p = document.createElement('div');
+            p.className = 'pad';
+            ghostGridEl.appendChild(p);
+          }
+        }
+        ghostPanel.appendChild(ghostGridEl);
+        ghostWrap.appendChild(ghostLbl);
+        ghostWrap.appendChild(ghostPanel);
+        emulatorPane.appendChild(ghostWrap);
+        ghostPadEls = [...ghostGridEl.querySelectorAll('.pad')];
+      }
 
-          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          path.setAttribute('class', 'map-connection');
-          path.setAttribute('stroke', group.color);
-          svg.appendChild(path);
-          paths.push({ path, r });
+      // ── Wait for ghost layout, then build overlay ───────────────────────────
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const mainRect   = main.getBoundingClientRect();
+        const livePadEls = [...document.querySelectorAll('#grid-container .pad')];
+
+        function getPad(x, y, isGhost) {
+          const idx = (y - 1) * COLS + (x - 1);
+          return (isGhost ? ghostPadEls : livePadEls)[idx] || null;
+        }
+
+        function getFrameRect(loc, isGhost) {
+          const tl = getPad(loc.xMin, loc.yMin, isGhost);
+          const br = getPad(loc.xMax, loc.yMax, isGhost);
+          if (!tl || !br) return null;
+          const tlR = tl.getBoundingClientRect();
+          const brR = br.getBoundingClientRect();
+          return {
+            left:   tlR.left   - mainRect.left - 4,
+            top:    tlR.top    - mainRect.top  - 4,
+            right:  brR.right  - mainRect.left + 4,
+            bottom: brR.bottom - mainRect.top  + 4,
+          };
+        }
+
+        // ── One label card per map group ──────────────────────────────────────
+        _mapGroups.forEach(group => {
+          const isGhost = isSettingsGroup(group);
+          const avgX = group.controls.reduce((s, c) => s + (c.loc.xMin + c.loc.xMax) / 2, 0) / group.controls.length;
+          const side = avgX <= 8.5 ? 'left' : 'right';
+          const col  = side === 'left' ? leftCol : rightCol;
+
+          // ── Label card ────────────────────────────────────────────────────
+          const lbl = document.createElement('div');
+          lbl.className = 'map-label';
+          lbl.style.borderColor = group.color + '55';
+
+          if (group.isNamed) {
+            // Group card: title + sub-control list
+            lbl.innerHTML = `
+              <div class="map-lbl-loc" style="color:${group.color}">${group.title}</div>
+              ${group.controls.map(c => `
+                <div class="map-lbl-entry">
+                  <div class="map-lbl-section-badge" style="color:${group.color}99">${c.location}</div>
+                  <div class="map-lbl-desc">${c.description}</div>
+                </div>`).join('')}`;
+          } else {
+            // Singleton card: location as title + description
+            lbl.innerHTML = `
+              <div class="map-lbl-loc" style="color:${group.color}">${group.controls[0].location}</div>
+              <div class="map-lbl-entry">
+                <div class="map-lbl-desc">${group.controls[0].description}</div>
+              </div>`;
+          }
+          col.appendChild(lbl);
+
+          // ── Frames + paths: one per control in the group ──────────────────
+          const allFrames = [], allPaths = [];
+          group.controls.forEach(ctrl => {
+            const r = getFrameRect(ctrl.loc, isGhost);
+            if (!r) return;
+
+            const frame = document.createElement('div');
+            frame.className = 'map-frame';
+            frame.style.cssText = `left:${r.left}px;top:${r.top}px;width:${r.right - r.left}px;height:${r.bottom - r.top}px;border-color:${group.color};`;
+            main.appendChild(frame);
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('class', 'map-connection');
+            path.setAttribute('stroke', group.color);
+            svg.appendChild(path);
+
+            allFrames.push({ frame, r });
+            allPaths.push({ path, r });
+          });
+
+          // ── Draw bezier fan lines after label is in DOM ───────────────────
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            const lblR  = lbl.getBoundingClientRect();
+            const lblCy = lblR.top - mainRect.top + lblR.height / 2;
+
+            allPaths.forEach(({ path, r }) => {
+              const frameCy = (r.top + r.bottom) / 2;
+              let sx, ex;
+              if (side === 'left') { sx = lblR.right - mainRect.left; ex = r.left; }
+              else                 { sx = lblR.left  - mainRect.left; ex = r.right; }
+              const cp1x = sx + (side === 'left' ?  60 : -60);
+              const cp2x = ex + (side === 'left' ? -60 :  60);
+              path.setAttribute('d', `M${sx},${lblCy} C${cp1x},${lblCy} ${cp2x},${frameCy} ${ex},${frameCy}`);
+            });
+          }));
+
+          // ── Hover: highlight card + all frames + all paths ────────────────
+          const hl = () => {
+            lbl.classList.add('hl');
+            allFrames.forEach(({ frame }) => { frame.classList.add('hl'); frame.style.boxShadow = `0 0 14px ${group.color}55`; });
+            allPaths.forEach(({ path }) => path.classList.add('hl'));
+          };
+          const uhl = () => {
+            lbl.classList.remove('hl');
+            allFrames.forEach(({ frame }) => { frame.classList.remove('hl'); frame.style.boxShadow = ''; });
+            allPaths.forEach(({ path }) => path.classList.remove('hl'));
+          };
+          lbl.addEventListener('mouseenter', hl);
+          lbl.addEventListener('mouseleave', uhl);
         });
-
-        // Draw bezier lines after layout settles (label must be in DOM)
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          const lblR  = lbl.getBoundingClientRect();
-          const lblCy = lblR.top - mainRect.top + lblR.height / 2;
-
-          paths.forEach(({ path, r }) => {
-            const frameCy = (r.top + r.bottom) / 2;
-            let sx, ex, cp1x, cp2x;
-            if (group._side === 'left') {
-              sx = lblR.right - mainRect.left;
-              ex = r.left;
-            } else {
-              sx = lblR.left - mainRect.left;
-              ex = r.right;
-            }
-            cp1x = sx + (group._side === 'left' ?  50 : -50);
-            cp2x = ex + (group._side === 'left' ? -50 :  50);
-            path.setAttribute('d', `M${sx},${lblCy} C${cp1x},${lblCy} ${cp2x},${frameCy} ${ex},${frameCy}`);
-          });
-        }));
-
-        // Hover: highlight label + all frames + all lines together
-        const hl = () => {
-          lbl.classList.add('hl');
-          frames.forEach(({ frame }) => {
-            frame.classList.add('hl');
-            frame.style.boxShadow = `0 0 14px ${group.color}55`;
-          });
-          paths.forEach(({ path }) => path.classList.add('hl'));
-        };
-        const uhl = () => {
-          lbl.classList.remove('hl');
-          frames.forEach(({ frame }) => { frame.classList.remove('hl'); frame.style.boxShadow = ''; });
-          paths.forEach(({ path }) => path.classList.remove('hl'));
-        };
-        lbl.addEventListener('mouseenter', hl);
-        lbl.addEventListener('mouseleave', uhl);
-      });
+      }));
     }
 
     document.getElementById('map-toggle').addEventListener('change', e => {

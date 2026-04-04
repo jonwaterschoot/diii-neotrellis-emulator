@@ -9,45 +9,47 @@
 -- Navigate with the D-PAD (bottom-right) or hold ALT to open settings.
 
 -- @section Grid Layout
--- x=1..16, y=1..8: Full 16x8 play grid
--- x=1, y=8: ALT toggle — momentary press opens Settings, double-tap = sticky; sequencer keeps running
--- x=2, y=8: Play/Stop toggle — green=running, red=stopped; stop sends MIDI panic (all notes off)
--- x=3, y=8: Base octave cycle (Settings only) — OC1–OC6
--- x=4, y=8: Octave range cycle (Settings only) — RA1–RA6
--- x=15, y=7: D-PAD UP
--- x=14, y=8: D-PAD LEFT
--- x=15, y=8: D-PAD DOWN
--- x=16, y=8: D-PAD RIGHT
+-- @screen live
+-- x=1, y=8: ALT — momentary hold opens Settings; double-tap = sticky; sequencer keeps running
+-- x=2, y=8: Play/Stop — green=running, red=stopped; stop sends MIDI panic (all notes off)
+-- @group D-PAD
+-- x=15, y=7: UP
+-- x=14, y=8: LEFT
+-- x=15, y=8: DOWN
+-- x=16, y=8: RIGHT
 
 -- @section Settings View (hold ALT)
--- x=1..8, y=1: Fruit spawn quantity slider (each step = 2 fruits, max 16)
--- x=11..16, y=1: Fruit type toggles — Red, Blue, Yellow, Cyan, Orange, Purple
--- x=1..8, y=2: Accent interval slider (1–8 steps; shows lit beats in 8-step window)
--- x=9..16, y=2: Arpeggio pool max capacity (1–8 notes)
--- x=1, y=3: Autopilot toggle — dim=manual, bright green=auto (BFS to fruits)
--- x=3, y=3: Arpeggio playback order — ORD / RND / UP / DWN
--- x=5, y=3: Arp on/off toggle — green=on (arp plays), dim red=off (eat notes only)
--- x=7, y=3: Humanize toggle — cyan=on (±vel + duration drift), dim=off; shows HU1/HU0
--- x=3, y=8: Base octave cycle (green) — OC1–OC6, shifts all note output
--- x=4, y=8: Octave range cycle (blue) — RA1–RA6, spreads notes across octaves
--- x=10, y=3: BPM −10
--- x=11, y=3: BPM −1
--- x=12, y=3: BPM +1
--- x=13, y=3: BPM +10
--- x=15, y=3: Master brightness step (4 → 8 → 12)
--- x=16, y=3: Monochrome tint cycle (5 cinematic tints + off)
--- x=1..7, y=4: Scale selection — MAJ / MIN / PMA / PMI / DOR / LYD / CUS
--- x=8..16, y=4: 3×5 LED numeric readout (BPM / scale name / arp mode)
--- x=1..7, y=6: Black key root notes (C# D# F# G# A#)
--- x=1..7, y=7: White key root notes (C D E F G A B) / Custom scale toggles
-
--- @section Fruit Types
--- x=11, y=1: Red fruit — shrinks tail by 1, adds note to arp pool; toggle plays high sharp demo note
--- x=12, y=1: Blue fruit — grows tail by 1, adds note to arp pool; toggle plays two-note fifth demo
--- x=13, y=1: Yellow fruit — halves tempo for 16 ticks, adds note to arp pool; toggle plays accent burst
--- x=14, y=1: Cyan fruit — plays diatonic triad chord (3 stages per position); toggle plays triad demo
--- x=15, y=1: Orange fruit — adds note with 33% per-note trigger probability, grows tail; toggle plays soft demo
--- x=16, y=1: Purple fruit — spawns decaying echo bounces, grows tail; toggle spawns echo demo
+-- @screen settings
+-- x=1..8, y=1: Spawn Quantity — slider, each step = 2 fruits, max 16 on grid
+-- @group Fruit Type Toggles
+-- x=11, y=1: Red — tail shrink, note to pool; demo: high sharp
+-- x=12, y=1: Blue — tail grow, note to pool; demo: fifth
+-- x=13, y=1: Yellow — halves tempo 16 ticks; demo: accent burst
+-- x=14, y=1: Cyan — diatonic triad (3 stages); demo: triad
+-- x=15, y=1: Orange — 33% trigger probability; demo: soft
+-- x=16, y=1: Purple — echo bounces; demo: echo
+-- @group
+-- x=1..8, y=2: Accent Interval — slider, 1–8 steps; lit LEDs show active beats
+-- x=9..16, y=2: Arp Pool Max Capacity — 1–8 notes
+-- x=1, y=3: Autopilot — dim=manual, bright green=auto (BFS to nearest fruit)
+-- x=3, y=3: Arp Playback Order — ORD / RND / UP / DWN
+-- x=5, y=3: Arp On/Off — green=on; dim red=off (collect only)
+-- x=7, y=3: Humanize — cyan=on (±vel+duration drift); shows HU1/HU0
+-- x=3, y=8: Base Octave — cycles OC1–OC6
+-- x=4, y=8: Octave Range — cycles RA1–RA6
+-- @group BPM Adjust
+-- x=10, y=3: −10 BPM
+-- x=11, y=3: −1 BPM
+-- x=12, y=3: +1 BPM
+-- x=13, y=3: +10 BPM
+-- @group
+-- x=15, y=3: Brightness — steps 4 → 8 → 12 LED limit
+-- x=16, y=3: Monochrome Tint — 5 cinematic tints + off
+-- x=1..7, y=4: Scale — MAJ / MIN / PMA / PMI / DOR / LYD / CUS
+-- x=8..16, y=4: LED Readout — 3×5 block font: BPM / scale / arp mode
+-- @group Root Note Keyboard
+-- x=1..7, y=6: Black keys (C# D# F# G# A#)
+-- x=1..7, y=7: White keys (C D E F G A B)
 
 local W, H = 16, 8
 local ALT_X, ALT_Y = 1, 8

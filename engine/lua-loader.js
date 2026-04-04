@@ -45,6 +45,9 @@ export class LuaLoader {
 
   // ─── PUBLIC API ───────────────────────────────────────────────────────────
 
+  get currentSource() { return this._currentSource; }
+  get currentScriptName() { return this._currentScriptName; }
+
   /** Fetch the manifest and return array of script descriptors */
   async fetchManifest(baseUrl = '') {
     try {

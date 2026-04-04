@@ -57,20 +57,38 @@ export class DocExtractor {
     let currentSection = { title: 'General', description: '', functions: [], controls: [] };
     let pendingDoc = [];     // accumulated --- / -- @tparam lines before a function
     let pendingIsDoc = false;
+    let currentGroup  = null;   // set by -- @group Name, cleared by -- @group (empty)
+    let currentScreen = null;   // set by -- @screen live|settings
 
     for (let i = 0; i < lines.length; i++) {
       const raw = lines[i];
       const trimmed = raw.trim();
 
-      // Section marker: -- @section Title
+      // Section marker: -- @section Title  (resets group + screen)
       const sectionMatch = trimmed.match(/^--\s*@section\s+(.+)/);
       if (sectionMatch) {
         if (currentSection.functions.length > 0 || currentSection.controls.length > 0) {
           result.sections.push(currentSection);
         }
         currentSection = { title: sectionMatch[1].trim(), description: '', functions: [], controls: [] };
+        currentGroup  = null;
+        currentScreen = null;
         pendingDoc = [];
         pendingIsDoc = false;
+        continue;
+      }
+
+      // Group marker: -- @group Name  (empty name clears group)
+      const groupMatch = trimmed.match(/^--\s*@group\s*(.*)/);
+      if (groupMatch) {
+        currentGroup = groupMatch[1].trim() || null;
+        continue;
+      }
+
+      // Screen marker: -- @screen live|settings|game|alt
+      const screenMatch = trimmed.match(/^--\s*@screen\s+(live|settings|game|alt)\b/i);
+      if (screenMatch) {
+        currentScreen = /live|game/i.test(screenMatch[1]) ? 'live' : 'settings';
         continue;
       }
 
@@ -114,15 +132,14 @@ export class DocExtractor {
       // Control map comment pattern: -- x=N..M: description  OR -- Row N: description
       const controlMatch = trimmed.match(/^--\s*((?:x=\d.*?|y=\d.*?|[Rr]ow\s+\d.*?|[Cc]ol(?:s?)\s*[\d\-]+.*?)):(.+)/);
       if (controlMatch) {
-        currentSection.controls.push({
-          location: controlMatch[1].trim(),
-          description: controlMatch[2].trim()
-        });
-        result.controls.push({
-          section: currentSection.title,
-          location: controlMatch[1].trim(),
-          description: controlMatch[2].trim()
-        });
+        const ctrlEntry = {
+          location:    controlMatch[1].trim(),
+          description: controlMatch[2].trim(),
+          group:       currentGroup,
+          screen:      currentScreen,
+        };
+        currentSection.controls.push(ctrlEntry);
+        result.controls.push({ section: currentSection.title, ...ctrlEntry });
         pendingIsDoc = false;
         pendingDoc = [];
         continue;
