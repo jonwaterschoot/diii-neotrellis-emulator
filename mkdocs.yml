@@ -3,6 +3,9 @@ site_description: Browser-based emulator for Monome and NeoTrellis Lua scripts
 site_author: jonwaterschoot
 site_url: https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/
 
+repo_name: "Launch Emulator"
+repo_url: https://jonwaterschoot.github.io/diii-neotrellis-emulator/
+
 docs_dir: docs
 
 nav:
@@ -10,6 +13,7 @@ nav:
   - Project Overview:
     - Main README: main-readme.md
     - Roadmap: roadmap.md
+    - To Do: todo.md
   - Emulator Usage:
     - Walkthrough: walkthrough.md
     - Script Standards: script-standards.md

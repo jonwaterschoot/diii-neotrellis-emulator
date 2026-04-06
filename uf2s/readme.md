@@ -1,13 +1,13 @@
 # NeoTrellis RP2040 Firmware
 
-This UF2 was built from a fork of [okyeron's neotrellis repo](https://github.com/okyeron/neotrellis).
+This UF2 was built from a fork of [okyeron's neotrellis repo](https://github.com/okyeron/neotrellis-monome).
 
 ---
 
 ## Installing the firmware
 
 1. Hold the **boot button** on the Pico while powering it on — it will mount as a drive in your file explorer / Finder.
-2. Drag [neotrellis-pico-iii-20260329-jonwtr.uf2](neotrellis-pico-iii-20260329-jonwtr.uf2) into that drive.
+2. Drag [neotrellis-pico-iii-20260329-jonwtr.uf2](https://github.com/jonwaterschoot/diii-neotrellis-emulator/raw/main/uf2s/neotrellis-pico-iii-20260329-jonwtr.uf2) into that drive.
 3. The Pico will reboot automatically with the new firmware.
 
 ---

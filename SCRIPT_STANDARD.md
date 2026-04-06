@@ -329,6 +329,6 @@ These can be added to `doc-extractor.js` incrementally as needed.
 
 | File | Role |
 |------|------|
-| [scripts/serpentineSeqr/serpentine_dev.lua](scripts/serpentineSeqr/serpentine_dev.lua) | Reference `.lua` with inline LDoc header and control map comments |
-| [scripts/serpentineSeqr/serpentineseqr_docs.md](scripts/serpentineSeqr/serpentineseqr_docs.md) | Reference README (to be renamed and kept alongside the `.lua`) |
-| [engine/doc-extractor.js](engine/doc-extractor.js) | Parser — extracts header + control map from `.lua` source |
+| [scripts/serpentineSeqr/serpentine_dev.lua](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/serpentine_dev.lua) | Reference `.lua` with inline LDoc header and control map comments |
+| [scripts/serpentineSeqr/serpentineseqr_docs.md](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/serpentineseqr_docs.md) | Reference README (to be renamed and kept alongside the `.lua`) |
+| [engine/doc-extractor.js](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/engine/doc-extractor.js) | Parser — extracts header + control map from `.lua` source |

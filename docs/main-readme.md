@@ -1,1 +1,1 @@
-{% include-markdown "../README.md" resolve_links=true %}
+{% include-markdown "../README.md" %}

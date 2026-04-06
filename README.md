@@ -20,7 +20,7 @@ I also hope I'm not breaking any licensing things, if so please let me know. I t
 
 *Recording of `color_fallback_demo.lua` on NeoTrellis hardware, showing the fallback test running on device with interactive pixel toggling.*
 
-I wrote a quick [readme guide](uf2s/readme.md)in the uf2s directory with some quick tips to get the custom firmware for pico neotrellis up and running.
+I wrote a quick [readme guide](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/uf2s/readme.md)in the uf2s directory with some quick tips to get the custom firmware for pico neotrellis up and running.
 
 The emulator supports scripts written for both the original **Monome Grid** (monochrome) and the **Adafruit NeoTrellis** (RGB). To ensure your scripts are portable across different hardware targets, the following compatibility patterns are recommended.
 
@@ -148,12 +148,12 @@ Okyeron's neotrellis repo: https://github.com/okyeron/neotrellis-monome
 
 ## My scripts
 
-- [serpentineseqr dev](scripts/serpentineseqr_dev.lua) - a snake game with color support for a 128 grid - my main reason to build this seq, and my main focus before i started building this emulator.  
+- [serpentineseqr dev](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineseqr_dev.lua) - a snake game with color support for a 128 grid - my main reason to build this seq, and my main focus before i started building this emulator.  
 Its still not working as I envisioned it, but its getting there.  
 
-- [monochrome fallback test](scripts/monochrome_fallback.lua) - as i needed to test if the monochrome fallback was working
+- [monochrome fallback test](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/monochrome_fallback.lua) - as i needed to test if the monochrome fallback was working
 
-- [power test](scripts/power_test.lua) - as i needed to test if the power wasnt causing brownouts
+- [power test](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/power_test.lua) - as i needed to test if the power wasnt causing brownouts
 
 > [!NOTE]  
 > It is my intention to try and make my scripts backwards compatible with a standard monome grid, so that they can be run on both a standard monome grid and a neotrellis grid.  
