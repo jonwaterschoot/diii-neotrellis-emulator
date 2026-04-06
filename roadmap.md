@@ -3,7 +3,7 @@
 ## Serpentine Lua Script
 
 ### Core Features & Bugfixes
-- [ ] Investigate note-off message issue (clicking stop does not clear all notes).
+- [x] Investigate note-off message issue (clicking stop does not clear all notes).
 - [ ] Make the death animation faster or de/increment speed (e.g., from fast to slow at the last 2-3 bars).
 - [ ] Fix panic button not (fully?) working.
 - [ ] Investigate BPM syncing (in or out) - failed previous attempts.

@@ -543,8 +543,14 @@ end
 
 local function seq_tick()
   if on_note then
-    if humanize_hold then humanize_hold = false
-    else midi_note_off(on_note); on_note = nil end
+    if humanize_hold then
+      -- Extend the held note by one more tick, then let it release naturally next tick.
+      -- Do NOT play a new note this tick — avoids overwriting on_note without note-off.
+      humanize_hold = false
+      return
+    else
+      midi_note_off(on_note); on_note = nil
+    end
   end
   if on_chord then
     chord_hold_ticks = chord_hold_ticks - 1
@@ -554,7 +560,6 @@ local function seq_tick()
     end
   end
   if not arp_enabled then return end
-  if arp_pool_len == 0 then return end
   if arp_pool_len == 0 then return end
 
   local n = arp_pool_len
