@@ -14,6 +14,8 @@ This is a universal development tool that runs **real `.lua` scripts natively** 
 
 *Note: The hardware does not mirror the web app; scripts run locally either in the browser or entirely on the physical device. Additionally, routing MIDI out from the app generally requires a Chromium-based browser.*
 
+![Color fallback test on NeoTrellis device with pixel interaction](img/neotrellis_diii_color.gif)
+
 ### 💾 How to get this on my device?
 1. **Flash Custom Firmware**: Install the custom `.uf2` firmware to your device (see [Firmware Installation](firmware-installation.md)).
 2. **Upload Scripts**: Use the [official diii web app](https://monome.org/diii/) to push `.lua` files to your device's memory.
