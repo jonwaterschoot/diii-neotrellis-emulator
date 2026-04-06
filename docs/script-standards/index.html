@@ -1,0 +1,1430 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Browser-based emulator for Monome and NeoTrellis Lua scripts">
+      
+      
+        <meta name="author" content="jonwaterschoot">
+      
+      
+        <link rel="canonical" href="https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/script-standards/">
+      
+      
+        <link rel="prev" href="../walkthrough/">
+      
+      
+        <link rel="next" href="../firmware-installation/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Script Standards - diii-neotrellis-emulator Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Manrope:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Manrope";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#script-documentation-standard" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="diii-neotrellis-emulator Documentation" class="md-header__button md-logo" aria-label="diii-neotrellis-emulator Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            diii-neotrellis-emulator Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Script Standards
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../main-readme/" class="md-tabs__link">
+          
+  
+  
+  Project Overview
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../walkthrough/" class="md-tabs__link">
+          
+  
+  
+  Emulator Usage
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../firmware-installation/" class="md-tabs__link">
+          
+  
+  
+  Hardware & Firmware
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../serpentine-sequencer/" class="md-tabs__link">
+          
+  
+  
+  Scripts
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="diii-neotrellis-emulator Documentation" class="md-nav__button md-logo" aria-label="diii-neotrellis-emulator Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    diii-neotrellis-emulator Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Project Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../main-readme/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Main README
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Emulator Usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Emulator Usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../walkthrough/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Walkthrough
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Script Standards
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Script Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-lua-file-header-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Lua file header (required)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-inline-control-map-comments-for-the-grid-overlay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Inline control map comments (for the grid overlay)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Inline control map comments (for the grid overlay)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sections-groups-and-screen-assignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sections, groups, and screen assignment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-screen-rendering-required-pattern-for-dual-view-and-minimap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-screen rendering (required pattern for dual-view and minimap)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-readmemd-recommended-for-github-repos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. README.md (recommended for GitHub repos)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-manifestjson-optional-for-emulator-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. manifest.json (optional, for emulator discovery)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-github-import-flow-planned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. GitHub import flow (planned)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-keyboard-shortcut-hints-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Keyboard shortcut hints (@key)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-ldoc-tag-reference-what-doc-extractorjs-recognizes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. LDoc tag reference (what doc-extractor.js recognizes)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reference-implementations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reference implementations
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hardware & Firmware
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Hardware & Firmware
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../firmware-installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firmware Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building-firmware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building Firmware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scripts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Scripts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../serpentine-sequencer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Serpentine Sequencer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multi-screen-test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Screen Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="script-documentation-standard">Script Documentation Standard<a class="headerlink" href="#script-documentation-standard" title="Permanent link">&para;</a></h1>
+<p>This document defines the standard for how scripts are documented in this emulator.
+It is intentionally kept close to the norns/monome ecosystem conventions so that community
+scripts can be imported with minimal adaptation.</p>
+<hr />
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>A "script package" can consist of either a single file or a folder with multiple files.
+The emulator resolves documentation in the following priority order:</p>
+<ol>
+<li><code>manifest.json</code> (explicit, structured — highest priority)</li>
+<li><code>README.md</code> alongside the <code>.lua</code> file (human-readable, fetched from GitHub raw)</li>
+<li>LDoc-style comments inside the <code>.lua</code> file (always present, used for overlay)</li>
+</ol>
+<p>A script does <strong>not</strong> need all three. A solo <code>.lua</code> with good inline comments is valid.
+A GitHub repo with a <code>.lua</code> + <code>README.md</code> is the recommended minimum.</p>
+<hr />
+<h2 id="1-lua-file-header-required">1. Lua file header (required)<a class="headerlink" href="#1-lua-file-header-required" title="Permanent link">&para;</a></h2>
+<p>The top of every script should have an uninterrupted block of <code>--</code> comments:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">-- scriptname: Human Readable Script Name</span>
+<span class="c1">-- v1.0.0</span>
+<span class="c1">-- @author: Your Name</span>
+<span class="c1">-- llllllll.co/t/your-thread  (or any URL)</span>
+<span class="c1">--</span>
+<span class="c1">-- One-line description of what the script does.</span>
+</code></pre></div>
+
+<p>Rules:
+- First line: <code>-- scriptname: Name</code> (parsed by <code>doc-extractor.js</code>)
+- Second line: <code>-- vX.Y.Z</code> (semver, parsed as version)
+- <code>@author</code> line is optional but encouraged
+- A bare URL on its own line is parsed as the discussion/reference link
+- The first untagged line after <code>scriptname</code> becomes the short description
+- The header ends at the first non-comment line</p>
+<p>This mirrors the norns script header convention used in the community catalog.</p>
+<hr />
+<h2 id="2-inline-control-map-comments-for-the-grid-overlay">2. Inline control map comments (for the grid overlay)<a class="headerlink" href="#2-inline-control-map-comments-for-the-grid-overlay" title="Permanent link">&para;</a></h2>
+<p>Inside the script, use <code>--</code> comments in the following format to describe grid positions.
+These are extracted by <code>doc-extractor.js</code> and rendered as the map overlay.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">-- x=1, y=8: ALT toggle — momentary press opens Settings, double-tap = sticky</span>
+<span class="c1">-- x=1..8, y=1: Spawn quantity slider (2 fruits per step, max 16)</span>
+<span class="c1">-- Row 3, x=1: Autopilot mode cycles NON → SEM → AUT</span>
+<span class="c1">-- Row 6: Black keys (C# D# F# G# A#) — root note selection when CUS active</span>
+</code></pre></div>
+
+<p>Supported location formats (all case-insensitive):
+- <code>x=N</code> — single column
+- <code>x=N..M</code> — column range
+- <code>y=N</code> — single row (as row number)
+- <code>x=N, y=M</code> — specific cell
+- <code>Row N</code> — entire row
+- <code>Row N, col M</code> — specific cell by row/col
+- <code>Cols N-M</code> / <code>Col N</code> — column range or single col</p>
+<p>A control comment must end with <code>: description</code> — the colon is the delimiter.</p>
+<h3 id="sections-groups-and-screen-assignment">Sections, groups, and screen assignment<a class="headerlink" href="#sections-groups-and-screen-assignment" title="Permanent link">&para;</a></h3>
+<p>The hierarchy is: <strong>Section → Group → Control</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1">-- @section Section Name    ← major logical block; resets @screen and @group</span>
+<span class="c1">-- @screen live             ← all controls below go to the main (primary) grid</span>
+<span class="c1">-- @screen settings         ← named alt screen — shown in the ghost grid beside main</span>
+<span class="c1">-- @screen menu             ← another named alt screen — gets its own tab in the ghost grid</span>
+
+<span class="c1">-- @group Group Name        ← start a named group; controls below belong to it</span>
+<span class="c1">-- x=N, y=M: Description   ← sub-control inside the group</span>
+<span class="c1">-- x=N, y=M: Description</span>
+<span class="c1">-- @group                   ← empty @group clears the group; next controls are singletons</span>
+<span class="c1">-- x=N, y=M: Description   ← singleton — gets its own overlay card</span>
+</code></pre></div>
+
+<p><strong><code>@section</code></strong> defines a major logical grouping (e.g. "Grid Layout", "Settings View").
+Resets both <code>@screen</code> and <code>@group</code>.</p>
+<p><strong><code>@screen &lt;name&gt;</code></strong> sets which visual grid this section/group renders on in the map overlay.</p>
+<p><strong>Naming convention:</strong>
+- <code>live</code> — always the primary/main screen. This name is fixed and expected by the emulator.
+  It is the only screen shown in single-view by default and always occupies the main grid in dual-view.
+- Any other name becomes a <strong>secondary screen</strong> — shown in the ghost grid (dual-view) or swapped
+  in as the main view (single-view). Use short, descriptive lowercase words: <code>settings</code>, <code>menu</code>,
+  <code>edit1</code>, <code>page2</code>, etc. Scripts with multiple secondary screens get a tab row in dual-view
+  so the user can switch between them.</p>
+<p>The name is used as the ghost grid label and in the minimap. Persists until the next
+<code>@section</code> or another <code>@screen</code> tag.</p>
+<p><strong><code>@group Name</code></strong> starts a named group. All controls until the next <code>@group</code>, <code>@group</code>
+(empty, to close), or <code>@section</code> belong to this group. In the overlay, the group renders
+as one card with a fan of bezier lines to each sub-control's pad position. An empty
+<code>-- @group</code> closes the group — subsequent controls become singletons again.</p>
+<p><strong>Full-grid controls</strong> (<code>x=1..16, y=1..8</code>) are automatically excluded from the overlay
+since they describe the whole grid rather than a specific interaction point.</p>
+<h3 id="multi-screen-rendering-required-pattern-for-dual-view-and-minimap">Multi-screen rendering (required pattern for dual-view and minimap)<a class="headerlink" href="#multi-screen-rendering-required-pattern-for-dual-view-and-minimap" title="Permanent link">&para;</a></h3>
+<p>The emulator maintains a <strong>separate frame buffer per screen name</strong>. The minimap and ghost grid
+(dual-view) are only populated if content is written to those buffers. A script that only ever
+draws to <code>live</code> will have empty thumbnails and an empty ghost grid.</p>
+<p><strong>Required approach:</strong> render ALL screens into their buffers on every <code>redraw()</code>, then call
+<code>grid_refresh()</code> once. <code>grid_refresh()</code> flushes every buffer simultaneously — the minimap,
+ghost grid, and main grid all update in one pass.</p>
+<div class="codehilite"><pre><span></span><code><span class="kr">function</span><span class="w"> </span><span class="nf">redraw</span><span class="p">()</span>
+<span class="w">    </span><span class="c1">-- Primary screen</span>
+<span class="w">    </span><span class="nf">grid_set_screen</span><span class="p">(</span><span class="s1">&#39;live&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="nf">grid_led_all</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="c1">-- ... draw live content ...</span>
+
+<span class="w">    </span><span class="c1">-- Each secondary screen gets its own buffer</span>
+<span class="w">    </span><span class="nf">grid_set_screen</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="nf">grid_led_all</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="c1">-- ... draw settings content ...</span>
+
+<span class="w">    </span><span class="c1">-- One flush updates everything: main grid, ghost grid, all minimap tiles</span>
+<span class="w">    </span><span class="nf">grid_refresh</span><span class="p">()</span>
+<span class="kr">end</span>
+</code></pre></div>
+
+<p><strong><code>grid_set_screen(name)</code></strong> switches which buffer subsequent <code>grid_led</code> / <code>grid_led_rgb</code> /
+<code>grid_led_all</code> calls write to. Call it before drawing each screen's content.</p>
+<p><strong><code>display_screen(name)</code></strong> signals the emulator which screen is currently <em>active</em> — this
+controls the minimap highlight and switches the ghost grid in dual-view. Call it whenever
+the user navigates between screens. Guard with <code>if display_screen then</code> for hardware
+compatibility (the function does not exist on real NeoTrellis hardware):</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">-- When navigating to a secondary screen:</span>
+<span class="kr">if</span><span class="w"> </span><span class="nv">display_screen</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="nf">display_screen</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">)</span><span class="w"> </span><span class="kr">end</span>
+
+<span class="c1">-- When returning to main:</span>
+<span class="kr">if</span><span class="w"> </span><span class="nv">display_screen</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="nf">display_screen</span><span class="p">(</span><span class="s1">&#39;live&#39;</span><span class="p">)</span><span class="w"> </span><span class="kr">end</span>
+</code></pre></div>
+
+<p><strong>Backwards compatibility note:</strong> with serial testing with the viii app
+to run scripts over serial for OG monome norns compatibility — i learned to not provide
+<code>grid_set_screen</code>. In that case, scripts should either stub it or branch around it and
+draw only the active screen. For example:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">supports_multi_screen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nv">grid_set_screen</span><span class="w"> </span><span class="o">~=</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span>
+<span class="kr">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nv">grid_set_screen</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="nv">grid_set_screen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kr">function</span><span class="p">(</span><span class="nv">name</span><span class="p">)</span><span class="w"> </span><span class="kr">end</span><span class="w"> </span><span class="kr">end</span>
+
+<span class="kr">function</span><span class="w"> </span><span class="nf">redraw</span><span class="p">()</span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="nv">supports_multi_screen</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">    </span><span class="nf">grid_set_screen</span><span class="p">(</span><span class="s1">&#39;live&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="c1">-- draw live and alternate screen buffers...</span>
+<span class="w">    </span><span class="nf">grid_set_screen</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="c1">-- draw settings screen...</span>
+<span class="w">  </span><span class="kr">else</span>
+<span class="w">    </span><span class="c1">-- draw only the currently active screen</span>
+<span class="w">  </span><span class="kr">end</span>
+<span class="w">  </span><span class="nf">grid_refresh</span><span class="p">()</span>
+<span class="kr">end</span>
+</code></pre></div>
+
+<p>The same compatibility pattern applies to <code>display_screen</code> and any alternate-screen logic.</p>
+<p>Full example (from serpentine_dev.lua):</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">-- @section Grid Layout</span>
+<span class="c1">-- @screen live</span>
+<span class="c1">-- x=1, y=8: ALT — momentary hold opens Settings; double-tap = sticky</span>
+<span class="c1">-- x=2, y=8: Play/Stop — green=running, red=stopped</span>
+<span class="c1">-- @group D-PAD</span>
+<span class="c1">-- x=15, y=7: UP</span>
+<span class="c1">-- x=14, y=8: LEFT</span>
+<span class="c1">-- x=15, y=8: DOWN</span>
+<span class="c1">-- x=16, y=8: RIGHT</span>
+
+<span class="c1">-- @section Settings View (hold ALT)</span>
+<span class="c1">-- @screen settings</span>
+<span class="c1">-- x=1..8, y=1: Spawn Quantity — slider, each step = 2 fruits</span>
+<span class="c1">-- @group Fruit Type Toggles</span>
+<span class="c1">-- x=11, y=1: Red — tail shrink, note to pool</span>
+<span class="c1">-- x=12, y=1: Blue — tail grow, note to pool</span>
+<span class="c1">-- @group</span>
+<span class="c1">-- x=1, y=3: Autopilot — dim=manual, bright=auto</span>
+<span class="c1">-- @group BPM Adjust</span>
+<span class="c1">-- x=10, y=3: −10 BPM</span>
+<span class="c1">-- x=11, y=3: −1 BPM</span>
+<span class="c1">-- x=12, y=3: +1 BPM</span>
+<span class="c1">-- x=13, y=3: +10 BPM</span>
+<span class="c1">-- @group</span>
+<span class="c1">-- @group Root Note Keyboard</span>
+<span class="c1">-- x=1..7, y=6: Black keys (C# D# F# G# A#)</span>
+<span class="c1">-- x=1..7, y=7: White keys (C D E F G A B)</span>
+</code></pre></div>
+
+<hr />
+<h2 id="3-readmemd-recommended-for-github-repos">3. README.md (recommended for GitHub repos)<a class="headerlink" href="#3-readmemd-recommended-for-github-repos" title="Permanent link">&para;</a></h2>
+<p>A <code>README.md</code> in the same directory as the <code>.lua</code> file serves as the full human-readable guide,
+displayed in the documentation panel below the grid overlays.</p>
+<p>There is no required structure, but the following H2 sections are recognized and rendered
+with special formatting in the emulator UI:</p>
+<div class="codehilite"><pre><span></span><code><span class="gu">## Controls        ← rendered as a controls reference table</span>
+<span class="gu">## Settings        ← rendered inline, often maps to ALT-menu docs</span>
+<span class="gu">## Usage           ← shown as a getting-started section</span>
+<span class="gu">## Notes           ← rendered as a callout block</span>
+<span class="gu">## Changelog       ← collapsed by default</span>
+</code></pre></div>
+
+<p>Any other H2 sections are rendered as plain markdown.</p>
+<p>The <code>serpentineseqr_docs.md</code> file is the reference implementation of this format —
+it should be renamed to <code>README.md</code> when the script is packaged for external import.</p>
+<hr />
+<h2 id="4-manifestjson-optional-for-emulator-discovery">4. manifest.json (optional, for emulator discovery)<a class="headerlink" href="#4-manifestjson-optional-for-emulator-discovery" title="Permanent link">&para;</a></h2>
+<p>A <code>manifest.json</code> in the script folder enables the emulator to display rich metadata
+and supports future catalog-based browsing. The shape mirrors the norns community catalog:</p>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;project_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;serpentine&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;project_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://github.com/user/repo&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your-name&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Snake sequencer with arpeggiator for NeoTrellis 16x8&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;discussion_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://llllllll.co/t/your-thread/12345&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;documentation_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://raw.githubusercontent.com/user/repo/main/README.md&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;tags&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sequencer&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;generative&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;neotrellis&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rgb&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;lua_file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;myscript.lua&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Fields:
+- <code>project_name</code> — display name
+- <code>project_url</code> — GitHub repo root (used to derive raw file URLs if not overridden)
+- <code>author</code> — display name
+- <code>description</code> — one-liner, shown in the script selector
+- <code>discussion_url</code> — llllllll.co thread or forum link
+- <code>documentation_url</code> — direct URL to README.md (raw GitHub URL preferred)
+- <code>tags</code> — array of strings for future filtering
+- <code>lua_file</code> — filename of the main script (defaults to <code>index.lua</code> if omitted)</p>
+<hr />
+<h2 id="5-github-import-flow-planned">5. GitHub import flow (planned)<a class="headerlink" href="#5-github-import-flow-planned" title="Permanent link">&para;</a></h2>
+<p>When a user pastes a GitHub repo URL, the emulator will:</p>
+<ol>
+<li>Parse the URL to extract <code>owner/repo</code></li>
+<li>Try to fetch <code>manifest.json</code> from the default branch root via:
+   <code>https://raw.githubusercontent.com/&lt;owner&gt;/&lt;repo&gt;/main/manifest.json</code></li>
+<li>If no manifest: try <code>README.md</code> at the same path</li>
+<li>Fetch the <code>.lua</code> file (from <code>lua_file</code> in manifest, or by scanning for <code>*.lua</code>)</li>
+<li>Run <code>doc-extractor.js</code> on the <code>.lua</code> source → powers the grid overlay</li>
+<li>Render the README.md source → populates the docs panel below the grids</li>
+</ol>
+<p>CORS: <code>raw.githubusercontent.com</code> returns <code>Access-Control-Allow-Origin: *</code> for public repos,
+so no proxy is needed for the browser fetch.</p>
+<hr />
+<h2 id="6-keyboard-shortcut-hints-key">6. Keyboard shortcut hints (<code>@key</code>)<a class="headerlink" href="#6-keyboard-shortcut-hints-key" title="Permanent link">&para;</a></h2>
+<p>Scripts can declare their keyboard shortcuts using <code>@key</code> tags in the header block.
+The emulator reads these and populates the hints bar below the grid automatically.
+The <code>R</code> key (Reload) is always shown as an app-level entry at the end; do not redeclare it.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">-- @key ↑↓←→: Steer</span>
+<span class="c1">-- @key Tab: Settings</span>
+<span class="c1">-- @key Space: Sticky</span>
+<span class="c1">-- @key 1/2: BPM−</span>
+<span class="c1">-- @key 3/4: BPM+</span>
+<span class="c1">-- @key A: Autopilot</span>
+</code></pre></div>
+
+<p><strong>Notation rules:</strong>
+- Place <code>@key</code> lines anywhere in the leading comment block (same area as the header)
+- Format: <code>-- @key KEYS: Label</code>
+- <code>KEYS</code> is the text shown in the badge — keep it short (≤8 characters)
+- Use <code>/</code> to separate two keys that share a label: <code>1/2</code> renders as two separate badges with <code>/</code> between them
+- Unicode symbols are fine: <code>↑↓←→</code>, <code>⌘</code>, <code>⇧</code>
+- <code>Label</code> is plain text; keep it to 1–2 words</p>
+<hr />
+<h2 id="7-ldoc-tag-reference-what-doc-extractorjs-recognizes">7. LDoc tag reference (what doc-extractor.js recognizes)<a class="headerlink" href="#7-ldoc-tag-reference-what-doc-extractorjs-recognizes" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>Usage</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--- description</code></td>
+<td>Triple-dash opens a doc block</td>
+<td><code>--- Updates the snake position</code></td>
+</tr>
+<tr>
+<td><code>-- @tparam type name desc</code></td>
+<td>Typed parameter</td>
+<td><code>-- @tparam number x Grid column (1-16)</code></td>
+</tr>
+<tr>
+<td><code>-- @treturn type desc</code></td>
+<td>Typed return value</td>
+<td><code>-- @treturn boolean True if alive</code></td>
+</tr>
+<tr>
+<td><code>-- @param name desc</code></td>
+<td>Untyped parameter</td>
+<td><code>-- @param x Column</code></td>
+</tr>
+<tr>
+<td><code>-- @section Name</code></td>
+<td>Groups following controls</td>
+<td><code>-- @section Spawner Engine</code></td>
+</tr>
+<tr>
+<td><code>-- @key KEYS: Label</code></td>
+<td>Keyboard shortcut hint</td>
+<td><code>-- @key ↑↓←→: Steer</code></td>
+</tr>
+<tr>
+<td><code>-- x=N: desc</code></td>
+<td>Control map (single cell)</td>
+<td><code>-- x=1, y=8: ALT toggle</code></td>
+</tr>
+<tr>
+<td><code>-- Row N: desc</code></td>
+<td>Control map (full row)</td>
+<td><code>-- Row 6: Black keys</code></td>
+</tr>
+</tbody>
+</table>
+<p>Tags from the full LDoc spec that are <strong>not</strong> currently extracted (low priority for grid scripts):
+<code>@usage</code>, <code>@see</code>, <code>@field</code>, <code>@release</code>, <code>@license</code>, <code>@classmod</code>, <code>@module</code>, <code>@script</code></p>
+<p>These can be added to <code>doc-extractor.js</code> incrementally as needed.</p>
+<hr />
+<h2 id="reference-implementations">Reference implementations<a class="headerlink" href="#reference-implementations" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../scripts/serpentineSeqr/serpentine_dev.lua">scripts/serpentineSeqr/serpentine_dev.lua</a></td>
+<td>Reference <code>.lua</code> with inline LDoc header and control map comments</td>
+</tr>
+<tr>
+<td><a href="../scripts/serpentineSeqr/serpentineseqr_docs.md">scripts/serpentineSeqr/serpentineseqr_docs.md</a></td>
+<td>Reference README (to be renamed and kept alongside the <code>.lua</code>)</td>
+</tr>
+<tr>
+<td><a href="../engine/doc-extractor.js">engine/doc-extractor.js</a></td>
+<td>Parser — extracts header + control map from <code>.lua</code> source</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

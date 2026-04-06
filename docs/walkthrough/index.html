@@ -1,0 +1,1392 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Browser-based emulator for Monome and NeoTrellis Lua scripts">
+      
+      
+        <meta name="author" content="jonwaterschoot">
+      
+      
+        <link rel="canonical" href="https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/walkthrough/">
+      
+      
+        <link rel="prev" href="../roadmap/">
+      
+      
+        <link rel="next" href="../script-standards/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Walkthrough - diii-neotrellis-emulator Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Manrope:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Manrope";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#universal-monome-grid-lua-emulator-walkthrough" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="diii-neotrellis-emulator Documentation" class="md-header__button md-logo" aria-label="diii-neotrellis-emulator Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            diii-neotrellis-emulator Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Walkthrough
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../main-readme/" class="md-tabs__link">
+          
+  
+  
+  Project Overview
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Emulator Usage
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../firmware-installation/" class="md-tabs__link">
+          
+  
+  
+  Hardware & Firmware
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../serpentine-sequencer/" class="md-tabs__link">
+          
+  
+  
+  Scripts
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="diii-neotrellis-emulator Documentation" class="md-nav__button md-logo" aria-label="diii-neotrellis-emulator Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    diii-neotrellis-emulator Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Project Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../main-readme/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Main README
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Emulator Usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Emulator Usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Walkthrough
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Walkthrough
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#screenshot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Screenshot
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#project-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Project Structure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-script-loading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Script Loading
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-fengari-execution-enginelua-loaderjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Fengari Execution (engine/lua-loader.js)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-grid-rendering-enginemonome-apijs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Grid Rendering (engine/monome-api.js)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-hot-reload-servejs-lua-loaderjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Hot-Reload (serve.js + lua-loader.js)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-documentation-extraction-enginedoc-extractorjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Documentation Extraction (engine/doc-extractor.js)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#keyboard-shortcuts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keyboard Shortcuts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-a-new-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding a New Script
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ldoc-annotation-cheatsheet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LDoc Annotation Cheatsheet
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#midi-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MIDI Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extending-the-hardware-shim" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extending the Hardware Shim
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../script-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Script Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hardware & Firmware
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Hardware & Firmware
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../firmware-installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firmware Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building-firmware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building Firmware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scripts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Scripts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../serpentine-sequencer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Serpentine Sequencer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multi-screen-test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Screen Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="universal-monome-grid-lua-emulator-walkthrough">Universal Monome Grid Lua Emulator — Walkthrough<a class="headerlink" href="#universal-monome-grid-lua-emulator-walkthrough" title="Permanent link">&para;</a></h1>
+<p>A browser-based emulator that runs <strong>real <code>.lua</code> scripts natively</strong> using the
+<a href="https://fengari.io">Fengari</a> Lua 5.3 runtime, with a Node.js hot-reload dev
+server. Designed as a universal development tool for any Monome-compatible grid
+script.</p>
+<hr />
+<h2 id="screenshot">Screenshot<a class="headerlink" href="#screenshot" title="Permanent link">&para;</a></h2>
+<p><img alt="Emulator screenshot" src="../img/emulator_v1-1_screenshot.png" /></p>
+<p>*The emulator running <code>serpentine_dev.lua</code> — snake in motion, docs panel populated
+from LDoc comments</p>
+<hr />
+<h2 id="project-structure">Project Structure<a class="headerlink" href="#project-structure" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="n">emulator</span><span class="o">/</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">emulator</span><span class="o">.</span><span class="n">html</span><span class="w">           </span><span class="err">←</span><span class="w"> </span><span class="n">Main</span><span class="w"> </span><span class="n">UI</span><span class="w"> </span><span class="p">(</span><span class="n">grid</span><span class="p">,</span><span class="w"> </span><span class="n">script</span><span class="w"> </span><span class="n">browser</span><span class="p">,</span><span class="w"> </span><span class="n">docs</span><span class="o">/</span><span class="n">state</span><span class="o">/</span><span class="n">console</span><span class="w"> </span><span class="n">panel</span><span class="p">)</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">serve</span><span class="o">.</span><span class="n">js</span><span class="w">                </span><span class="err">←</span><span class="w"> </span><span class="n">Node</span><span class="o">.</span><span class="n">js</span><span class="w"> </span><span class="n">dev</span><span class="w"> </span><span class="n">server</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">WebSocket</span><span class="w"> </span><span class="n">hot</span><span class="o">-</span><span class="n">reload</span><span class="w"> </span><span class="n">broadcaster</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">package</span><span class="o">.</span><span class="n">json</span><span class="w">            </span><span class="err">←</span><span class="w"> </span><span class="n">Single</span><span class="w"> </span><span class="n">dependency</span><span class="p">:</span><span class="w"> </span><span class="n">ws</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">docs</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">walkthrough</span><span class="o">.</span><span class="n">md</span><span class="w">      </span><span class="err">←</span><span class="w"> </span><span class="n">This</span><span class="w"> </span><span class="n">file</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">scripts</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">manifest</span><span class="o">.</span><span class="n">json</span><span class="w">       </span><span class="err">←</span><span class="w"> </span><span class="n">Script</span><span class="w"> </span><span class="n">registry</span><span class="w"> </span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">file</span><span class="p">,</span><span class="w"> </span><span class="n">version</span><span class="p">,</span><span class="w"> </span><span class="n">description</span><span class="p">)</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">serpentine_dev</span><span class="o">.</span><span class="n">lua</span><span class="w">  </span><span class="err">←</span><span class="w"> </span><span class="n">Live</span><span class="w"> </span><span class="n">dev</span><span class="w"> </span><span class="n">copy</span><span class="w"> </span><span class="p">(</span><span class="n">synced</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">parent</span><span class="w"> </span><span class="n">folder</span><span class="p">)</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">serpentine</span><span class="o">.</span><span class="n">lua</span><span class="w">      </span><span class="err">←</span><span class="w"> </span><span class="n">Stable</span><span class="w"> </span><span class="n">reference</span><span class="w"> </span><span class="n">copy</span>
+<span class="err">└──</span><span class="w"> </span><span class="n">engine</span><span class="o">/</span>
+<span class="w">    </span><span class="err">├──</span><span class="w"> </span><span class="n">monome</span><span class="o">-</span><span class="n">api</span><span class="o">.</span><span class="n">js</span><span class="w">       </span><span class="err">←</span><span class="w"> </span><span class="n">Hardware</span><span class="w"> </span><span class="n">shim</span><span class="w"> </span><span class="n">layer</span>
+<span class="w">    </span><span class="err">├──</span><span class="w"> </span><span class="n">lua</span><span class="o">-</span><span class="n">loader</span><span class="o">.</span><span class="n">js</span><span class="w">       </span><span class="err">←</span><span class="w"> </span><span class="n">Fengari</span><span class="w"> </span><span class="n">execution</span><span class="w"> </span><span class="n">bridge</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">hot</span><span class="o">-</span><span class="n">reload</span><span class="w"> </span><span class="n">WS</span><span class="w"> </span><span class="n">client</span>
+<span class="w">    </span><span class="err">└──</span><span class="w"> </span><span class="n">doc</span><span class="o">-</span><span class="n">extractor</span><span class="o">.</span><span class="n">js</span><span class="w">    </span><span class="err">←</span><span class="w"> </span><span class="n">LDoc</span><span class="o">-</span><span class="n">style</span><span class="w"> </span><span class="n">comment</span><span class="w"> </span><span class="n">parser</span>
+</code></pre></div>
+
+<hr />
+<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="c"># From inside the emulator/ directory:</span>
+<span class="n">node</span> <span class="n">serve</span><span class="p">.</span><span class="n">js</span>
+</code></pre></div>
+
+<p>Open <strong>http://localhost:3141/</strong> in any browser.</p>
+<blockquote>
+<p>The File Picker button works even without the server — you can drag any <code>.lua</code>
+file from disk directly.</p>
+</blockquote>
+<hr />
+<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
+<h3 id="1-script-loading">1. Script Loading<a class="headerlink" href="#1-script-loading" title="Permanent link">&para;</a></h3>
+<p><code>emulator.html</code> fetches <code>scripts/manifest.json</code> on startup and populates the
+dropdown selector. Clicking <strong>▶ Load</strong> fetches the <code>.lua</code> source over HTTP and
+passes it to the Lua runtime. The <strong>Open File</strong> button accepts any local <code>.lua</code>
+without requiring the server.</p>
+<h3 id="2-fengari-execution-enginelua-loaderjs">2. Fengari Execution (<code>engine/lua-loader.js</code>)<a class="headerlink" href="#2-fengari-execution-enginelua-loaderjs" title="Permanent link">&para;</a></h3>
+<div class="codehilite"><pre><span></span><code><span class="n">Source</span><span class="w"> </span><span class="p">(</span><span class="o">.</span><span class="n">lua</span><span class="p">)</span>
+<span class="w">     </span><span class="err">│</span>
+<span class="w">     </span><span class="err">▼</span>
+<span class="n">luaL_newstate</span><span class="p">()</span><span class="w">         </span><span class="err">←</span><span class="w"> </span><span class="n">fresh</span><span class="w"> </span><span class="n">Lua</span><span class="w"> </span><span class="n">VM</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="n">script</span><span class="w"> </span><span class="nb">load</span>
+<span class="n">luaL_openlibs</span><span class="p">()</span><span class="w">         </span><span class="err">←</span><span class="w"> </span><span class="n">math</span><span class="p">,</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">table</span><span class="p">,</span><span class="w"> </span><span class="n">etc</span><span class="o">.</span>
+<span class="w">     </span><span class="err">│</span>
+<span class="w">     </span><span class="err">├─</span><span class="w"> </span><span class="n">Inject</span><span class="w"> </span><span class="n">globals</span><span class="w">  </span><span class="err">←</span><span class="w"> </span><span class="n">grid_led</span><span class="p">,</span><span class="w"> </span><span class="n">midi_note_on</span><span class="p">,</span><span class="w"> </span><span class="n">metro</span><span class="o">.</span><span class="n">init</span><span class="p">,</span><span class="w"> </span><span class="n">wrap</span><span class="p">,</span><span class="w"> </span><span class="n">get_time</span><span class="err">…</span>
+<span class="w">     </span><span class="err">│</span>
+<span class="n">luaL_loadbuffer</span><span class="p">()</span><span class="w">       </span><span class="err">←</span><span class="w"> </span><span class="n">compile</span><span class="w"> </span><span class="n">Lua</span><span class="w"> </span><span class="n">source</span>
+<span class="n">lua_pcall</span><span class="p">()</span><span class="w">             </span><span class="err">←</span><span class="w"> </span><span class="n">execute</span>
+<span class="w">     </span><span class="err">│</span>
+<span class="w">     </span><span class="err">└─</span><span class="w"> </span><span class="n">Capture</span><span class="w"> </span><span class="n">event_grid</span><span class="w"> </span><span class="n">global</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">wired</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">pad</span><span class="w"> </span><span class="n">clicks</span>
+</code></pre></div>
+
+<p>All MonomeAPI functions are injected as C-closures that delegate to the JS
+<code>MonomeAPI</code> class.</p>
+<blockquote>
+<p><strong>Fengari API note:</strong> In <code>fengari-web@0.1.4</code>, <code>to_luastring</code> is a <strong>top-level
+export</strong> on <code>window.fengari</code>, not nested inside <code>fengari.lua</code>. Always
+destructure it as:
+<code>js
+const { lua, lualib, lauxlib, to_luastring } = window.fengari;</code></p>
+</blockquote>
+<h3 id="3-grid-rendering-enginemonome-apijs">3. Grid Rendering (<code>engine/monome-api.js</code>)<a class="headerlink" href="#3-grid-rendering-enginemonome-apijs" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Lua call</th>
+<th>JS result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>grid_led(x, y, lum)</code></td>
+<td>writes mono <code>{r,g,b}</code> to frame buffer, using current global tint</td>
+</tr>
+<tr>
+<td><code>grid_led_rgb(x, y, r, g, b)</code></td>
+<td>writes RGB to frame buffer</td>
+</tr>
+<tr>
+<td><code>grid_color(r, g, b)</code></td>
+<td>sets a global tint for subsequent <code>grid_led()</code> / <code>grid_led_all()</code> output</td>
+</tr>
+<tr>
+<td><code>grid_led_all(lum)</code></td>
+<td>fills entire frame buffer, respecting current global tint</td>
+</tr>
+<tr>
+<td><code>grid_refresh()</code></td>
+<td>flushes buffer → updates <code>.pad</code> DOM elements</td>
+</tr>
+<tr>
+<td><code>grid_color_intensity(val)</code></td>
+<td>sets master brightness multiplier</td>
+</tr>
+</tbody>
+</table>
+<p>Every <code>grid_refresh()</code> call applies the master brightness and sets
+<code>background</code> + <code>box-shadow</code> CSS on each pad for the glow effect.</p>
+<p><code>grid_color()</code> is a global tint helper; it does not set per-pixel color. For true
+per-pixel RGB output, use <code>grid_led_rgb()</code>. <code>grid_color_intensity()</code> adjusts the
+final brightness of rendered output.</p>
+<h3 id="4-hot-reload-servejs-lua-loaderjs">4. Hot-Reload (<code>serve.js</code> + <code>lua-loader.js</code>)<a class="headerlink" href="#4-hot-reload-servejs-lua-loaderjs" title="Permanent link">&para;</a></h3>
+<div class="codehilite"><pre><span></span><code><span class="n">Edit</span><span class="w"> </span><span class="o">.</span><span class="n">lua</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">disk</span>
+<span class="w">        </span><span class="err">│</span>
+<span class="w">    </span><span class="n">fs</span><span class="o">.</span><span class="n">watch</span><span class="p">()</span><span class="w">                 </span><span class="err">←</span><span class="w"> </span><span class="n">serve</span><span class="o">.</span><span class="n">js</span><span class="w"> </span><span class="n">watches</span><span class="w"> </span><span class="n">scripts</span><span class="o">/</span>
+<span class="w">        </span><span class="err">│</span>
+<span class="w">    </span><span class="n">WebSocket</span><span class="w"> </span><span class="n">broadcast</span><span class="w">        </span><span class="err">←</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;file_changed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="err">│</span>
+<span class="w">    </span><span class="n">browser</span><span class="w"> </span><span class="n">receives</span><span class="w"> </span><span class="n">message</span><span class="w">   </span><span class="err">←</span><span class="w"> </span><span class="n">lua</span><span class="o">-</span><span class="n">loader</span><span class="o">.</span><span class="n">js</span>
+<span class="w">        </span><span class="err">│</span>
+<span class="w">    </span><span class="n">re</span><span class="o">-</span><span class="n">fetch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">re</span><span class="o">-</span><span class="n">execute</span><span class="w">      </span><span class="err">←</span><span class="w"> </span><span class="o">~</span><span class="mi">150</span><span class="n">ms</span><span class="w"> </span><span class="n">turnaround</span>
+</code></pre></div>
+
+<p>The WebSocket reconnects automatically if the server restarts.</p>
+<h3 id="5-documentation-extraction-enginedoc-extractorjs">5. Documentation Extraction (<code>engine/doc-extractor.js</code>)<a class="headerlink" href="#5-documentation-extraction-enginedoc-extractorjs" title="Permanent link">&para;</a></h3>
+<p>The doc extractor scans Lua source for LDoc-style comments and populates the
+<strong>Docs</strong> and <strong>State</strong> sidepanel tabs automatically after each script load.</p>
+<p><strong>Recognised patterns:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1">-- scriptname: My Script      ← populates script meta card</span>
+<span class="c1">-- v1.2.3</span>
+<span class="c1">-- @author: yourname</span>
+<span class="c1">-- llllllll.co/t/thread-link</span>
+
+<span class="c1">-- @section Grid Layout        ← creates a named section in the Docs tab</span>
+
+<span class="c1">-- x=1..8, y=1: Some control  ← control map entry (location + description)</span>
+<span class="c1">-- x=1, y=8: ALT toggle</span>
+
+<span class="c1">--- Short description.         ← function doc (triple-dash)</span>
+<span class="c1">-- @tparam number x  Column (1-based)</span>
+<span class="c1">-- @treturn boolean  Success flag</span>
+<span class="kd">local</span><span class="w"> </span><span class="kr">function</span><span class="w"> </span><span class="nf">my_fn</span><span class="p">(</span><span class="nv">x</span><span class="p">)</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="kr">end</span>
+
+<span class="kd">local</span><span class="w"> </span><span class="nv">bpm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">120</span><span class="w">                </span><span class="err">←</span><span class="w"> </span><span class="nv">captured</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">State</span><span class="w"> </span><span class="nf">tab</span><span class="w"> </span><span class="p">(</span><span class="nv">simple</span><span class="w"> </span><span class="nv">scalars</span><span class="p">)</span>
+</code></pre></div>
+
+<hr />
+<h2 id="keyboard-shortcuts">Keyboard Shortcuts<a class="headerlink" href="#keyboard-shortcuts" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Grid equivalent</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>↑ ↓ ← →</code></td>
+<td>D-PAD (x15-16, y7-8)</td>
+<td>Steer snake</td>
+</tr>
+<tr>
+<td><code>Tab</code></td>
+<td>ALT (x1, y8)</td>
+<td>Open settings (hold)</td>
+</tr>
+<tr>
+<td><code>Space</code></td>
+<td>ALT (x1, y8)</td>
+<td>Sticky settings toggle</td>
+</tr>
+<tr>
+<td><code>1</code> / <code>2</code></td>
+<td>x10-11, y3</td>
+<td>BPM −10 / −1</td>
+</tr>
+<tr>
+<td><code>3</code> / <code>4</code></td>
+<td>x12-13, y3</td>
+<td>BPM +1 / +10</td>
+</tr>
+<tr>
+<td><code>A</code></td>
+<td>x1, y3</td>
+<td>Cycle autopilot: NON → SEM → AUT</td>
+</tr>
+<tr>
+<td><code>R</code></td>
+<td>—</td>
+<td>Reload current script</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="adding-a-new-script">Adding a New Script<a class="headerlink" href="#adding-a-new-script" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Copy your <code>.lua</code> file into <code>emulator/scripts/</code></li>
+<li>Add an entry to <code>emulator/scripts/manifest.json</code>:</li>
+</ol>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My Script&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_script.lua&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;What it does&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ol>
+<li>The dropdown will include it on next page load (or reload).</li>
+</ol>
+<hr />
+<h2 id="ldoc-annotation-cheatsheet">LDoc Annotation Cheatsheet<a class="headerlink" href="#ldoc-annotation-cheatsheet" title="Permanent link">&para;</a></h2>
+<p>Paste this header at the top of any script to enable full doc extraction:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">-- scriptname: Script Name</span>
+<span class="c1">-- v1.0.0</span>
+<span class="c1">-- @author: yourname</span>
+<span class="c1">-- llllllll.co/t/thread</span>
+
+<span class="c1">-- A one-line description shown under the title.</span>
+
+<span class="c1">-- @section Controls</span>
+<span class="c1">-- x=1..8, y=1: Main slider — does X</span>
+<span class="c1">-- x=1, y=8: ALT toggle — opens settings</span>
+
+<span class="c1">-- @section Internal</span>
+<span class="c1">--- Initialise the game state.</span>
+<span class="c1">-- @tparam number seed  Random seed</span>
+<span class="kd">local</span><span class="w"> </span><span class="kr">function</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="nv">seed</span><span class="p">)</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="kr">end</span>
+</code></pre></div>
+
+<hr />
+<h2 id="midi-output">MIDI Output<a class="headerlink" href="#midi-output" title="Permanent link">&para;</a></h2>
+<p>Connect a MIDI output via the bottom bar dropdown. The emulator sends:
+- <code>0x90</code> Note On (from <code>midi_note_on</code>)
+- <code>0x80</code> Note Off (from <code>midi_note_off</code>)</p>
+<p>Web Audio synthesis runs as a fallback whenever no MIDI output is selected,
+using a triangle-wave oscillator with configurable volume, attack, and release
+(sliders below the grid).</p>
+<hr />
+<h2 id="extending-the-hardware-shim">Extending the Hardware Shim<a class="headerlink" href="#extending-the-hardware-shim" title="Permanent link">&para;</a></h2>
+<p>To add a new API function for a Lua script to call, edit <code>engine/monome-api.js</code>
+to add the JS-side implementation, then register it in <code>engine/lua-loader.js</code>
+using <code>setGlobal</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// In lua-loader.js _execute(), after other setGlobal calls:</span>
+<span class="nx">setGlobal</span><span class="p">(</span><span class="s1">&#39;my_new_fn&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="nx">L2</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">getInt</span><span class="p">(</span><span class="nx">L2</span><span class="p">,</span><span class="w"> </span><span class="mf">1</span><span class="p">);</span><span class="w">   </span><span class="c1">// first Lua argument</span>
+<span class="w">  </span><span class="nx">api</span><span class="p">.</span><span class="nx">my_new_fn</span><span class="p">(</span><span class="nx">val</span><span class="p">);</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span><span class="w">                    </span><span class="c1">// number of return values pushed</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c1">// In monome-api.js:</span>
+<span class="nx">my_new_fn</span><span class="p">(</span><span class="nx">val</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// JS implementation</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

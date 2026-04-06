@@ -1,0 +1,1423 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Browser-based emulator for Monome and NeoTrellis Lua scripts">
+      
+      
+        <meta name="author" content="jonwaterschoot">
+      
+      
+        <link rel="canonical" href="https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/main-readme/">
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../roadmap/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Main README - diii-neotrellis-emulator Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Manrope:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Manrope";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#diii-neotrellis-emulator" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="diii-neotrellis-emulator Documentation" class="md-header__button md-logo" aria-label="diii-neotrellis-emulator Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            diii-neotrellis-emulator Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Main README
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Project Overview
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../walkthrough/" class="md-tabs__link">
+          
+  
+  
+  Emulator Usage
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../firmware-installation/" class="md-tabs__link">
+          
+  
+  
+  Hardware & Firmware
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../serpentine-sequencer/" class="md-tabs__link">
+          
+  
+  
+  Scripts
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="diii-neotrellis-emulator Documentation" class="md-nav__button md-logo" aria-label="diii-neotrellis-emulator Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    diii-neotrellis-emulator Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Project Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Main README
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Main README
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scripting-hardware-compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scripting &amp; Hardware Compatibility
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scripting &amp; Hardware Compatibility">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#monochrome-fallback-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monochrome Fallback Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monochrome Fallback Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-feature-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Feature Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-global-tinting-vs-per-pixel-color" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Global Tinting vs. Per-Pixel Color
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-graceful-degradation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Graceful Degradation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hardware-limitations-color-accuracy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hardware Limitations &amp; Color Accuracy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hardware Limitations &amp; Color Accuracy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#neotrellis-color-rendering-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NeoTrellis Color Rendering Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#available-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Scripts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#official-diii-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Official diii pages:
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#my-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        My scripts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting Started
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting Started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Development">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#adding-new-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding New Scripts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-github-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment (GitHub Pages)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        License
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Emulator Usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Emulator Usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../walkthrough/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Walkthrough
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../script-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Script Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hardware & Firmware
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Hardware & Firmware
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../firmware-installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firmware Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building-firmware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building Firmware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scripts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Scripts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../serpentine-sequencer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Serpentine Sequencer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multi-screen-test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Screen Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="diii-neotrellis-emulator">diii-neotrellis-emulator<a class="headerlink" href="#diii-neotrellis-emulator" title="Permanent link">&para;</a></h1>
+<p>A browser-based emulator for loading Lua scripts designed for Monome and NeoTrellis grids. This project was born from my first tests of making an interactive manual for my serpentine script. I soon started implementing sound and thought i might as well build a full webapp to also emulate other scripts.</p>
+<p>This is a vibecoded project, but none the less I have spent many hours building this and learning about the eco system.</p>
+<p>I have a few diy projects from okyeron,  and it was through that discord server that I got intruiged by the new diii possibilities.</p>
+<p>I built my own version of the firmware looking to create compatibility with og monome grid. I do not own any original monome geaar unfortunately.</p>
+<p>I also hope I'm not breaking any licensing things, if so please let me know. I thought it be best if I also shared under the gpl license.</p>
+<h2 id="scripting-hardware-compatibility">Scripting &amp; Hardware Compatibility<a class="headerlink" href="#scripting-hardware-compatibility" title="Permanent link">&para;</a></h2>
+<p><img alt="Color fallback demo on NeoTrellis after monochrome viii mode" src="../img/neotrellis_diii_color_fallback_viii.gif" /></p>
+<p><em>Recording of <code>color_fallback_demo.lua</code> on NeoTrellis hardware, showing the device after using viii for the monochrome version of the test and then toggling pixels on the device.</em></p>
+<p><img alt="Color fallback test on NeoTrellis device with pixel interaction" src="../img/neotrellis_diii_color.gif" /></p>
+<p><em>Recording of <code>color_fallback_demo.lua</code> on NeoTrellis hardware, showing the fallback test running on device with interactive pixel toggling.</em></p>
+<p>I wrote a quick <a href="../uf2s/readme.md">readme guide</a>in the uf2s directory with some quick tips to get the custom firmware for pico neotrellis up and running.</p>
+<p>The emulator supports scripts written for both the original <strong>Monome Grid</strong> (monochrome) and the <strong>Adafruit NeoTrellis</strong> (RGB). To ensure your scripts are portable across different hardware targets, the following compatibility patterns are recommended.</p>
+<h3 id="monochrome-fallback-implementation">Monochrome Fallback Implementation<a class="headerlink" href="#monochrome-fallback-implementation" title="Permanent link">&para;</a></h3>
+<p>When developing for RGB grids, it is best practice to include a fallback for monochrome devices. This allows your script to run on standard Monome hardware without modification.</p>
+<h4 id="1-feature-detection">1. Feature Detection<a class="headerlink" href="#1-feature-detection" title="Permanent link">&para;</a></h4>
+<p>Use the presence of <code>grid_led_rgb</code> to determine if the hardware supports per-pixel color.</p>
+<div class="codehilite"><pre><span></span><code><span class="kr">if</span><span class="w"> </span><span class="nv">grid_led_rgb</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">    </span><span class="c1">-- RGB Hardware logic</span>
+<span class="w">    </span><span class="nf">grid_led_rgb</span><span class="p">(</span><span class="nv">x</span><span class="p">,</span><span class="w"> </span><span class="nv">y</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="mi">120</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="c1">-- Orange</span>
+<span class="kr">else</span>
+<span class="w">    </span><span class="c1">-- Monochrome Fallback logic</span>
+<span class="w">    </span><span class="nf">grid_led</span><span class="p">(</span><span class="nv">x</span><span class="p">,</span><span class="w"> </span><span class="nv">y</span><span class="p">,</span><span class="w"> </span><span class="mi">15</span><span class="p">)</span><span class="w"> </span><span class="c1">-- Full Brightness</span>
+<span class="kr">end</span>
+</code></pre></div>
+
+<h4 id="2-global-tinting-vs-per-pixel-color">2. Global Tinting vs. Per-Pixel Color<a class="headerlink" href="#2-global-tinting-vs-per-pixel-color" title="Permanent link">&para;</a></h4>
+<p>When firmware supports it, <code>grid_color(r, g, b)</code> sets a global tint for subsequent <code>grid_led()</code> / <code>grid_led_all()</code> output. This is useful when you want a single color theme across the grid without per-pixel overrides.</p>
+<ul>
+<li><code>grid_color(r, g, b)</code>: Sets the global tint for <code>grid_led()</code> and <code>grid_led_all()</code> output.</li>
+<li><code>grid_led_rgb(x, y, r, g, b)</code>: Sets true per-pixel RGB color.</li>
+<li><code>grid_color_intensity(level)</code>: Sets a master brightness multiplier for the rendered output.</li>
+</ul>
+<p>In practice, use <code>grid_color()</code> for tinted monochrome-style modes, and <code>grid_led_rgb()</code> when you need independent colors on the same grid.</p>
+<h4 id="3-graceful-degradation">3. Graceful Degradation<a class="headerlink" href="#3-graceful-degradation" title="Permanent link">&para;</a></h4>
+<p>Scripts like <code>monochrome_fallback.lua</code> demonstrate how to handle state transitions:
+- <strong>Rainbow/Color Modes</strong>: active only if <code>grid_led_rgb</code> is available.
+- <strong>Intensity Modes</strong>: fallback to <code>grid_led(x, y, 0-15)</code> when color is unavailable.
+- <strong>Auto-Initialization</strong>: Detect hardware on script load to set default animation modes.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">-- Example from monochrome_fallback.lua</span>
+<span class="kr">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nv">grid_led_rgb</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span>
+<span class="w">    </span><span class="nv">anim_mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="c1">-- Force Monochrome mode</span>
+<span class="w">    </span><span class="nv">palette_rgb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span>
+<span class="kr">end</span>
+</code></pre></div>
+
+<h2 id="hardware-limitations-color-accuracy">Hardware Limitations &amp; Color Accuracy<a class="headerlink" href="#hardware-limitations-color-accuracy" title="Permanent link">&para;</a></h2>
+<h3 id="neotrellis-color-rendering-issues">NeoTrellis Color Rendering Issues<a class="headerlink" href="#neotrellis-color-rendering-issues" title="Permanent link">&para;</a></h3>
+<p><strong>Low Brightness Color Shift</strong>: At brightness levels 4-7, NeoTrellis LEDs exhibit inconsistent color rendering where cyan/blue tints may appear orange or reddish. This is due to physical LED characteristics and PWM limitations at low duty cycles.</p>
+<p><strong>Confirmed Thresholds</strong> (based on hardware testing):
+- <strong>Level 1-2</strong>: Physically invisible on tinted <code>grid_led()</code> calls
+- <strong>Level 3</strong>: First visible level on tinted <code>grid_led()</code> calls, but colors may be inaccurate
+- <strong>Level 4-7</strong>: Visible but cyan/blue tints often render as orange/reddish
+- <strong>Level 8+</strong>: Generally accurate color reproduction
+- <strong>RGB overrides</strong>: <code>grid_led_rgb()</code> provides better color accuracy even at low brightness levels</p>
+<p><strong>Testing Results</strong>: Using <code>color-threshold-test.lua</code> on NeoTrellis hardware shows that tinted <code>grid_led()</code> calls become invisible at levels 1-2 and show color shifts at levels 3-7, while <code>grid_led_rgb()</code> calls maintain better color fidelity throughout the range.</p>
+<p><img alt="Color threshold test demonstration" src="../img/neotrellisEmulator_color_treshold_test_lua.gif" /></p>
+<p><em>Systematic testing of color accuracy across brightness levels. Left side: tinted grid_led() calls (may shift on hardware). Right side: RGB overrides (maintains color accuracy).</em></p>
+<p><strong>Cross-Platform Testing</strong>: Test scripts in both diii (color) and viii (monochrome) webapps:
+- <strong>diii app</strong>: Shows full color rendering with RGB overrides
+- <strong>viii app</strong>: Shows monochrome fallback (ignores RGB calls, shows only grid_led calls as white)</p>
+<p><strong>Testing Script</strong>: Use <code>scripts/colorfallback/color-threshold-test.lua</code> to identify exact color accuracy thresholds on your specific hardware.</p>
+<p><strong>Workaround Demo</strong>: <code>scripts/colorfallback/color-workaround-demo.lua</code> shows how to use <code>grid_led_rgb()</code> overrides for accurate low-brightness colors.</p>
+<p><strong>Recommendations</strong>:
+- For reliable color reproduction, use brightness levels 8-15
+- At lower levels, consider using monochrome mode or RGB overrides instead of tinted <code>grid_led()</code>
+- Test your scripts on actual hardware, as the emulator may not perfectly replicate these physical limitations</p>
+<h2 id="available-scripts">Available Scripts<a class="headerlink" href="#available-scripts" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>serpentine_dev.lua</code>: A sophisticated snake-style sequencer with arpeggio support.</li>
+<li><code>monochrome_fallback.lua</code>: A reference implementation for cross-hardware compatibility.</li>
+<li><code>power_test.lua</code>: Diagnostic tool for grid power management.</li>
+<li><code>test-grid-color.lua</code>: Comprehensive color compatibility test (global tints, RGB overrides, monochrome fallback).</li>
+<li><code>color-threshold-test.lua</code>: Tests color accuracy at different brightness levels to identify hardware limitations.</li>
+<li><code>color-workaround-demo.lua</code>: Demonstrates workarounds for NeoTrellis color accuracy issues at low brightness.</li>
+</ul>
+<p>As okyeron started sharing news of the diii build for pico, i started trying to make a script that uses color.<br />
+I forked his repo and started implementing this into this fork branch <a href="https://github.com/jonwaterschoot/neotrellis-monome/tree/feature/colors/neotrellis_monome_picosdk_iii">feature/colors</a></p>
+<blockquote>
+<p>Neotrellis repo by okyeron: https://github.com/okyeron/neotrellis-monome :</p>
+<p>Code to use a set of Adafruit NeoTrellis boards as a monome grid clone using an off-the-shelf microcontroller.</p>
+<p>[!IMPORTANT]<br />
+I am not a C++ developer, and have made heavy use of <strong>vibecoding</strong> using Claude, Gemini in as plugins in VSCode and Google Antigravity to get this working.</p>
+</blockquote>
+<p>I actually first started making a webpage to make a manual for my serpentines script, as it became close to a working version of the script i decided to try and make a emulator for it, so that i could keep my documentation up to date with my script.</p>
+<p>So far my goal is to make an emulator that can be used as a manual guide for my scripts, and to make it easier to develop and test them.  </p>
+<p><img alt="emulator V1 example" src="../img/emulatorV1example.png" /></p>
+<p>I have put my uf2 files in the <code>uf2s/</code> directory. in that directory also: a copy of the readme's that were created while building the neotrellis compatible firmware for the diii.  </p>
+<blockquote>
+<p>[!NOTE]
+<strong>Nuke uf2</strong> tool - Done some stupid thing like making a device crashing luascript the default to load on start? Bricking you out of using the webapp diii? Asking for friend 😉
+<a href="https://github.com/Gadgetoid/pico-universal-flash-nuke/releases">You'll need to nuke the Flash</a></p>
+</blockquote>
+<h2 id="official-diii-pages">Official diii pages:<a class="headerlink" href="#official-diii-pages" title="Permanent link">&para;</a></h2>
+<ul>
+<li>
+<p>Webapp to upload lua files: https://monome.org/diii/ </p>
+<ul>
+<li>Repo: https://github.com/monome/web-diii</li>
+</ul>
+</li>
+<li>
+<p>Docs: https://monome.org/docs/iii/</p>
+</li>
+<li>
+<p>Post on the monome forum about the release of iii by tehn (Brian Crabtree):
+https://llllllll.co/t/iii/74311</p>
+<ul>
+<li>Scripts shared by tehn on the forum:    <ul>
+<li><a href="https://monome.org/docs/iii/library/mp/">meadowphysics</a> (full version, basically identical to the module )</li>
+<li><a href="https://monome.org/docs/iii/library/intervals">intervals</a> (a MIDI key map with linnstrument-like indication)</li>
+<li><a href="https://monome.org/docs/iii/library/wake">wake</a> (another polymodulated awake-style sequencer with an interesting scale builder)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>Okyeron's neotrellis repo: https://github.com/okyeron/neotrellis-monome</p>
+<h2 id="my-scripts">My scripts<a class="headerlink" href="#my-scripts" title="Permanent link">&para;</a></h2>
+<ul>
+<li>
+<p><a href="../scripts/serpentineseqr_dev.lua">serpentineseqr dev</a> - a snake game with color support for a 128 grid - my main reason to build this seq, and my main focus before i started building this emulator.<br />
+Its still not working as I envisioned it, but its getting there.  </p>
+</li>
+<li>
+<p><a href="../scripts/monochrome_fallback.lua">monochrome fallback test</a> - as i needed to test if the monochrome fallback was working</p>
+</li>
+<li>
+<p><a href="../scripts/power_test.lua">power test</a> - as i needed to test if the power wasnt causing brownouts</p>
+</li>
+</ul>
+<blockquote>
+<p>[!NOTE]<br />
+It is my intention to try and make my scripts backwards compatible with a standard monome grid, so that they can be run on both a standard monome grid and a neotrellis grid.<br />
+This is why i have included the <code>monochrome_fallback.lua</code> script. And i'm trying to use if grid.type == "neotrellis" to check for the grid type.</p>
+</blockquote>
+<h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Grid Emulation</strong>: Simulate monome and neotrellis grids with interactive buttons.</li>
+<li><strong>Lua Script Execution</strong>: Run Lua scripts directly in the browser.</li>
+<li><strong>Real-time Feedback</strong>: See button presses and grid state updates in real-time.</li>
+<li><strong>Multiple Grid Support</strong>: Supports both standard monome grids and 16x16 neotrellis grids.</li>
+</ul>
+<h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
+<h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
+<ul>
+<li>A modern web browser (Chrome, Firefox, Safari, Edge).</li>
+<li><a href="https://nodejs.org/">Node.js</a> (for running the development server).</li>
+</ul>
+<h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p>Clone the repository:
+    <code>bash
+    git clone &lt;repository-url&gt;
+    cd diii-neotrellis-emulator</code></p>
+</li>
+<li>
+<p>Install dependencies:
+    <code>bash
+    npm install</code></p>
+</li>
+</ol>
+<h3 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p>Start the development server:
+    <code>bash
+    npm start</code></p>
+</li>
+<li>
+<p>Open your browser and navigate to <code>http://localhost:3141</code>.</p>
+</li>
+<li>
+<p>Select a Lua script to load and interact with the grid.</p>
+</li>
+</ol>
+<h2 id="development">Development<a class="headerlink" href="#development" title="Permanent link">&para;</a></h2>
+<h3 id="adding-new-scripts">Adding New Scripts<a class="headerlink" href="#adding-new-scripts" title="Permanent link">&para;</a></h3>
+<p>To add a new Lua script, simply place it in the <code>scripts/</code> directory. The script will be automatically loaded by the emulator.</p>
+<h3 id="development-server">Development Server<a class="headerlink" href="#development-server" title="Permanent link">&para;</a></h3>
+<p>The development server includes hot-reload, so any changes to the Lua scripts or the emulator code will be reflected immediately in the browser.</p>
+<h2 id="deployment-github-pages">Deployment (GitHub Pages)<a class="headerlink" href="#deployment-github-pages" title="Permanent link">&para;</a></h2>
+<p>This project is compatible with GitHub Pages. To host it yourself:</p>
+<ol>
+<li>Go to your repository <strong>Settings</strong> &gt; <strong>Pages</strong>.</li>
+<li>Under <strong>Build and deployment</strong>, set <strong>Source</strong> to <code>Deploy from a branch</code>.</li>
+<li>Select the <code>main</code> branch and the <code>/ (root)</code> folder, then click <strong>Save</strong>.</li>
+<li>Your emulator will be available at <code>https://&lt;your-username&gt;.github.io/diii-neotrellis-emulator/</code>.</li>
+</ol>
+<blockquote>
+<p>[!TIP]
+The application uses relative paths, so it will work correctly even in a repository subfolder.</p>
+</blockquote>
+<h2 id="license">License<a class="headerlink" href="#license" title="Permanent link">&para;</a></h2>
+<p>This project is currently under research regarding the various licenses that may apply to the third-party components and resources it integrates.</p>
+<p>For the original work contained within this repository, I have chosen the <strong>GPL-3.0 License</strong>. It is my personal intention to freely share anything I've made with the community.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

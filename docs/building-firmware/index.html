@@ -1,0 +1,1221 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Browser-based emulator for Monome and NeoTrellis Lua scripts">
+      
+      
+        <meta name="author" content="jonwaterschoot">
+      
+      
+        <link rel="canonical" href="https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/building-firmware/">
+      
+      
+        <link rel="prev" href="../firmware-installation/">
+      
+      
+        <link rel="next" href="../serpentine-sequencer/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Building Firmware - diii-neotrellis-emulator Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Manrope:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Manrope";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#neotrellis-grid-iii-code-for-raspberry-pi-picorp2040-boards" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="diii-neotrellis-emulator Documentation" class="md-header__button md-logo" aria-label="diii-neotrellis-emulator Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            diii-neotrellis-emulator Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Building Firmware
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../main-readme/" class="md-tabs__link">
+          
+  
+  
+  Project Overview
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../walkthrough/" class="md-tabs__link">
+          
+  
+  
+  Emulator Usage
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../firmware-installation/" class="md-tabs__link">
+          
+  
+  
+  Hardware & Firmware
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../serpentine-sequencer/" class="md-tabs__link">
+          
+  
+  
+  Scripts
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="diii-neotrellis-emulator Documentation" class="md-nav__button md-logo" aria-label="diii-neotrellis-emulator Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    diii-neotrellis-emulator Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Project Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../main-readme/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Main README
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Emulator Usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Emulator Usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../walkthrough/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Walkthrough
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../script-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Script Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hardware & Firmware
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Hardware & Firmware
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../firmware-installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firmware Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building Firmware
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building Firmware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#device-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Device modes.
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#i2c-address-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        i2c address configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#led-color-and-brightness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LED color and brightness
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iii" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iii
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#writing-cross-device-scripts-monochrome-fallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing cross-device scripts — monochrome fallback
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scripts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Scripts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../serpentine-sequencer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Serpentine Sequencer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multi-screen-test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Screen Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<p>This is the readme from the fork i made for neotrellis - at https://github.com/jonwaterschoot/neotrellis-monome/tree/feature/colors/neotrellis_monome_picosdk_iii</p>
+<h1 id="neotrellis-grid-iii-code-for-raspberry-pi-picorp2040-boards">Neotrellis Grid + iii Code for Raspberry Pi Pico/RP2040 boards<a class="headerlink" href="#neotrellis-grid-iii-code-for-raspberry-pi-picorp2040-boards" title="Permanent link">&para;</a></h1>
+<p>This version is rewritten to use the Raspberry Pi Pico VS Code Extension and includes the monome iii scripting mode.  </p>
+<p>Install the Raspberry Pi Pico VS Code Extension from the Extensions tab in VSCode.  </p>
+<p><img alt="alt text" src="../uf2s/PicoVSCodeExtn.png" /></p>
+<h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h3>
+<p>Look at the <code># UPDATE HERE FOR YOUR BOARD AND BUILD</code> sections of <code>CMakeLists.txt</code> to configure for your specific board. This <em>should</em> be the only configuration changes needed.  </p>
+<div class="codehilite"><pre><span></span><code><span class="err">#</span><span class="w"> </span><span class="nx">SET</span><span class="w"> </span><span class="nx">BOARD</span><span class="w"> </span><span class="nx">TYPE</span>
+<span class="err">#</span><span class="w"> </span><span class="nx">board</span><span class="w"> </span><span class="k">type</span><span class="w"> </span><span class="nx">can</span><span class="w"> </span><span class="nx">be</span><span class="p">:</span>
+<span class="err">#</span><span class="w"> </span><span class="nx">pico</span><span class="w">  </span><span class="p">(</span><span class="nx">included</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nx">Pico</span><span class="w"> </span><span class="nx">SDK</span><span class="p">)</span>
+<span class="err">#</span><span class="w"> </span><span class="nx">adafruit_kb2040</span><span class="w">  </span><span class="p">(</span><span class="nx">included</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nx">Pico</span><span class="w"> </span><span class="nx">SDK</span><span class="p">)</span>
+<span class="err">#</span><span class="w"> </span><span class="nx">board_dinkii</span><span class="w">  </span><span class="p">(</span><span class="nx">included</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nx">neotrellis</span><span class="w"> </span><span class="nx">repo</span><span class="p">)</span>
+<span class="err">#</span><span class="w"> </span><span class="nx">adafruit_feather_rp2040</span><span class="w">  </span><span class="p">(</span><span class="nx">included</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nx">Pico</span><span class="w"> </span><span class="nx">SDK</span><span class="p">)</span>
+
+<span class="nx">set</span><span class="p">(</span><span class="nx">PICO_BOARD</span><span class="w"> </span><span class="nx">pico</span><span class="w"> </span><span class="nx">CACHE</span><span class="w"> </span><span class="nx">STRING</span><span class="w"> </span><span class="s">&quot;Board type&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p>and then further down, look for...  </p>
+<div class="codehilite"><pre><span></span><code># Build defines
+</code></pre></div>
+
+<p>Set these according to your specific build  </p>
+<div class="codehilite"><pre><span></span><code>    BOARDTYPE=1   # must be number - options are:  1=PICO, 2=KB2040QT, 3=DINKII, 4=FEATHER2040QT
+    GRIDCOUNT=3   # must be number - options are:  1=4X4, 2=8x8, 3=16x8, 4=16x16 
+</code></pre></div>
+
+<h3 id="building">Building<a class="headerlink" href="#building" title="Permanent link">&para;</a></h3>
+<p>Use the <strong>Raspberry Pi Pico VS Code Extension</strong> to configure and build:</p>
+<ol>
+<li>Open the project folder in VS Code  </li>
+<li>Run <strong>Raspberry Pi Pico: Configure CMake</strong> from the Command Palette to generate the build directory  </li>
+<li>Run <strong>Raspberry Pi Pico: Build Project</strong> (or press the build button in the status bar). </li>
+</ol>
+<p>The build output (<code>neotrellis-iii.uf2</code>) will be in the <code>build/</code> directory.  </p>
+<blockquote>
+<p><strong>Note:</strong> You do not need to wipe the <code>build/</code> folder between builds. CMake/Ninja performs incremental builds automatically — only changed files are recompiled. Only wipe the build folder if you change CMake configuration options (board type, SDK version, etc.) and the build behaves unexpectedly.  </p>
+</blockquote>
+<p>To flash: hold the BOOTSEL button on the Pico while plugging in USB, then drag-and-drop the <code>.uf2</code> file onto the mass storage drive that appears.  </p>
+<h3 id="device-modes">Device modes.<a class="headerlink" href="#device-modes" title="Permanent link">&para;</a></h3>
+<p>The firmware supports two modes, stored in flash and persisted across power cycles and UF2 uploads:  </p>
+<ul>
+<li><strong>Mode 0 (iii)</strong> — Lua scripting via iii. Connect to https://monome.org/diii in Chrome to use the interactive REPL. The device appears as a USB CDC serial port and MIDI device.  </li>
+<li><strong>Mode 1 (monome)</strong> — Standard monome serial protocol over USB CDC. Use with serialosc and monome-compatible apps.  </li>
+</ul>
+<p>To toggle between modes: hold key <strong>(0,0)</strong> (top-left) while the device is powering up.  </p>
+<h3 id="i2c-address-configuration">i2c address configuration<a class="headerlink" href="#i2c-address-configuration" title="Permanent link">&para;</a></h3>
+<p>NeoTrellis tiles have I2C address jumpers (A0–A4) and a base address of <code>0x2E</code>. The addresses in <code>config.h</code> must match the physical jumper settings on your tiles.  </p>
+<p>The reference address map (as shown in <a href="https://github.com/okyeron/neotrellis-monome/blob/main/neotrellis_addresses.jpg">neotrellis_addresses.jpg</a>) lists tiles left-to-right:  </p>
+<p><strong>16×8 (ONETWENTYEIGHT) — 8 tiles:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>col 1</th>
+<th>col 2</th>
+<th>col 3</th>
+<th>col 4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Row 1 (top)</strong></td>
+<td>none → <code>0x2E</code></td>
+<td>A0 → <code>0x2F</code></td>
+<td>A1 → <code>0x30</code></td>
+<td>A2 → <code>0x32</code></td>
+</tr>
+<tr>
+<td><strong>Row 2 (bottom)</strong></td>
+<td>A3 → <code>0x36</code></td>
+<td>A4 → <code>0x3E</code></td>
+<td>A0+A1 → <code>0x31</code></td>
+<td>A0+A2 → <code>0x33</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>8×8 (SIXTYFOUR) — 4 tiles:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>col 1</th>
+<th>col 2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Row 1 (top)</strong></td>
+<td>none → <code>0x2E</code></td>
+<td>A0 → <code>0x2F</code></td>
+</tr>
+<tr>
+<td><strong>Row 2 (bottom)</strong></td>
+<td>A3 → <code>0x36</code></td>
+<td>A4 → <code>0x3E</code></td>
+</tr>
+</tbody>
+</table>
+<p>Note: the arrays in <code>config.h</code> are written right-to-left (matching the pixel index ordering), which is the mirror of the picture. If your grid's first column responds to the wrong tile, swap the address order in <code>config.h</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// ONETWENTYEIGHT</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">addrRowOne</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mh">0x32</span><span class="p">,</span><span class="w"> </span><span class="mh">0x30</span><span class="p">,</span><span class="w"> </span><span class="mh">0x2F</span><span class="p">,</span><span class="w"> </span><span class="mh">0x2E</span><span class="p">};</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">addrRowTwo</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mh">0x33</span><span class="p">,</span><span class="w"> </span><span class="mh">0x31</span><span class="p">,</span><span class="w"> </span><span class="mh">0x3E</span><span class="p">,</span><span class="w"> </span><span class="mh">0x36</span><span class="p">};</span>
+
+<span class="c1">// SIXTYFOUR</span>
+<span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">addrRowOne</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mh">0x2F</span><span class="p">,</span><span class="w"> </span><span class="mh">0x2E</span><span class="p">};</span>
+<span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">addrRowTwo</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mh">0x3E</span><span class="p">,</span><span class="w"> </span><span class="mh">0x36</span><span class="p">};</span>
+</code></pre></div>
+
+<p>If you're not using the default address configuration, update these arrays in <code>config.h</code> to match your boards.</p>
+<h3 id="led-color-and-brightness">LED color and brightness<a class="headerlink" href="#led-color-and-brightness" title="Permanent link">&para;</a></h3>
+<p>All LED settings are in <code>config.h</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">#define BRIGHTNESS 96   // overall brightness (lower = dimmer; may need reduction for larger grids)</span>
+
+<span class="c1">#define R 255           // red component   (0–255)</span>
+<span class="c1">#define G 255           // green component (0–255)</span>
+<span class="c1">#define B 255           // blue component  (0–255)</span>
+
+<span class="o">//</span><span class="w"> </span><span class="n">gamma</span><span class="w"> </span><span class="n">table</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="mi">16</span><span class="w"> </span><span class="n">brightness</span><span class="w"> </span><span class="n">levels</span><span class="w"> </span><span class="p">(</span><span class="n">monome</span><span class="w"> </span><span class="n">uses</span><span class="w"> </span><span class="mi">0</span><span class="err">–</span><span class="mi">15</span><span class="p">)</span>
+<span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">uint8_t</span><span class="w"> </span><span class="n">gammaTable</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w"> </span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="mi">25</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="p">,</span>
+<span class="w">                                       </span><span class="mi">41</span><span class="p">,</span><span class="w"> </span><span class="mi">59</span><span class="p">,</span><span class="w"> </span><span class="mi">70</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p">,</span><span class="w"> </span><span class="mi">92</span><span class="p">,</span><span class="w"> </span><span class="mi">103</span><span class="p">,</span><span class="w"> </span><span class="mi">115</span><span class="p">,</span><span class="w"> </span><span class="mi">127</span><span class="p">};</span>
+<span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">uint8_t</span><span class="w"> </span><span class="n">gammaAdj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">multiply</span><span class="w"> </span><span class="n">gamma</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="mi">2</span>
+</code></pre></div>
+
+<p>For example, to use a green-tinted color:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// Seafoam / Mint Green</span>
+#<span class="n">define</span><span class="w"> </span><span class="n">R</span><span class="w"> </span><span class="mi">73</span>
+#<span class="n">define</span><span class="w"> </span><span class="n">G</span><span class="w"> </span><span class="mi">214</span>
+#<span class="n">define</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="mi">148</span>
+</code></pre></div>
+
+<p><code>BRIGHTNESS</code> caps the overall output — useful if NeoPixels are too bright when powered over USB. <code>gammaAdj</code> can be set to <code>2</code> to boost perceived brightness at lower levels.</p>
+<h3 id="iii">iii<a class="headerlink" href="#iii" title="Permanent link">&para;</a></h3>
+<p>iii is an interactive scripting environment that runs on the device itself.  With grid, this can turn the device into a user-scriptable midi controller/sequencer.  </p>
+<p>See https://github.com/monome/iii for documentation.  </p>
+<p>The <code>diii</code> REPL tool is hosted at https://monome.org/diii  </p>
+<p>The neotrellis build includes custom lua functions to change LED colors.</p>
+<p><code>grid_color(r, g, b)</code> sets a global tint applied to all pixels. You can use this in scripts as follows. The if statement is there to avoid errors on regular iii devices.</p>
+<p><code>if grid_color then grid_color(250,80,10) end</code></p>
+<p>This tint applies to <code>grid_led()</code> / <code>grid_led_all()</code> output, while <code>grid_led_rgb()</code> provides true independent per-pixel color.</p>
+<p><code>grid_led_rgb(x, y, r, g, b)</code> sets a true per-pixel RGB color (0–255 per channel), bypassing the global tint. This allows multicolor scripts without any multiplexing or constant refresh. Use the same if guard:</p>
+<p><code>if grid_led_rgb then grid_led_rgb(x, y, 255, 0, 0) end</code></p>
+<p>See <a href="../uf2s/grid_led_rgb.md">grid_led_rgb.md</a> for full details, behavior notes, and examples.</p>
+<h3 id="writing-cross-device-scripts-monochrome-fallback">Writing cross-device scripts — monochrome fallback<a class="headerlink" href="#writing-cross-device-scripts-monochrome-fallback" title="Permanent link">&para;</a></h3>
+<p>Scripts that call <code>grid_led_rgb</code> run in full color on NeoTrellis. On a standard iii device <code>grid_led_rgb</code> is <code>nil</code>, so those calls are safely skipped — but that means <strong>every pixel stays dark</strong>. A well-written script degrades gracefully by translating its color intent into a <code>grid_led</code> brightness level.</p>
+<p>The recommended pattern is a single <code>spx</code> wrapper function at the top of your script:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">W</span><span class="p">,</span><span class="w"> </span><span class="nv">H</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">grid_size_x</span><span class="p">(),</span><span class="w"> </span><span class="nf">grid_size_y</span><span class="p">()</span>
+
+<span class="kd">local</span><span class="w"> </span><span class="kr">function</span><span class="w"> </span><span class="nf">spx</span><span class="p">(</span><span class="nv">x</span><span class="p">,</span><span class="w"> </span><span class="nv">y</span><span class="p">,</span><span class="w"> </span><span class="nv">r</span><span class="p">,</span><span class="w"> </span><span class="nv">g</span><span class="p">,</span><span class="w"> </span><span class="nv">b</span><span class="p">)</span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="nv">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="nv">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nv">W</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="nv">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="nv">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nv">H</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="kr">return</span><span class="w"> </span><span class="kr">end</span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="nv">grid_led_rgb</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">    </span><span class="nf">grid_led_rgb</span><span class="p">(</span><span class="nv">x</span><span class="p">,</span><span class="w"> </span><span class="nv">y</span><span class="p">,</span><span class="w"> </span><span class="nv">r</span><span class="p">,</span><span class="w"> </span><span class="nv">g</span><span class="p">,</span><span class="w"> </span><span class="nv">b</span><span class="p">)</span>
+<span class="w">  </span><span class="kr">else</span>
+<span class="w">    </span><span class="c1">-- Convert brightest channel to 0-15 level.</span>
+<span class="w">    </span><span class="c1">-- Floor at 4: levels 1-3 are physically invisible on NeoTrellis</span>
+<span class="w">    </span><span class="c1">-- hardware and very dim on standard grids — any non-black pixel</span>
+<span class="w">    </span><span class="c1">-- should be at least faintly visible.</span>
+<span class="w">    </span><span class="kd">local</span><span class="w"> </span><span class="nv">lv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">math.floor</span><span class="p">(</span><span class="nb">math.max</span><span class="p">(</span><span class="nv">r</span><span class="p">,</span><span class="w"> </span><span class="nv">g</span><span class="p">,</span><span class="w"> </span><span class="nv">b</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">17</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">if</span><span class="w"> </span><span class="nv">lv</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="p">(</span><span class="nv">r</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="nv">g</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="nv">b</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="nv">lv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="kr">end</span>
+<span class="w">    </span><span class="nf">grid_led</span><span class="p">(</span><span class="nv">x</span><span class="p">,</span><span class="w"> </span><span class="nv">y</span><span class="p">,</span><span class="w"> </span><span class="nv">lv</span><span class="p">)</span>
+<span class="w">  </span><span class="kr">end</span>
+<span class="kr">end</span>
+</code></pre></div>
+
+<p>Then replace every direct <code>grid_led_rgb</code> / <code>grid_led</code> call in your draw code with <code>spx(x, y, r, g, b)</code>. The color ratios you choose for NeoTrellis become the brightness contrast on monochrome grids automatically — a bright green active state and a dark green inactive state will render as level 15 and level 4 respectively.</p>
+<p><strong>Why level 4?</strong> Confirmed through hardware testing on NeoTrellis via the viii app (WebSerial/mext protocol). The mext protocol uses a 0-15 brightness scale; levels 1–3 fall below the physical LED threshold and appear off. Level 4 (~27% of maximum) is the lowest level that renders as visibly dim-but-intentional. Bright active states typically land at level 10–15, giving clear contrast.</p>
+<p><strong>Testing with viii</strong>: <a href="https://github.com/dessertplanet/viii">dessertplanet/viii</a> is a browser app that connects to a physical Monome-compatible grid over WebSerial and runs iii Lua scripts directly. It exposes only <code>grid_led</code> (0-15), not <code>grid_led_rgb</code> — making it the ideal tool to verify your monochrome fallback before deploying to hardware, without needing a second device.</p>
+<p>See <a href="../scripts/color_fallback_demo.lua">color_fallback_demo.lua</a> for a minimal, runnable example of this pattern.</p>
+<p>Please don't bother monome or the lines forum with regards to these particular features.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
