@@ -3490,7 +3490,10 @@
   <div id="about-modal" class="modal-overlay">
     <div class="modal-container">
       <div class="modal-header">
-        <h2>About & Documentation</h2>
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <h2>About & Documentation</h2>
+          <a href="https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/" target="_blank" style="color:var(--accent); text-decoration:none; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; padding-top:2px;">Full Docs ↗</a>
+        </div>
         <button class="btn sm" id="btn-close-about">✕</button>
       </div>
       <div class="modal-body guide-content" id="about-modal-body">
@@ -3509,9 +3512,13 @@
       modalAbout.classList.add('active');
       if (aboutBody.innerHTML.includes('Loading...')) {
         try {
-          const res = await fetch('emulator-docs/index.md');
+          let res = await fetch('emulator-docs/index.md');
+          if (!res.ok) res = await fetch('docs/index.md');
           if (!res.ok) throw new Error('Network error');
-          const text = await res.text();
+          let text = await res.text();
+          // Rewrite relative .md and img/ links to absolute mkdocs urls
+          text = text.replace(/\]\((?!http)([^)]+)\.md\)/g, '](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/$1/)');
+          text = text.replace(/\]\(img\/(.*?)\)/g, '](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/img/$1)');
           aboutBody.innerHTML = marked.parse(text);
         } catch (e) {
           aboutBody.innerHTML = '<p class="log-err">Failed to load docs/index.md. Ensure you test via a web server.</p>';
