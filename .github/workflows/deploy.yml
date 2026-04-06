@@ -30,14 +30,12 @@ jobs:
 
       - name: Prepare Emulator Deployment 
         run: |
-          # Copy emulator files to root
-          cp index.html dist/
-          cp -r engine dist/
-          cp -r scripts dist/
-          cp -r img dist/
-          cp -r uf2s dist/
-          cp LICENSE dist/
-          cp README.md dist/
+          # Copy emulator files to root (only if they exist)
+          for item in index.html engine scripts img uf2s LICENSE README.md; do
+            if [ -e "$item" ]; then
+              cp -r "$item" dist/
+            fi
+          done
           
           # Copy raw docs folder to /emulator-docs/ for the About modal
           cp -r docs dist/emulator-docs
