@@ -44,6 +44,9 @@ jobs:
           
           # Clean up any unexpected build artifacts in emulator-docs
           find dist/emulator-docs -type f -not -name "*.md" -not -name "*.png" -not -name "*.jpg" -not -name "*.jpeg" -delete
+          
+          # Disable Jekyll on GitHub Pages so it doesn't fail parsing MkDocs markdown extensions
+          touch dist/.nojekyll
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
