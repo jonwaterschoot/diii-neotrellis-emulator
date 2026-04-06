@@ -400,8 +400,12 @@ local function arp_add(note, x, y, kind)
 end
 local function seq_tick()
   if on_note then
-    if humanize_hold then humanize_hold = false
-    else midi_note_off(on_note); on_note = nil end
+    if humanize_hold then
+      humanize_hold = false
+      return
+    else
+      midi_note_off(on_note); on_note = nil
+    end
   end
   if on_chord then
     chord_hold_ticks = chord_hold_ticks - 1
@@ -411,7 +415,6 @@ local function seq_tick()
     end
   end
   if not arp_enabled then return end
-  if arp_pool_len == 0 then return end
   if arp_pool_len == 0 then return end
   local n = arp_pool_len
   for i=1,n do arp_pool[i].note = note_for(arp_pool[i].x, arp_pool[i].y) end
