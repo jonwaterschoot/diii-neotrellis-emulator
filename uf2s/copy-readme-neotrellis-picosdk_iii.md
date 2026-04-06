@@ -133,6 +133,8 @@ The neotrellis build includes custom lua functions to change LED colors.
 
 ```if grid_color then grid_color(250,80,10) end```
 
+This tint applies to `grid_led()` / `grid_led_all()` output, while `grid_led_rgb()` provides true independent per-pixel color.
+
 `grid_led_rgb(x, y, r, g, b)` sets a true per-pixel RGB color (0–255 per channel), bypassing the global tint. This allows multicolor scripts without any multiplexing or constant refresh. Use the same if guard:
 
 ```if grid_led_rgb then grid_led_rgb(x, y, 255, 0, 0) end```

@@ -250,6 +250,28 @@ export class LuaLoader {
       api.grid_refresh(); return 0;
     });
 
+    // grid_set_screen(name) — switch which screen buffer draws write to
+    setGlobal('grid_set_screen', (L2) => {
+      const name = lua.lua_tojsstring(L2, 1);
+      api.grid_set_screen(name); return 0;
+    });
+
+    // get_focused_screen() → string — which grid the last user interaction came from
+    setGlobal('get_focused_screen', (L2) => {
+      lua.lua_pushstring(L2, luaStr(api.getFocusedScreen())); return 1;
+    });
+
+    // display_screen(name) — signal the emulator which screen should be shown
+    setGlobal('display_screen', (L2) => {
+      const name = lua.lua_tojsstring(L2, 1);
+      api.display_screen(name); return 0;
+    });
+
+    // grid_color(r, g, b)
+    setGlobal('grid_color', (L2) => {
+      api.grid_color(getInt(L2, 1), getInt(L2, 2), getInt(L2, 3)); return 0;
+    });
+
     // grid_color_intensity(val)
     setGlobal('grid_color_intensity', (L2) => {
       api.grid_color_intensity(getInt(L2, 1)); return 0;

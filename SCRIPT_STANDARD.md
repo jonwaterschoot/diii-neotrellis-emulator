@@ -74,8 +74,9 @@ The hierarchy is: **Section → Group → Control**
 
 ```lua
 -- @section Section Name    ← major logical block; resets @screen and @group
--- @screen live             ← all controls below go to the game-view grid
--- @screen settings         ← all controls below go to the settings-view grid
+-- @screen live             ← all controls below go to the main (primary) grid
+-- @screen settings         ← named alt screen — shown in the ghost grid beside main
+-- @screen menu             ← another named alt screen — gets its own tab in the ghost grid
 
 -- @group Group Name        ← start a named group; controls below belong to it
 -- x=N, y=M: Description   ← sub-control inside the group
@@ -87,9 +88,18 @@ The hierarchy is: **Section → Group → Control**
 **`@section`** defines a major logical grouping (e.g. "Grid Layout", "Settings View").
 Resets both `@screen` and `@group`.
 
-**`@screen live | settings | game | alt`** sets which visual grid this section/group renders
-on in the map overlay. `live` and `game` are synonyms; `settings` and `alt` are synonyms.
-Persists until the next `@section` or another `@screen` tag.
+**`@screen <name>`** sets which visual grid this section/group renders on in the map overlay.
+
+**Naming convention:**
+- `live` — always the primary/main screen. This name is fixed and expected by the emulator.
+  It is the only screen shown in single-view by default and always occupies the main grid in dual-view.
+- Any other name becomes a **secondary screen** — shown in the ghost grid (dual-view) or swapped
+  in as the main view (single-view). Use short, descriptive lowercase words: `settings`, `menu`,
+  `edit1`, `page2`, etc. Scripts with multiple secondary screens get a tab row in dual-view
+  so the user can switch between them.
+
+The name is used as the ghost grid label and in the minimap. Persists until the next
+`@section` or another `@screen` tag.
 
 **`@group Name`** starts a named group. All controls until the next `@group`, `@group`
 (empty, to close), or `@section` belong to this group. In the overlay, the group renders
@@ -98,6 +108,73 @@ as one card with a fan of bezier lines to each sub-control's pad position. An em
 
 **Full-grid controls** (`x=1..16, y=1..8`) are automatically excluded from the overlay
 since they describe the whole grid rather than a specific interaction point.
+
+### Multi-screen rendering (required pattern for dual-view and minimap)
+
+The emulator maintains a **separate frame buffer per screen name**. The minimap and ghost grid
+(dual-view) are only populated if content is written to those buffers. A script that only ever
+draws to `live` will have empty thumbnails and an empty ghost grid.
+
+**Required approach:** render ALL screens into their buffers on every `redraw()`, then call
+`grid_refresh()` once. `grid_refresh()` flushes every buffer simultaneously — the minimap,
+ghost grid, and main grid all update in one pass.
+
+```lua
+function redraw()
+    -- Primary screen
+    grid_set_screen('live')
+    grid_led_all(0)
+    -- ... draw live content ...
+
+    -- Each secondary screen gets its own buffer
+    grid_set_screen('settings')
+    grid_led_all(0)
+    -- ... draw settings content ...
+
+    -- One flush updates everything: main grid, ghost grid, all minimap tiles
+    grid_refresh()
+end
+```
+
+**`grid_set_screen(name)`** switches which buffer subsequent `grid_led` / `grid_led_rgb` /
+`grid_led_all` calls write to. Call it before drawing each screen's content.
+
+**`display_screen(name)`** signals the emulator which screen is currently *active* — this
+controls the minimap highlight and switches the ghost grid in dual-view. Call it whenever
+the user navigates between screens. Guard with `if display_screen then` for hardware
+compatibility (the function does not exist on real NeoTrellis hardware):
+
+```lua
+-- When navigating to a secondary screen:
+if display_screen then display_screen('settings') end
+
+-- When returning to main:
+if display_screen then display_screen('live') end
+```
+
+**Backwards compatibility note:** with serial testing with the viii app
+to run scripts over serial for OG monome norns compatibility — i learned to not provide
+`grid_set_screen`. In that case, scripts should either stub it or branch around it and
+draw only the active screen. For example:
+
+```lua
+local supports_multi_screen = (grid_set_screen ~= nil)
+if not grid_set_screen then grid_set_screen = function(name) end end
+
+function redraw()
+  if supports_multi_screen then
+    grid_set_screen('live')
+    -- draw live and alternate screen buffers...
+    grid_set_screen('settings')
+    -- draw settings screen...
+  else
+    -- draw only the currently active screen
+  end
+  grid_refresh()
+end
+```
+
+The same compatibility pattern applies to `display_screen` and any alternate-screen logic.
 
 Full example (from serpentine_dev.lua):
 
@@ -203,7 +280,32 @@ so no proxy is needed for the browser fetch.
 
 ---
 
-## 6. LDoc tag reference (what doc-extractor.js recognizes)
+## 6. Keyboard shortcut hints (`@key`)
+
+Scripts can declare their keyboard shortcuts using `@key` tags in the header block.
+The emulator reads these and populates the hints bar below the grid automatically.
+The `R` key (Reload) is always shown as an app-level entry at the end; do not redeclare it.
+
+```lua
+-- @key ↑↓←→: Steer
+-- @key Tab: Settings
+-- @key Space: Sticky
+-- @key 1/2: BPM−
+-- @key 3/4: BPM+
+-- @key A: Autopilot
+```
+
+**Notation rules:**
+- Place `@key` lines anywhere in the leading comment block (same area as the header)
+- Format: `-- @key KEYS: Label`
+- `KEYS` is the text shown in the badge — keep it short (≤8 characters)
+- Use `/` to separate two keys that share a label: `1/2` renders as two separate badges with `/` between them
+- Unicode symbols are fine: `↑↓←→`, `⌘`, `⇧`
+- `Label` is plain text; keep it to 1–2 words
+
+---
+
+## 7. LDoc tag reference (what doc-extractor.js recognizes)
 
 | Tag | Usage | Example |
 |-----|-------|---------|
@@ -212,6 +314,7 @@ so no proxy is needed for the browser fetch.
 | `-- @treturn type desc` | Typed return value | `-- @treturn boolean True if alive` |
 | `-- @param name desc` | Untyped parameter | `-- @param x Column` |
 | `-- @section Name` | Groups following controls | `-- @section Spawner Engine` |
+| `-- @key KEYS: Label` | Keyboard shortcut hint | `-- @key ↑↓←→: Steer` |
 | `-- x=N: desc` | Control map (single cell) | `-- x=1, y=8: ALT toggle` |
 | `-- Row N: desc` | Control map (full row) | `-- Row 6: Black keys` |
 

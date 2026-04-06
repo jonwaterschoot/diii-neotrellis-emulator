@@ -3,56 +3,93 @@
 [x]- allow BPM to go to 1
 [0]- make BPM able to sync in or out? - failed attempts
 
+- Spawn quantity = not a title?
+
 - make the death animation faster or de/increment speed -actually would be cool if it went from fast to slow at the last 2-3 bars
+
+- still a big problem with the note off messages, try to find out which methods cause the prblem, clicking stop does not clear all notes
+
+- look into the option to re-enable display for autorun
 
 ## in the webapp:
 
-- disable interactive overlay on full screen? or adapt to fit better
+---
 
-- disable on mobile? - fallback to a manual with a per pixel overlay
+show an icon when key is on hold down
 
-- display the full readme below the grids (colllapsed?)
+----
 
-- general overlay approach is getting better; though we need a better way to extract groups so there are less individual seperate blocks.
+ Info / about page with links + short summary on how to get the scripts onto neotrellis: use my uf2 and goto diii upload minified files
 
-- the full grid layout overlay just ssaying full 16*8 should be excluded by default.
+---
 
-- we need a standard in our docs that embraces the main group - sub controls approach
+UI:
+- Mobile view is not fitting fully, width of the grids is overflown
+- menu buttons outside view? - check after push
 
-- on our overlay it becomes apparent that the two octave buttons are part of both grids, which isn't the case, or at least shouldn't be.
+---
+UX:
 
-- this makes it more needed to have a clear distinction on what lives on which view / screen
-
-- examples of ungrouped items:
-    - black keys and white keys are two groups, should be one
-    - Dpad 4 pixels are not grouped
-    - fruits are a question, should it be one group with different sub settings, ort kept seperate (i'd think a group with subs)
+/// nothing atm
 
 
 
 ---
 
-- add two sliders for a reverb and delay in the browser synth 
-  - with basic settings for both a general slider for amount, and a expand button allows for fine control. 
 
-- the webapp seems to stop playing - partially when not in focus? 
+### Live Manual:
 
-- more clearly show when a custom script is loaded, disabling the download button / graying out the list , showing in the list, custom script = loaded
+/// nothing atm
 
+## Other
 
+Prepare a empty project with all the structure that is easy to clone; 
+- perhaps super clear instructions on the difference between cloning and starting a new repo based on this template
 
+- create a changelog for the emulator app itself
 
+### future implementation option:
 
+- Momentary/hold icons — needs a @type hold|toggle annotation in the standard. Not wired yet, worth a separate pass when the annotation format is settled.
 
+### porting Serpentine
+
+- how "easy" would it be to port my serpentine lua script to a native norns (shieldXL) device, would there be a way to still make that use the color info?
+- how feasible to port to my anbernic, or use a synth on anbernic that get's triggered by neotrellis, make an expanded version using larger screen resolution with more pixels
 
 vvvv IGNORE BELOW vvvvv
-
-
 
 ----
 ----
 vvv -- DONE / scratchpad -- vvv
 ----
+- add two sliders for a reverb and delay in the browser synth 
+  - with basic settings for both a general slider for amount, and a expand button allows for fine control. 
+
+
+Scripts content:
+- allow other sources like codeberg, specifically we could already prelink the scripts from tehn at: https://codeberg.org/tehn/iii-scripts/src/branch/main/grid
+Though these scripts do not adhere to our so called and thus unofficial structure standard. they are made by the main monome team. I'm not sure about the license of these so i'd rather not blindly copy them into our own repository but just link them and give due credit. as tehn + linking to the repo.
+   - we could use a subcategory in the selector list called "external scripts -tehn-"
+
+- accent color - use the current slider colors tint as base for the accent for buttons, site icon, headers, ...
+- add short descriptors inside the grid, defined by the first letter or fitting the word of the title of the section, or add a value in the pixel where applicable, the notes for keyboards etc. leave empty when unsure/undocumented 
+- more clearly show when a custom script is loaded, disabling the download button / graying out the list , showing in the list, custom script = loaded
+
+- keyboard bindings for webapp are these integrated in the script / docs?
+
+[x] - general overlay approach is getting better; though we need a better way to extract groups so there are less individual seperate blocks.
+[x] - the full grid layout overlay just saying full 16*8 should be excluded by default.
+[x] - we need a standard in our docs that embraces the main group - sub controls approach
+[x] - on our overlay it becomes apparent that the two octave buttons are part of both grids, which isn't the case, or at least shouldn't be.
+[x] - this makes it more needed to have a clear distinction on what lives on which view / screen
+[x] - examples of ungrouped items:
+    [x] - black keys and white keys are two groups, should be one
+    [x] - Dpad 4 pixels are not grouped
+    [x] - fruits are a question, should it be one group with different sub settings, ort kept seperate (i'd think a group with subs)
+
+
+
 [x]- the dimmed buttons are rendered too dark, it does not fit the brightness of the actual device. e.g. the dimmed middle character in the 3 digit display. 
 
 [x]- integrate the script that allows to autostrip / minimize the lua scripts, so that when downloading you could choose to optimize for use on device (github pages probably doesn't have a run python script option?)

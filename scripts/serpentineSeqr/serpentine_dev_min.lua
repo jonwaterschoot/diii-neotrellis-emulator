@@ -1,96 +1,20 @@
--- scriptname: Serpentine Sequencer
--- v1.3.0-dev
--- @author: jonwaterschoot aka jonwtr
--- no link yet
---
--- A snake sequencer game for the NeoTrellis / Monome-compatible 16x8 grid.
--- The snake eats fruit to collect notes into an arpeggiator pool.
--- Each fruit type triggers different musical events on collection.
--- Navigate with the D-PAD (bottom-right) or hold ALT to open settings.
---
--- @key ↑↓←→: Steer
--- @key Tab: Settings
--- @key Space: Sticky
--- @key 1/2: BPM−
--- @key 3/4: BPM+
--- @key A: Autopilot
-
--- @section Grid Layout
--- @screen live
--- @group Main Controls
--- x=1, y=8: ALT — momentary hold opens Settings; double-tap = sticky; sequencer keeps running
--- x=2, y=8: Play/Stop — green=running, red=stopped; stop sends MIDI panic (all notes off)
--- @group D-PAD
--- x=15, y=7: UP
--- x=14, y=8: LEFT
--- x=15, y=8: DOWN
--- x=16, y=8: RIGHT
-
--- @section Settings View (hold ALT)
--- @screen settings
--- x=1..8, y=1: Spawn Quantity — slider, each step = 2 fruits, max 16 on grid
--- @group Fruit Type Toggles
--- x=11, y=1: Red — tail shrink, note to pool; demo: high sharp
--- x=12, y=1: Blue — tail grow, note to pool; demo: fifth
--- x=13, y=1: Yellow — halves tempo 16 ticks; demo: accent burst
--- x=14, y=1: Cyan — diatonic triad (3 stages); demo: triad
--- x=15, y=1: Orange — 33% trigger probability; demo: soft
--- x=16, y=1: Purple — echo bounces; demo: echo
--- @group Timing & Pool
--- x=1..8, y=2: Accent Interval — slider, 1–8 steps; lit LEDs show active beats
--- x=9..16, y=2: Arp Pool Max Capacity — 1–8 notes
--- @group Playback
--- x=1, y=3: Autopilot — dim=manual, bright green=auto (BFS to nearest fruit)
--- x=3, y=3: Arp Playback Order — ORD / RND / UP / DWN
--- x=5, y=3: Arp On/Off — green=on; dim red=off (collect only)
--- x=7, y=3: Humanize — cyan=on (±vel+duration drift); shows HU1/HU0
--- @group Octave
--- x=3, y=8: Base Octave — cycles OC1–OC6
--- x=4, y=8: Octave Range — cycles RA1–RA6
--- @group BPM Adjust
--- x=10, y=3: −10 BPM
--- x=11, y=3: −1 BPM
--- x=12, y=3: +1 BPM
--- x=13, y=3: +10 BPM
--- @group Display
--- x=15, y=3: Brightness — steps 4 → 8 → 12 LED limit
--- x=16, y=3: Monochrome Tint — 5 cinematic tints + off
--- x=8..16, y=4: LED Readout — 3×5 block font: BPM / scale / arp mode
--- @group Scale System
--- x=1..7, y=4: Scale — MAJ / MIN / PMA / PMI / DOR / LYD / CUS
--- @group Root Note Keyboard
--- x=1..7, y=6: Black keys (C# D# F# G# A#)
--- x=1..7, y=7: White keys (C D E F G A B)
--- @group Persistent Controls
--- x=1, y=8: ALT — exits settings when released (momentary) or stays sticky (double-tap)
--- x=2, y=8: Play/Stop — toggle sequencer; stop sends MIDI panic
-
 local W, H = 16, 8
 local ALT_X, ALT_Y = 1, 8
 local PANIC_X, PANIC_Y = 2, 8
 local DPAD = {{x=15,y=7,dx=0,dy=-1},{x=14,y=8,dx=-1,dy=0},{x=15,y=8,dx=0,dy=1},{x=16,y=8,dx=1,dy=0}}
 local num_fruits = 3
 local auto_mode = 0
-
 local supports_multi_screen = (grid_set_screen ~= nil)
 if not grid_set_screen then grid_set_screen = function(name) end end
-
 local bpm = 120
 local temp_slow_steps = 0
-
---- Calculate the metro tick interval in seconds.
--- Halves BPM when yellow fruit slow-down is active.
--- @treturn number interval in seconds (used by metro:start)
 local function get_interval()
   local current_bpm = (temp_slow_steps > 0) and (bpm / 2) or bpm
   return 60 / current_bpm / 4
 end
-
-
 local ECHO_MAX = 4
 local ECHO_BUF = {}
 for i=1,ECHO_MAX do ECHO_BUF[i] = {active=false, note=0, vel=0, ticks_left=0, current_interval=0, bounces=0} end
-
 local arp_pool = {}
 for i=1,8 do arp_pool[i]={note=0,x=0,y=0,kind=0,prob=1.0} end
 local arp_pool_len = 0
@@ -104,15 +28,11 @@ local hum_flash = 0
 local arp_labels = {"ORD","RND","UP","DWN"}
 local SORT_BUF = {}
 for i=1,8 do SORT_BUF[i]={note=0,x=0,y=0,kind=0,prob=1.0} end
-
-
 local FRUIT_COL = {{r=220,g=40,b=20},{r=80,g=120,b=240},{r=240,g=200,b=20},{r=40,g=220,b=200},{r=255,g=140,b=0},{r=200,g=40,b=240}}
 local FRUIT_W = {20, 40, 20, 20, 15, 10}
 local fruit_enabled = {true, true, true, true, true, true}
-
 local halos = {}
 for i=1,W*H do halos[i]={state=0,life=0} end
-
 local SCALE_NAMES = {"MAJ", "MIN", "PMA", "PMI", "DOR", "LYD", "CUS"}
 local SCALE_MASKS = {
   {0,2,4,5,7,9,11}, {0,2,3,5,7,8,10}, {0,2,4,7,9}, {0,3,5,7,10}, {0,2,3,5,7,9,10}, {0,2,4,6,7,9,11}
@@ -123,15 +43,9 @@ local custom_scale = {true,false,true,false,true,false,false,true,false,true,fal
 local SCALE = {0,2,4,7,9,0,0,0,0,0,0,0}
 local SCALE_LEN = 5
 local BASE = 24
-local oct_base = 1   -- 1–6, cycles; OC1 = C2 (MIDI 36), OC2 = C3, etc.
-local oct_range = 2  -- 1–6, cycles; RA1 = mono-octave, RA2 = 2-oct spread, etc.
+local oct_base = 1
+local oct_range = 2
 local KB_MAP = { [7] = {[1]=0, [2]=2, [3]=4, [4]=5, [5]=7, [6]=9, [7]=11}, [6] = {[2]=1, [3]=3, [5]=6, [6]=8, [7]=10} }
-
--- @section Music System
-
---- Rebuild the active SCALE table from current scale_mode and root_note.
--- Populates the global SCALE array and SCALE_LEN.
--- Must be called after changing scale_mode or root_note.
 local function generate_scale()
   SCALE_LEN = 0
   if scale_mode == 7 then
@@ -154,9 +68,7 @@ for i=1,SNAKE_MAX do SNAKE_BUF[i]={x=0,y=0} end
 local snake_head = 1
 local snake_len = 0
 local snk_len = 4
-
 local function snk(i) return SNAKE_BUF[(snake_head+i-2)%SNAKE_MAX+1] end
-
 local dir = {x=1,y=0}
 local queued = {x=1,y=0}
 local death_phase = 0
@@ -166,9 +78,8 @@ local beat_count = 0
 local on_note = nil
 local eat_note = nil
 local on_chord = false
-local chord_hold_ticks = 0  -- seq_ticks remaining before chord notes are silenced
+local chord_hold_ticks = 0
 local chord_notes = {0,0,0}
-
 local seq_running = true
 local alt_held = false
 local menu_sticky = false
@@ -176,14 +87,12 @@ local last_alt_tap = 0
 local master_bright = 12
 local alt_disp_timer = 0
 local alt_disp_mode = "BPM"
-
 local mono_mode = 0
 local MONO_TINTS = {
   {r=0.14,g=1.0,b=0.79},{r=1.0,g=0.20,b=0.90},
   {r=0.80,g=0.80,b=0.80},{r=1.0,g=0.63,b=0.08},
   {r=1.0,g=1.0,b=1.0}
 }
-
 local fruits = {}
 local m_game, m_death
 local BFS_SZ = W * H
@@ -191,18 +100,8 @@ local BFS_S = {}
 local BFS_Q = {}
 local BFS_T = {}
 for i=1,BFS_SZ do BFS_S[i]=0; BFS_Q[i]=0; BFS_T[i]=false end
-
 local DIR_DX = {1, -1, 0, 0}
 local DIR_DY = {0, 0, 1, -1}
-
--- @section Autopilot (BFS)
-
---- Breadth-first search for the nearest target.
--- Used by AUT mode to BFS toward any fruit.
--- @tparam boolean use_tgt_flags true = seek any BFS_T flagged cell, false = seek (tx,ty)
--- @tparam number tx target x (1-based)
--- @tparam number ty target y (1-based)
--- @treturn number direction index 1–4 (matching DIR_DX/DIR_DY), or 0 if unreachable
 local function bfs_run(use_tgt_flags, tx, ty)
   if snake_len == 0 then return 0 end
   local h = snk(1)
@@ -240,7 +139,6 @@ local function bfs_run(use_tgt_flags, tx, ty)
   end
   return 0
 end
-
 local function spx(x,y,r,g,b)
   if x<1 or x>W or y<1 or y>H then return end
   if mono_mode > 0 then
@@ -255,23 +153,18 @@ local function spx(x,y,r,g,b)
     grid_led(x,y,lv)
   end
 end
-
 local function clr() grid_led_all(0) end
-
 local function degree_note(deg, oct)
   local _d = ((deg-1)%SCALE_LEN)+1
   local deg_oct = math.floor((deg-1)/SCALE_LEN)
   local note = BASE + oct_base*12 + SCALE[_d] + math.min(oct+deg_oct, oct_range-1)*12
   return math.max(24,math.min(108,note))
 end
-
 local function note_for(x,y)
   local oct = math.floor((H-y)/4) + math.floor((x-1)/SCALE_LEN)%2
   return degree_note(x, oct)
 end
-
 local FONT={["0"]=0x75557,["1"]=0x22222,["2"]=0x71747,["3"]=0x71717,["4"]=0x55711,["5"]=0x74717,["6"]=0x74757,["7"]=0x71111,["8"]=0x75757,["9"]=0x75711,["A"]=0x75755,["C"]=0x74447,["D"]=0x65556,["E"]=0x74747,["F"]=0x74744,["H"]=0x55755,["I"]=0x72227,["J"]=0x71153,["L"]=0x44447,["M"]=0x57555,["N"]=0x75555,["O"]=0x75557,["P"]=0x75744,["R"]=0x75765,["S"]=0x74717,["T"]=0x72222,["U"]=0x55557,["W"]=0x55575,["Y"]=0x55222}
-
 local function draw_char(x,y,char,r,g,b,bm)
   local f = FONT[tostring(char)]
   if not f then return end
@@ -285,13 +178,11 @@ local function draw_char(x,y,char,r,g,b,bm)
     end
   end
 end
-
 local function draw_label(x,y,str,r,g,b,hl_idx)
   for i=1,#str do
     draw_char(x+(i-1)*3, y, str:sub(i,i), r, g, b, (i==hl_idx) and 0.2 or 1.0)
   end
 end
-
 local function draw_scene_raw()
   for hkey=1,128 do
     local h = halos[hkey]
@@ -307,7 +198,6 @@ local function draw_scene_raw()
       spx(hx,hy,5,20,25)
     end
   end
-
   for i=1,#fruits do
     local f=fruits[i]; local c=FRUIT_COL[f.kind]
     spx(f.x, f.y, c.r, c.g, c.b)
@@ -323,7 +213,6 @@ local function draw_scene_raw()
   end
   if n > 0 then local h=snk(1); spx(h.x, h.y, 95, 210, 28) end
 end
-
 local function draw_game()
   if supports_multi_screen then
     grid_set_screen("live")
@@ -331,7 +220,6 @@ local function draw_game()
   clr()
   draw_scene_raw()
 end
-
 local function draw_alt()
   if supports_multi_screen then
     grid_set_screen("settings")
@@ -363,7 +251,6 @@ local function draw_alt()
     local t = MONO_TINTS[mono_mode]
     spx(16,3,math.floor(t.r*200),math.floor(t.g*200),math.floor(t.b*200))
   else spx(16,3,30,30,30) end
-
   for y_kb=6,7 do
     for x_kb=1,7 do
       local note = KB_MAP[y_kb][x_kb]
@@ -385,7 +272,6 @@ local function draw_alt()
     if scale_mode == x_sc then spx(x_sc, 4, 255, 255, 255)
     else spx(x_sc, 4, 40, 40, 40) end
   end
-
   if alt_disp_timer > 0 and alt_disp_mode == "ARP" then
     local label = arp_labels[arp_mode]
     if label == "UP" then label = " UP" end
@@ -406,14 +292,11 @@ local function draw_alt()
       draw_label(8, 4, string.format("%03d", bpm), 180, 120, 20, 2)
     end
   end
-  -- Base octave (x=3), range (x=4) on y=8
   spx(3, 8, 20, 180, 60)
   spx(4, 8, 20, 80, 220)
   if seq_running then spx(PANIC_X,PANIC_Y,20,180,40) else spx(PANIC_X,PANIC_Y,220,20,20) end
   spx(ALT_X, ALT_Y, 232, 112, 18)
 end
-
---- Render both the live and settings screens simultaneously, then flush once.
 local function redraw()
   if supports_multi_screen then
     draw_game()
@@ -427,12 +310,10 @@ local function redraw()
   end
   grid_refresh()
 end
-
 local function is_dpad(x,y)
   for i=1,#DPAD do if DPAD[i].x==x and DPAD[i].y==y then return true end end
   return false
 end
-
 local function occupied(x,y)
   for i=1,snake_len do
     local s = snk(i); if s.x==x and s.y==y then return true end
@@ -442,11 +323,6 @@ local function occupied(x,y)
   end
   return (x==ALT_X and y==ALT_Y) or (x==PANIC_X and y==PANIC_Y) or is_dpad(x,y)
 end
-
--- @section Fruit Spawning
-
---- Move a fruit to a random unoccupied position with weighted kind selection.
--- @tparam table f fruit object with {x, y, kind} fields
 local function reposition_fruit(f)
   f.x, f.y = -1, -1
   for _=1,100 do
@@ -466,14 +342,12 @@ local function reposition_fruit(f)
     end
   end
 end
-
 local function spawn_fruit()
   if #fruits >= num_fruits then return end
   local f = {x=-1, y=-1, kind=0}
   table.insert(fruits, f)
   reposition_fruit(f)
 end
-
 local function reset_snake()
   snake_head, snake_len = 1, 4
   for i=1,4 do
@@ -483,11 +357,6 @@ local function reset_snake()
   dir.x, dir.y, queued.x, queued.y = 1,0,1,0
   snk_len = 4
 end
-
--- @section Death Animation
-
---- Advance the death animation by one tick.
--- Orange wipe sweeps left-to-right with a sparse descending note. Resets board when done.
 local function death_tick()
   if on_note then midi_note_off(on_note); on_note=nil end
   local note
@@ -516,16 +385,6 @@ local function death_tick()
     redraw()
   end
 end
-
--- @section Arpeggiator
-
---- Add a note to the arp pool.
--- Evicts the oldest entry if pool is at capacity.
--- Resets the lifespan countdown and records position in collected_notes.
--- @tparam number note MIDI note number
--- @tparam number x grid x position of collected fruit
--- @tparam number y grid y position of collected fruit
--- @tparam number kind fruit kind index (1–6)
 local function arp_add(note, x, y, kind)
   if arp_pool_len >= arp_pool_max then
     local old = arp_pool[1]
@@ -539,8 +398,6 @@ local function arp_add(note, x, y, kind)
   target.note, target.x, target.y, target.kind = note, x, y, kind
   target.prob = (kind == 5) and 0.33 or 1.0
 end
-
-
 local function seq_tick()
   if on_note then
     if humanize_hold then humanize_hold = false
@@ -556,7 +413,6 @@ local function seq_tick()
   if not arp_enabled then return end
   if arp_pool_len == 0 then return end
   if arp_pool_len == 0 then return end
-
   local n = arp_pool_len
   for i=1,n do arp_pool[i].note = note_for(arp_pool[i].x, arp_pool[i].y) end
   local triggered_note_obj = nil
@@ -584,12 +440,8 @@ local function seq_tick()
     seq_i = (seq_i%n)+1
     triggered_note_obj = arp_pool[seq_i]
   end
-
   if triggered_note_obj == nil then return end
-  -- Per-note probability gate (orange notes play at 33% chance)
   if triggered_note_obj.prob < 1.0 and math.random() > triggered_note_obj.prob then return end
-
-  -- Velocity contour: macro accent every 16, beat accent every 4, else softer
   beat_count = beat_count + 1
   local vel
   if beat_count % 16 == 1 then vel = 127
@@ -603,17 +455,10 @@ local function seq_tick()
   end
   midi_note_on(triggered_note_obj.note, vel); on_note = triggered_note_obj.note
 end
-
 local need_interval_update = false
 local fast_tick = 0
--- @section Game Loop
-
---- Main game tick — called by the metro every interval.
--- Handles: echo decay, death phases, autopilot BFS, snake movement,
--- collision detection, fruit collection effects, and arp sequencer trigger.
 local function game_tick()
   fast_tick = fast_tick + 1
-
   for i=1,ECHO_MAX do
     local e = ECHO_BUF[i]
     if e.active then
@@ -633,19 +478,13 @@ local function game_tick()
       end
     end
   end
-
   if not seq_running then return end
-
   if death_phase == 1 then
     if fast_tick % 8 == 0 then death_tick() end
     return
   end
-
-  -- Yellow slow: keep arp at original wall-clock rate while snake moves at half speed
   if temp_slow_steps > 0 and fast_tick % 4 == 0 and fast_tick % 8 ~= 0 then seq_tick() end
-
   if fast_tick % 8 ~= 0 then return end
-  -- Turn off eat note from previous game tick
   if eat_note then midi_note_off(eat_note); eat_note = nil end
   if auto_mode == 1 then
     for i=1,BFS_SZ do BFS_T[i] = false end
@@ -653,13 +492,11 @@ local function game_tick()
     local d = bfs_run(true,0,0)
     if d>0 then queued.x=DIR_DX[d]; queued.y=DIR_DY[d] end
   end
-
   if not (queued.x == -dir.x and dir.x ~= 0) and not (queued.y == -dir.y and dir.y ~= 0) then
     dir.x, dir.y = queued.x, queued.y
   end
   local h = snk(1)
   local hx, hy = wrap(h.x+dir.x,1,W), wrap(h.y+dir.y,1,H)
-
   for i=1,snake_len-1 do
     local s = snk(i)
     if s.x==hx and s.y==hy then
@@ -667,12 +504,10 @@ local function game_tick()
       return
     end
   end
-
   snake_head = (snake_head-2)%SNAKE_MAX+1
   local nh = SNAKE_BUF[snake_head]
   nh.x, nh.y = hx, hy
   snake_len = snake_len + 1
-
   for i=1,#fruits do
     local f = fruits[i]
     if f.x==hx and f.y==hy then
@@ -712,7 +547,6 @@ local function game_tick()
       elseif f.kind == 6 then
         snk_len = snk_len + 1; arp_add(pool_note, hx, hy, f.kind)
         midi_note_on(eat_n, 127); eat_note = eat_n
-        -- Single decaying echo chain at collect — 3–5 bounces only
         for ei=1,ECHO_MAX do
           if not ECHO_BUF[ei].active then
             local e = ECHO_BUF[ei]; e.active=true; e.note=pool_note
@@ -726,7 +560,6 @@ local function game_tick()
     end
   end
   ::after_fruit::
-
   if temp_slow_steps > 0 then
     temp_slow_steps = temp_slow_steps - 1
     if temp_slow_steps == 0 then need_interval_update = true end
@@ -738,8 +571,6 @@ local function game_tick()
   seq_tick()
   redraw()
 end
-
---- Kill all active notes: clears Lua note state and sends CC 120 (All Sound Off).
 local function do_panic()
   if on_note then midi_note_off(on_note); on_note = nil end
   if eat_note then midi_note_off(eat_note); eat_note = nil end
@@ -749,20 +580,9 @@ local function do_panic()
   end
   if midi_panic then midi_panic() end
 end
-
--- @section Input Handler
-
---- Grid key event handler — called by the hardware / emulator on pad press/release.
--- Routes to: ALT toggle, settings controls (when alt_held), D-PAD, autopilot target, or direction steering.
--- @tparam number x grid column (1-based)
--- @tparam number y grid row (1-based)
--- @tparam number z 1 = pressed, 0 = released
 function event_grid(x,y,z)
-  -- Determine which screen the interaction came from (live grid vs ghost/settings grid)
   local screen = get_focused_screen and get_focused_screen() or "live"
   local in_settings = alt_held or (screen ~= "live")
-
-  -- ALT button: only process from the live grid to avoid ghost-grid conflicts
   if x==ALT_X and y==ALT_Y then
     if z==1 then
       local now = get_time()
@@ -771,13 +591,11 @@ function event_grid(x,y,z)
     else
       if not menu_sticky then alt_held=false end
     end
-    -- Tell the emulator which screen to display in single-view mode.
     if display_screen then display_screen(alt_held and "settings" or "live") end
     redraw()
     return
   end
   if z==0 then return end
-  -- Play/Stop works from any screen
   if x==PANIC_X and y==PANIC_Y then
     seq_running = not seq_running
     if not seq_running then do_panic() end
@@ -848,7 +666,6 @@ function event_grid(x,y,z)
     redraw()
     return
   end
-
   for i=1,#DPAD do
     local a = DPAD[i]
     if a.x==x and a.y==y then
@@ -856,7 +673,6 @@ function event_grid(x,y,z)
       return
     end
   end
-
   if snake_len == 0 then return end
   local h = snk(1)
   local dx, dy = x - h.x, y - h.y
@@ -867,13 +683,10 @@ function event_grid(x,y,z)
     queued.x, queued.y = 0, (dy>0) and 1 or -1
   end
 end
-
-
 math.randomseed(math.floor(get_time()*1e6)%999983)
 if grid_color_intensity then grid_color_intensity(master_bright) end
 reset_snake()
 while #fruits < num_fruits do spawn_fruit() end
 redraw()
-
 m_game = metro.init(game_tick, get_interval() / 4)
 m_game:start()

@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap');
+
+/* 
+  Official Custom Color Overrides for MkDocs Material
+  Enabling #dda43c as Primary and Accent colors 
+*/
+
+[data-md-color-scheme="slate"] {
+  /* Primary color overrides */
+  --md-primary-fg-color:        #dda43c;
+  --md-primary-fg-color--light: #f1d394;
+  --md-primary-fg-color--dark:  #b18534;
+
+  /* Accent color overrides */
+  --md-accent-fg-color:             #dda43c;
+  --md-accent-fg-color--transparent: rgba(221, 164, 60, 0.1);
+  --md-accent-bg-color:             #dda43c;
+  --md-accent-bg-color--light:       rgba(221, 164, 60, 0.1);
+}
+
+/* Ensure links use the primary color */
+.md-typeset a {
+  color: var(--md-primary-fg-color);
+}
+
+/* Custom Header & Tabs Background (Darker Tint) */
+.md-header, .md-tabs {
+  background-color: #343029 !important;
+}
+
+/* Typography Customization: Lora for Headings */
+.md-typeset h1, 
+.md-typeset h2, 
+.md-typeset h3, 
+.md-typeset h4, 
+.md-typeset h5, 
+.md-typeset h6 {
+  font-family: 'Lora', serif;
+  font-weight: 700;
+}

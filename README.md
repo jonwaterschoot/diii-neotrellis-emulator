@@ -12,9 +12,13 @@ I also hope I'm not breaking any licensing things, if so please let me know. I t
 
 ## Scripting & Hardware Compatibility
 
-![neotrellis diii color fallback viii](img/neotrellis_diii_color_fallback_viii.gif)
+![Color fallback demo on NeoTrellis after monochrome viii mode](docs/img/neotrellis_diii_color_fallback_viii.gif)
 
-![neotrellis diii color](img/neotrellis_diii_color.gif)
+*Recording of `color_fallback_demo.lua` on NeoTrellis hardware, showing the device after using viii for the monochrome version of the test and then toggling pixels on the device.*
+
+![Color fallback test on NeoTrellis device with pixel interaction](docs/img/neotrellis_diii_color.gif)
+
+*Recording of `color_fallback_demo.lua` on NeoTrellis hardware, showing the fallback test running on device with interactive pixel toggling.*
 
 I wrote a quick [readme guide](uf2s/readme.md)in the uf2s directory with some quick tips to get the custom firmware for pico neotrellis up and running.
 
@@ -37,11 +41,14 @@ else
 end
 ```
 
-#### 2. Global Tinting
-For monochrome grids, you can use `grid_color(r, g, b)` to set a global hardware tint. This simulates a single-color LED grid (e.g., all blue or all orange).
+#### 2. Global Tinting vs. Per-Pixel Color
+When firmware supports it, `grid_color(r, g, b)` sets a global tint for subsequent `grid_led()` / `grid_led_all()` output. This is useful when you want a single color theme across the grid without per-pixel overrides.
 
-- `grid_color(r, g, b)`: Sets the target color for all `grid_led` calls.
-- `grid_color_intensity(level)`: Sets the global brightness multiplier for the color tint.
+- `grid_color(r, g, b)`: Sets the global tint for `grid_led()` and `grid_led_all()` output.
+- `grid_led_rgb(x, y, r, g, b)`: Sets true per-pixel RGB color.
+- `grid_color_intensity(level)`: Sets a master brightness multiplier for the rendered output.
+
+In practice, use `grid_color()` for tinted monochrome-style modes, and `grid_led_rgb()` when you need independent colors on the same grid.
 
 #### 3. Graceful Degradation
 Scripts like `monochrome_fallback.lua` demonstrate how to handle state transitions:
@@ -57,11 +64,46 @@ if not grid_led_rgb then
 end
 ```
 
+## Hardware Limitations & Color Accuracy
+
+### NeoTrellis Color Rendering Issues
+
+**Low Brightness Color Shift**: At brightness levels 4-7, NeoTrellis LEDs exhibit inconsistent color rendering where cyan/blue tints may appear orange or reddish. This is due to physical LED characteristics and PWM limitations at low duty cycles.
+
+**Confirmed Thresholds** (based on hardware testing):
+- **Level 1-2**: Physically invisible on tinted `grid_led()` calls
+- **Level 3**: First visible level on tinted `grid_led()` calls, but colors may be inaccurate
+- **Level 4-7**: Visible but cyan/blue tints often render as orange/reddish
+- **Level 8+**: Generally accurate color reproduction
+- **RGB overrides**: `grid_led_rgb()` provides better color accuracy even at low brightness levels
+
+**Testing Results**: Using `color-threshold-test.lua` on NeoTrellis hardware shows that tinted `grid_led()` calls become invisible at levels 1-2 and show color shifts at levels 3-7, while `grid_led_rgb()` calls maintain better color fidelity throughout the range.
+
+![Color threshold test demonstration](docs/img/neotrellisEmulator_color_treshold_test_lua.gif)
+
+*Systematic testing of color accuracy across brightness levels. Left side: tinted grid_led() calls (may shift on hardware). Right side: RGB overrides (maintains color accuracy).*
+
+**Cross-Platform Testing**: Test scripts in both diii (color) and viii (monochrome) webapps:
+- **diii app**: Shows full color rendering with RGB overrides
+- **viii app**: Shows monochrome fallback (ignores RGB calls, shows only grid_led calls as white)
+
+**Testing Script**: Use `scripts/colorfallback/color-threshold-test.lua` to identify exact color accuracy thresholds on your specific hardware.
+
+**Workaround Demo**: `scripts/colorfallback/color-workaround-demo.lua` shows how to use `grid_led_rgb()` overrides for accurate low-brightness colors.
+
+**Recommendations**:
+- For reliable color reproduction, use brightness levels 8-15
+- At lower levels, consider using monochrome mode or RGB overrides instead of tinted `grid_led()`
+- Test your scripts on actual hardware, as the emulator may not perfectly replicate these physical limitations
+
 ## Available Scripts
 
 - `serpentine_dev.lua`: A sophisticated snake-style sequencer with arpeggio support.
 - `monochrome_fallback.lua`: A reference implementation for cross-hardware compatibility.
 - `power_test.lua`: Diagnostic tool for grid power management.
+- `test-grid-color.lua`: Comprehensive color compatibility test (global tints, RGB overrides, monochrome fallback).
+- `color-threshold-test.lua`: Tests color accuracy at different brightness levels to identify hardware limitations.
+- `color-workaround-demo.lua`: Demonstrates workarounds for NeoTrellis color accuracy issues at low brightness.
 
 As okyeron started sharing news of the diii build for pico, i started trying to make a script that uses color.  
 I forked his repo and started implementing this into this fork branch [feature/colors](https://github.com/jonwaterschoot/neotrellis-monome/tree/feature/colors/neotrellis_monome_picosdk_iii)
@@ -77,7 +119,7 @@ I actually first started making a webpage to make a manual for my serpentines sc
 
 So far my goal is to make an emulator that can be used as a manual guide for my scripts, and to make it easier to develop and test them.  
 
-![emulator V1 example](docs/emulatorV1example.png)
+![emulator V1 example](docs/img/emulatorV1example.png)
 
 I have put my uf2 files in the `uf2s/` directory. in that directory also: a copy of the readme's that were created while building the neotrellis compatible firmware for the diii.  
 

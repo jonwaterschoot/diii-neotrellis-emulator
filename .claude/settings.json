@@ -4,7 +4,11 @@
       "WebSearch",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:stevedonovan.github.io)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(node -e \":*)",
+      "Bash(curl -s -D - \"https://codeberg.org/api/v1/repos/tehn/iii-scripts/contents/grid\")",
+      "Bash(curl -s -D - \"https://codeberg.org/api/v1/repos/tehn/iii-scripts/contents/grid/test\")",
+      "WebFetch(domain:codeberg.org)"
     ]
   }
 }

@@ -9,10 +9,10 @@ script.
 
 ## Screenshot
 
-![Emulator running serpentine_dev.lua](./emulator_screenshot.png)
+![Emulator screenshot](img/emulator_v1-1_screenshot.png)
 
 *The emulator running `serpentine_dev.lua` — snake in motion, docs panel populated
-from LDoc comments, hot-reload active.*
+from LDoc comments
 
 ---
 
@@ -91,14 +91,19 @@ All MonomeAPI functions are injected as C-closures that delegate to the JS
 
 | Lua call | JS result |
 |---|---|
-| `grid_led(x, y, lum)` | writes mono `{r,g,b}` to frame buffer |
+| `grid_led(x, y, lum)` | writes mono `{r,g,b}` to frame buffer, using current global tint |
 | `grid_led_rgb(x, y, r, g, b)` | writes RGB to frame buffer |
-| `grid_led_all(lum)` | fills entire frame buffer |
+| `grid_color(r, g, b)` | sets a global tint for subsequent `grid_led()` / `grid_led_all()` output |
+| `grid_led_all(lum)` | fills entire frame buffer, respecting current global tint |
 | `grid_refresh()` | flushes buffer → updates `.pad` DOM elements |
 | `grid_color_intensity(val)` | sets master brightness multiplier |
 
 Every `grid_refresh()` call applies the master brightness and sets
 `background` + `box-shadow` CSS on each pad for the glow effect.
+
+`grid_color()` is a global tint helper; it does not set per-pixel color. For true
+per-pixel RGB output, use `grid_led_rgb()`. `grid_color_intensity()` adjusts the
+final brightness of rendered output.
 
 ### 4. Hot-Reload (`serve.js` + `lua-loader.js`)
 

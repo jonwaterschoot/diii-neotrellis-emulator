@@ -25,8 +25,10 @@
       --border2: #253045;
       --text: #d6e0f0;
       --muted: #4a6080;
-      --accent: #3b82f6;
-      --accent-glow: #1d4ed8;
+      --slider-tint: #968971;
+      --slider-tint-active: #b0a48e;
+      --accent: #dda43c;
+      --accent-glow: #a5751d;
       --green: #22c55e;
       --amber: #f59e0b;
       --red: #ef4444;
@@ -160,7 +162,7 @@
     }
 
     .btn.primary:hover {
-      background: #2563eb;
+      background: var(--accent-glow);
     }
 
     .btn.danger {
@@ -326,9 +328,10 @@
       border-radius: 5px;
       pointer-events: none;
       box-sizing: border-box;
-      opacity: 0.3;
+      opacity: 0.35;
       transition: opacity 0.15s, box-shadow 0.15s, border-style 0.1s;
       z-index: 55;
+      cursor: default;
     }
     .map-frame.hl { opacity: 1; border-style: solid; }
     .map-label {
@@ -339,13 +342,13 @@
       font-size: 11px;
       cursor: default;
       transition: opacity 0.15s, border-color 0.15s, box-shadow 0.15s;
-      opacity: 0.45;
+      opacity: 0.9;
       user-select: none;
     }
     .map-label:hover, .map-label.hl {
       opacity: 1;
-      border-color: rgba(255,255,255,0.25);
-      box-shadow: 0 2px 16px rgba(0,0,0,0.6);
+      border-color: rgba(255,255,255,0.35);
+      box-shadow: 0 0 10px rgba(255,255,255,0.08), 0 2px 16px rgba(0,0,0,0.6);
     }
     .map-lbl-title {
       font-size: 10px;
@@ -368,6 +371,33 @@
       opacity: 0.8;
       stroke-width: 2;
       filter: drop-shadow(0 0 3px currentColor);
+    }
+    /* Cross-screen wire: live pad ↔ ghost pad for controls that appear on both screens */
+    .map-connection-cross {
+      stroke-width: 1;
+      stroke-dasharray: 3 5;
+      opacity: 0.18;
+    }
+    /* Pad micro-labels: shown in map-mode over each documented pad */
+    .map-pad-label {
+      position: absolute;
+      pointer-events: none;
+      font-family: var(--font-mono);
+      font-size: clamp(8px, calc(var(--pad-size) * 0.28), 11px);
+      font-weight: 500;
+      color: #fff;
+      text-align: center;
+      transform: translate(-50%, -50%);
+      white-space: nowrap;
+      z-index: 62;
+      line-height: 1;
+      background: rgba(20, 28, 40, 0.5);
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      padding: 2px 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     /* ── MAP LABEL CONTROLS LIST ─────────────────────────────────────── */
@@ -433,23 +463,105 @@
     .map-label:hover .map-lbl-desc,
     .map-label.hl .map-lbl-desc { color: var(--text); }
 
-    /* ── GHOST GRID (Settings View) ──────────────────────────────────── */
+    /* ── GHOST GRID (Alt Screen View) ───────────────────────────────────── */
     .map-ghost-wrap {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 8px;
-      opacity: 0.5;
+      opacity: 0.45;
       transition: opacity 0.2s;
     }
-    .map-ghost-wrap:hover { opacity: 0.75; }
+    /* Brighten when Live Manual is active — annotation makes the secondary grid useful */
+    body.map-mode .map-ghost-wrap { opacity: 0.75; }
+    .map-ghost-wrap:hover { opacity: 1; }
     .map-ghost-grid {
       display: grid;
       grid-template-columns: repeat(16, var(--pad-size));
       grid-template-rows: repeat(8, var(--pad-size));
       gap: var(--pad-gap);
     }
-    .map-ghost-grid .pad { pointer-events: none; }
+    .map-ghost-grid .pad { pointer-events: auto; }
+    .map-ghost-tabs {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .map-ghost-tab {
+      padding: 2px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 11px;
+      font-family: inherit;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .map-ghost-tab:hover { color: var(--text); border-color: var(--text); }
+    .map-ghost-tab.active { color: var(--text); border-color: var(--text); background: var(--bg2); }
+
+    /* ── LIVE MANUAL SHORTCUT ───────────────────────────────────────── */
+    .live-manual-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      margin-bottom: 10px;
+      justify-content: center;
+      border-color: var(--border);
+    }
+    .live-manual-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    #btn-dual-view.active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── MINIMAP STRIP ──────────────────────────────────────────────── */
+    .minimap-strip {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 6px 0 2px;
+    }
+    .minimap-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      opacity: 0.45;
+      transition: opacity 0.15s;
+    }
+    .minimap-tile:hover  { opacity: 0.75; }
+    .minimap-tile.active { opacity: 1; }
+    .minimap-num {
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+    .minimap-tile.active .minimap-num { color: var(--accent); }
+    .minimap-canvas {
+      image-rendering: pixelated;
+      width:  64px;
+      height: 32px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      display: block;
+    }
+    .minimap-tile.active .minimap-canvas { border-color: var(--accent); }
+    .minimap-label {
+      font-size: 9px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .minimap-tile.active .minimap-label { color: var(--text); }
 
     /* ── GITHUB IMPORT ROW ───────────────────────────────────────────── */
     .import-row {
@@ -541,6 +653,64 @@
         padding: 8px 4px;
         gap: 8px;
       }
+      /* Hide Live Manual and Dual View on phones — too small for overlay */
+      #map-toggle-btn, #btn-dual-view { display: none !important; }
+    }
+
+    /* ── MAP README PANEL ───────────────────────────────────────────── */
+    #map-readme-panel {
+      display: none;
+      width: 100%;
+      max-width: 820px;
+      border-top: 1px solid var(--border);
+      margin-top: 4px;
+    }
+    body.map-mode #map-readme-panel { display: block; }
+
+    .map-readme-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      user-select: none;
+    }
+    .map-readme-header:hover { color: var(--text); }
+    .map-readme-arrow { font-size: 10px; transition: transform 0.15s; }
+    .map-readme-header.open .map-readme-arrow { transform: rotate(90deg); }
+    .map-readme-body {
+      display: none;
+      padding: 12px 16px 24px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    .map-readme-body.open { display: block; }
+    .map-readme-body .guide-content { font-size: 12px; line-height: 1.7; }
+    .map-readme-body .guide-content h1 { font-size: 16px; margin: 0 0 8px; }
+    .map-readme-body .guide-content h2 { font-size: 13px; margin: 14px 0 6px; color: var(--accent); }
+    .map-readme-body .guide-content p,
+    .map-readme-body .guide-content ul,
+    .map-readme-body .guide-content ol { margin-bottom: 8px; }
+    .map-readme-body .guide-content img { max-width: 100%; border-radius: 4px; margin: 8px 0; }
+    .map-readme-body .guide-content a { color: var(--accent); }
+    .yt-embed {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      margin: 10px 0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .yt-embed iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: none;
     }
 
     .side-pane {
@@ -610,6 +780,15 @@
     .pad.lit {
       /* Dynamic brightness set via JS */
       filter: brightness(1.5);
+    }
+
+    .pad.locked::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 3px;
+      box-shadow: inset 0 0 0 2px var(--accent);
+      pointer-events: none;
     }
 
     /* ── STATE BAR below grid ────────────────────────────────────────── */
@@ -960,9 +1139,16 @@
     body.fullscreen-mode .hints,
     body.fullscreen-mode .audio-bar,
     body.fullscreen-mode .state-bar,
-    body.fullscreen-mode .grid-label {
+    body.fullscreen-mode .grid-label,
+    body.fullscreen-mode .map-ghost-wrap,
+    body.fullscreen-mode .minimap-strip,
+    body.fullscreen-mode #map-readme-panel {
       display: none !important;
     }
+    /* Disable interactive map overlay in fullscreen */
+    body.fullscreen-mode .map-frame,
+    body.fullscreen-mode .map-label,
+    body.fullscreen-mode #map-lines-svg { display: none !important; }
 
     body.fullscreen-mode .main {
       grid-template-columns: 1fr;
@@ -1054,8 +1240,7 @@
       height: 14px;
       width: 14px;
       border-radius: 50%;
-      background: #968971;
-      /* Amber Gray */
+      background: var(--slider-tint);
       cursor: pointer;
       -webkit-appearance: none;
       margin-top: -5px;
@@ -1068,7 +1253,7 @@
       height: 14px;
       width: 14px;
       border-radius: 50%;
-      background: #968971;
+      background: var(--slider-tint);
       cursor: pointer;
       border: none;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
@@ -1076,12 +1261,12 @@
     }
 
     input[type=range]:active::-webkit-slider-thumb {
-      background: #b0a48e;
+      background: var(--slider-tint-active);
       transform: scale(1.15);
     }
 
     input[type=range]:active::-moz-range-thumb {
-      background: #b0a48e;
+      background: var(--slider-tint-active);
       transform: scale(1.15);
     }
 
@@ -1195,6 +1380,12 @@
         <div class="topbar-title">Neotrellis/Monome Grid Emulator</div>
         <div class="topbar-sub" id="topbar-script-label">No script loaded</div>
       </div>
+      <div class="topbar-links" style="display:flex; gap:16px; margin-left: 20px; border-left: 1px solid var(--border); padding-left: 20px; align-items: center;">
+          <a href="#" id="btn-about" class="nav-link" style="color:var(--accent); text-decoration:none; font-size:11px; font-weight:600; text-transform:uppercase;">About / Docs</a>
+          <a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator" target="_blank" class="nav-link" style="color:var(--muted); text-decoration:none; font-size:11px; text-transform:uppercase;">GitHub Repo</a>
+          <a href="https://monome.org/diii/" target="_blank" class="nav-link" style="color:var(--muted); text-decoration:none; font-size:11px; text-transform:lowercase;">diii app</a>
+          <a href="https://dessertplanet.github.io/viii/" target="_blank" class="nav-link" style="color:var(--muted); text-decoration:none; font-size:11px; text-transform:lowercase;">viii app</a>
+      </div>
     </div>
     <div class="topbar-spacer"></div>
     <div class="topbar-controls">
@@ -1215,7 +1406,7 @@
         <input type="file" id="file-input" accept=".lua">
       </label>
       <button class="btn" id="btn-reload" title="Reload current script (R)">↻ Reload</button>
-      <button class="btn" id="btn-github-toggle" title="Import script from a public GitHub repository">⇱ GitHub</button>
+      <button class="btn" id="btn-github-toggle" title="Import script from a public GitHub or Codeberg repository">⇱ Import script repo</button>
       <div class="status-pill">
         <div class="status-dot" id="status-dot"></div>
         <span id="status-text"
@@ -1243,10 +1434,11 @@
           <input type="range" id="zoom-slider" min="12" max="80" value="32" style="width: 70px;">
           <button class="btn sm" id="btn-fit" title="Fit grid to window">⤢ Fit</button>
         </div>
-        <label class="btn" id="map-toggle-btn" title="Toggle interactive control map overlay" style="gap:6px;cursor:pointer;">
+        <label class="btn" id="map-toggle-btn" title="Toggle Live Manual — interactive control map overlay" style="gap:6px;cursor:pointer;">
           <input type="checkbox" id="map-toggle" style="width:12px;height:12px;cursor:pointer;accent-color:var(--accent);">
-          Map
+          Live Manual
         </label>
+        <button class="btn" id="btn-dual-view" title="Toggle secondary screen (dual view)">⊞ Dual View</button>
         <button class="btn" id="btn-fullscreen" title="Toggle Fullscreen (F)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
@@ -1256,11 +1448,11 @@
       </div>
     </div>
 
-    <!-- GitHub import row (toggled by ⇱ GitHub button) -->
+    <!-- Script import row (toggled by ⇱ Import script repo button) -->
     <div class="import-row" id="import-row">
-      <label>GitHub repo:</label>
+      <label>Script repo:</label>
       <input type="text" id="github-url-input"
-        placeholder="github.com/owner/repo  or  owner/repo"
+        placeholder="github.com/owner/repo  or  codeberg.org/owner/repo"
         autocomplete="off" spellcheck="false">
       <button class="btn primary sm" id="btn-github-import">Import</button>
     </div>
@@ -1274,6 +1466,145 @@
     <!-- Emulator pane -->
     <div class="emulator-pane">
 
+      <!-- Sound Module -->
+      <div id="sound-module-container" class="minimized">
+        <div class="sound-module-header">
+          <span>Sound Module</span>
+          <div class="minimized-volume-control">
+            <label>Vol <input type="range" id="min-vol-slider" min="0" max="100" value="70"></label>
+          </div>
+          <div class="header-controls">
+            <button class="btn sm" id="sound-toggle-btn" title="Mute/Unmute Sound">🔇</button>
+            <button class="btn sm" id="minimize-sound-btn" title="Expand">+</button>
+          </div>
+        </div>
+        <div class="sound-module-body">
+            <div class="sm-part">
+                <h5>Volume</h5>
+                <label>Level <input type="range" id="vol-slider" min="0" max="100" value="70"></label>
+            </div>
+            <div class="sm-part adsr-container">
+                <h5>ADSR</h5>
+                <div class="adsr-controls">
+                    <canvas id="adsr-canvas" width="180" height="70"></canvas>
+                    <div class="adsr-sliders">
+                        <label>A <input type="range" id="attack-slider" min="0" max="100" value="5"></label>
+                        <label>D <input type="range" id="decay-slider" min="0" max="100" value="10"></label>
+                        <label>S <input type="range" id="sustain-slider" min="0" max="100" value="60"></label>
+                        <label>R <input type="range" id="release-slider" min="10" max="200" value="80"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="sm-part">
+                <h5>Delay</h5>
+                <label>Amount <input type="range" id="delay-slider" min="0" max="100" value="20"></label>
+                <label>Time <input type="range" id="delay-time-slider" min="0" max="100" value="25"></label>
+                <label>Feedback <input type="range" id="delay-feedback-slider" min="0" max="100" value="30"></label>
+            </div>
+            <div class="sm-part">
+                <h5>Reverb</h5>
+                <label>Amount <input type="range" id="reverb-slider" min="0" max="100" value="20"></label>
+                <label>Decay <input type="range" id="reverb-decay-slider" min="0" max="100" value="50"></label>
+            </div>
+        </div>
+      </div>
+      <style>
+        #sound-module-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px;
+            width: 100%;
+            max-width: 800px; /* Adjusted for wider layout */
+        }
+        .sound-module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .sound-module-header .header-controls {
+            display: flex;
+            gap: 8px;
+        }
+        .sound-module-body {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+        .sm-part {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          background: var(--surface2);
+          padding: 8px 12px;
+          border-radius: 8px;
+          border: 1px solid var(--border2);
+        }
+        .sm-part h5 {
+          font-size: 10px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          color: var(--muted);
+          margin-bottom: 4px;
+        }
+        .sm-part label {
+          font-size: 11px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          color: var(--muted);
+        }
+        /* ADSR specific styles */
+        .adsr-container {
+            padding: 8px;
+        }
+        .adsr-controls {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        #adsr-canvas {
+          border: 1px solid var(--border);
+          border-radius: 4px;
+          background: var(--bg);
+        }
+        .adsr-sliders {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .adsr-sliders label {
+          gap: 6px;
+        }
+        /* Minimized styles */
+        .sound-module-header .minimized-volume-control {
+            display: none;
+        }
+        #sound-module-container.minimized .sound-module-body {
+            display: none;
+        }
+        #sound-module-container.minimized .minimized-volume-control {
+            display: flex;
+            align-items: center;
+        }
+        #sound-module-container.minimized .minimized-volume-control label {
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--muted);
+        }
+        #sound-module-container.minimized .sound-module-header {
+            margin-bottom: 0;
+        }
+      </style>
+
       <!-- Grid -->
       <div class="grid-wrapper">
         <div class="grid-label" id="grid-label">16 × 8 Grid</div>
@@ -1285,23 +1616,21 @@
       <!-- State bar -->
       <div class="state-bar" id="runtime-state-bar" style="display:none"></div>
 
-      <!-- Keyboard hints -->
-      <div class="hints">
-        <span><span class="hint-key">↑↓←→</span> Steer</span>
-        <span><span class="hint-key">Tab</span> Settings</span>
-        <span><span class="hint-key">Space</span> Sticky</span>
-        <span><span class="hint-key">1</span>/<span class="hint-key">2</span> BPM−</span>
-        <span><span class="hint-key">3</span>/<span class="hint-key">4</span> BPM+</span>
-        <span><span class="hint-key">A</span> Auto</span>
+      <!-- Keyboard hints (populated from script @key annotations) -->
+      <div class="hints" id="hints-bar">
         <span><span class="hint-key">R</span> Reload</span>
       </div>
+      
+      <!-- Minimap strip: one thumbnail per screen, always visible except fullscreen -->
+      <div id="minimap-strip" class="minimap-strip"></div>
 
-      <!-- Audio controls -->
-      <div class="audio-bar">
-        <label>Vol <input type="range" id="vol-slider" min="0" max="100" value="70"></label>
-        <label>Attack <input type="range" id="atk-slider" min="0" max="200" value="5"></label>
-        <label>Release <input type="range" id="rel-slider" min="10" max="400" value="80"></label>
-        <span style="color:#253045">Web Audio · MIDI output below</span>
+      <!-- README panel: shown below grids when Live Manual is active -->
+      <div id="map-readme-panel">
+        <div class="map-readme-header" id="map-readme-toggle">
+          <span class="map-readme-arrow">▸</span>
+          <span id="map-readme-title">Script Guide</span>
+        </div>
+        <div class="map-readme-body" id="map-readme-body"></div>
       </div>
 
     </div><!-- /emulator-pane -->
@@ -1320,7 +1649,7 @@
         <div class="side-panel" id="panel-guide">
           <div class="empty-state">
             <strong>No Guide Available</strong><br><br>
-            Import a script via ⇱ GitHub, or load a bundled script that includes a README.
+            Import a script via ⇱ Import script repo, or load a bundled script that includes a README.
           </div>
         </div>
 
@@ -1370,11 +1699,24 @@
     import { MonomeAPI } from './engine/monome-api.js';
     import { LuaLoader } from './engine/lua-loader.js';
     import { LuaMinifier } from './engine/lua-minifier.js';
-    import { GitHubImporter } from './engine/github-importer.js';
+    import { ScriptImporter } from './engine/script-importer.js';
 
     // ─── STATE ─────────────────────────────────────────────────────────────────
-    let _pendingReadme = null;   // set before _execute so onScriptLoad can pick it up
+    let _pendingReadme = null;      // set before _execute so onScriptLoad can pick it up
+    let _customScriptActive = false; // true when loaded from disk or external repo (not bundled)
     const _manifestMap = new Map(); // file → manifest entry (for readme lookup)
+
+    // ─── EXTERNAL SCRIPTS — tehn (monome) ──────────────────────────────────────
+    const TEHN_RAW_BASE = 'https://codeberg.org/tehn/iii-scripts/raw/branch/main/';
+    const TEHN_REPO_URL = 'https://codeberg.org/tehn/iii-scripts';
+    const TEHN_SCRIPTS = [
+      { name: 'intervals', path: 'grid/intervals.lua' },
+      { name: 'mp',        path: 'grid/mp.lua'        },
+      { name: 'select',    path: 'grid/select.lua'    },
+      { name: 'wake',      path: 'grid/wake.lua'      },
+      { name: 'test/slew', path: 'grid/test/slew.lua' },
+      { name: 'test/step', path: 'grid/test/step.lua' },
+    ];
 
     // ─── GRID DOM ──────────────────────────────────────────────────────────────
     const COLS = 16, ROWS = 8;
@@ -1386,8 +1728,23 @@
         const pad = document.createElement('div');
         pad.className = 'pad';
         pad.id = `pad-${x}-${y}`;
-        pad.addEventListener('mousedown', () => loader.api.handlePadEvent(x, y, 1));
-        pad.addEventListener('mouseup', () => loader.api.handlePadEvent(x, y, 0));
+        pad.addEventListener('mousedown', e => {
+          if (e.button === 2 || pad.classList.contains('locked')) return; // right-click handled by contextmenu; locked pad ignores new presses
+          loader.api.setFocusedScreen(_showGhostGrid ? 'live' : _singleViewScreen);
+          loader.api.handlePadEvent(x, y, 1);
+        });
+        pad.addEventListener('mouseup', e => {
+          if (e.button === 2 || pad.classList.contains('locked')) return; // right-click handled by contextmenu
+          loader.api.setFocusedScreen(_showGhostGrid ? 'live' : _singleViewScreen);
+          loader.api.handlePadEvent(x, y, 0);
+        });
+        pad.addEventListener('contextmenu', e => {
+          e.preventDefault();
+          const locked = pad.classList.toggle('locked');
+          loader.api.setFocusedScreen(_showGhostGrid ? 'live' : _singleViewScreen);
+          // contextmenu is the sole sender of press/release for right-click holds
+          loader.api.handlePadEvent(x, y, locked ? 1 : 0);
+        });
         gridContainer.appendChild(pad);
         pads.push(pad);
       }
@@ -1422,13 +1779,36 @@
     // emulator matches real hardware appearance (20% → ~70, 100% → 255).
     function ledG(v) { return v === 0 ? 0 : Math.round(Math.pow(v / 255, 0.55) * 255); }
 
+    // All map-overlay state declared before MonomeAPI/LuaLoader to avoid TDZ
+    let _ghostPadEls       = [];
+    let _minimapCtxs       = {};
+    let _mapGroups         = [];
+    let _mapMode           = false;
+    let _activeGhostScreen = null;
+    let _showGhostGrid     = true;
+    let _singleViewScreen  = 'live';   // which screen is displayed on the main grid in single-view mode
+    let _padGroupMap       = new Map(); // 'l:idx' / 'g:idx' → { hl, uhl }
+
     const api = new MonomeAPI({
       cols: COLS,
       rows: ROWS,
-      onLedUpdate: (frame, cols, rows) => {
+      onLedUpdate: (frame, cols, rows, screenName = 'live') => {
+        // Route to the appropriate pad array based on which screen just refreshed.
+        // Dual-view: live → main pads, alt → ghost pads.
+        // Single-view: whichever screen is active (_singleViewScreen) → main pads; others → minimap only.
+        let padEls;
+        if (_showGhostGrid) {
+          // Dual-view: live → main pads, active ghost screen → ghost pads, others → minimap only.
+          if (screenName === 'live') padEls = pads;
+          else if (screenName === _activeGhostScreen) padEls = _ghostPadEls;
+          else padEls = [];
+        } else {
+          padEls = screenName === _singleViewScreen ? pads : [];
+        }
+
         for (let i = 0; i < frame.length; i++) {
           let { r, g, b } = frame[i];
-          const pad = pads[i];
+          const pad = padEls[i];
           if (!pad) continue;
           if (r === 0 && g === 0 && b === 0) {
             pad.style.background = 'var(--pad-empty)';
@@ -1444,19 +1824,182 @@
             pad.style.borderColor = `rgba(${r},${g},${b},0.35)`;
           }
         }
-      }
+
+        // Update this screen's minimap canvas
+        const ctx = _minimapCtxs[screenName];
+        if (ctx) {
+          for (let i = 0; i < frame.length; i++) {
+            let { r, g, b } = frame[i];
+            if (r === 0 && g === 0 && b === 0) {
+              ctx.fillStyle = '#111';
+            } else {
+              r = ledG(r); g = ledG(g); b = ledG(b);
+              ctx.fillStyle = `rgb(${r},${g},${b})`;
+            }
+            ctx.fillRect(i % COLS, Math.floor(i / COLS), 1, 1);
+          }
+        }
+      },
+      onDisplayScreen: (name) => {
+        // Script explicitly signals which screen should be visible.
+        if (!_showGhostGrid) {
+          // Single-view: switch the main grid to the requested screen.
+          if (_singleViewScreen === name) return;
+          _singleViewScreen = name;
+          const strip = document.getElementById('minimap-strip');
+          if (strip) {
+            strip.querySelectorAll('.minimap-tile').forEach(t =>
+              t.classList.toggle('active', t.dataset.screen === name));
+          }
+          api.grid_refresh();
+        } else if (name !== 'live') {
+          // Dual-view: switch ghost grid to the requested alt screen if needed.
+          if (_activeGhostScreen !== name) {
+            _activeGhostScreen = name;
+            _buildGhostAndMinimap();
+            if (_mapMode) requestAnimationFrame(_buildMap);
+          }
+        }
+      },
     });
 
     // Audio slider bindings
-    document.getElementById('vol-slider').addEventListener('input', e => {
-      api.volume = e.target.value / 100;
-      if (api._masterGain) api._masterGain.gain.value = api.volume;
+    const volSlider = document.getElementById('vol-slider');
+    const minVolSlider = document.getElementById('min-vol-slider');
+
+    function syncVolume(value) {
+        const volume = value / 100;
+        api.volume = volume;
+        if (api._masterGain && !isMuted) {
+            api._masterGain.gain.value = volume;
+        }
+        volSlider.value = value;
+        minVolSlider.value = value;
+    }
+
+    volSlider.addEventListener('input', e => syncVolume(e.target.value));
+    minVolSlider.addEventListener('input', e => syncVolume(e.target.value));
+
+
+    const adsrCanvas = document.getElementById('adsr-canvas');
+    const adsrCtx = adsrCanvas.getContext('2d');
+    const attackSlider = document.getElementById('attack-slider');
+    const decaySlider = document.getElementById('decay-slider');
+    const sustainSlider = document.getElementById('sustain-slider');
+    const releaseSlider = document.getElementById('release-slider');
+
+    function drawAdsrCanvas() {
+        const w = adsrCanvas.width;
+        const h = adsrCanvas.height;
+        const a = (attackSlider.value / 100) * 0.25; // 0-25% of width
+        const d = (decaySlider.value / 100) * 0.25; // 0-25% of width
+        const s = sustainSlider.value / 100;
+        const r = (releaseSlider.value / 100) * 0.5; // 0-50% of width
+
+        const totalTime = a + d + r;
+        const scaleX = w / totalTime;
+
+        adsrCtx.clearRect(0, 0, w, h);
+        const sliderColor = getComputedStyle(document.documentElement).getPropertyValue('--slider-tint');
+        adsrCtx.strokeStyle = sliderColor ? sliderColor.trim() : '#968971';
+        adsrCtx.lineWidth = 2;
+        adsrCtx.beginPath();
+        adsrCtx.moveTo(0, h);
+
+        // Attack
+        const ax = a * scaleX;
+        const ay = 0;
+        adsrCtx.lineTo(ax, ay);
+
+        // Decay
+        const dx = (a + d) * scaleX;
+        const dy = h * (1 - s);
+        adsrCtx.lineTo(dx, dy);
+
+        // Sustain
+        const sx = dx + 2; // a small line for sustain
+        adsrCtx.lineTo(sx, dy);
+        
+        // Release
+        const rx = sx + (r * scaleX);
+        const ry = h;
+        adsrCtx.lineTo(rx, ry);
+
+        adsrCtx.stroke();
+    }
+
+    attackSlider.addEventListener('input', e => {
+      api.adsr.attack = e.target.value / 100 * 2; // 0-2s
+      drawAdsrCanvas();
     });
-    document.getElementById('atk-slider').addEventListener('input', e => {
-      api.attack = e.target.value / 1000;
+    decaySlider.addEventListener('input', e => {
+      api.adsr.decay = e.target.value / 100 * 2; // 0-2s
+      drawAdsrCanvas();
     });
-    document.getElementById('rel-slider').addEventListener('input', e => {
-      api.release = e.target.value / 1000;
+    sustainSlider.addEventListener('input', e => {
+      api.adsr.sustain = e.target.value / 100;
+      drawAdsrCanvas();
+    });
+    releaseSlider.addEventListener('input', e => {
+      api.adsr.release = e.target.value / 100 * 4; // 0-4s
+      drawAdsrCanvas();
+    });
+
+    drawAdsrCanvas();
+
+    // Sound module controls
+    const soundModuleContainer = document.getElementById('sound-module-container');
+    const minimizeBtn = document.getElementById('minimize-sound-btn');
+    minimizeBtn.addEventListener('click', () => {
+        soundModuleContainer.classList.toggle('minimized');
+        minimizeBtn.textContent = soundModuleContainer.classList.contains('minimized') ? '+' : '--';
+    });
+
+    let isMuted = true;
+    let hasGridInteracted = false;
+    document.getElementById('sound-toggle-btn').addEventListener('click', e => {
+        isMuted = !isMuted;
+        if (api._masterGain) {
+            api._masterGain.gain.value = isMuted ? 0 : api.volume;
+        }
+        e.target.textContent = isMuted ? '🔇' : '🔊';
+        hasGridInteracted = true;
+    });
+
+    // Auto-unmute sound on first interaction with the emulator
+    document.querySelector('.emulator-pane').addEventListener('mousedown', () => {
+        if (!hasGridInteracted && isMuted) {
+            document.getElementById('sound-toggle-btn').click();
+        }
+    });
+
+    // FX slider bindings
+    document.getElementById('reverb-slider').addEventListener('input', e => {
+      const amount = e.target.value / 100;
+      api.reverb.amount = amount;
+      if (api._reverbGain) api._reverbGain.gain.value = amount;
+    });
+    document.getElementById('delay-slider').addEventListener('input', e => {
+      const amount = e.target.value / 100;
+      api.delay.amount = amount;
+      if (api._delayGain) api._delayGain.gain.value = amount;
+    });
+
+    // FX detail sliders
+    document.getElementById('reverb-decay-slider').addEventListener('input', e => {
+        const decay = e.target.value / 100 * 4; // 0-4s range
+        api.reverb.decay = decay;
+        if (api._reverbNode) api._generateReverbImpulse();
+    });
+    document.getElementById('delay-time-slider').addEventListener('input', e => {
+        const time = e.target.value / 100; // 0-1s range
+        api.delay.time = time;
+        if (api._delayNode) api._delayNode.delayTime.value = time;
+    });
+    document.getElementById('delay-feedback-slider').addEventListener('input', e => {
+        const feedback = e.target.value / 100 * 0.9; // 0-0.9 range
+        api.delay.feedback = feedback;
+        if (api._delayFeedback) api._delayFeedback.gain.value = feedback;
     });
 
     // ─── LUA LOADER ────────────────────────────────────────────────────────────
@@ -1465,14 +2008,38 @@
       onStatusChange: setStatus,
       onScriptLoad: (name, docs) => {
         document.getElementById('topbar-script-label').textContent = name;
-        document.getElementById('grid-label').textContent = `${COLS} × ${ROWS} · ${name}`;
+        document.getElementById('grid-label').textContent = `1 · ${COLS} × ${ROWS} · ${name}`;
         renderDocs(docs);
         renderState(docs);
+        renderHints(docs);
         renderReadme(_pendingReadme);
         _pendingReadme = null;
         setStatus(`✓ ${name} running`, 'success');
         _buildMapGroups(docs);
+        _singleViewScreen = 'live'; // reset to live whenever a new script loads
+        _buildGhostAndMinimap();
         if (_mapMode) requestAnimationFrame(_buildMap);
+
+        // Show/hide custom script state in the selector UI
+        const existingCustomOpt = document.getElementById('__custom_opt__');
+        if (_customScriptActive) {
+          let customOpt = existingCustomOpt;
+          if (!customOpt) {
+            customOpt = document.createElement('option');
+            customOpt.id = '__custom_opt__';
+            customOpt.value = '__custom__';
+            scriptSelect.insertBefore(customOpt, scriptSelect.firstChild);
+          }
+          customOpt.textContent = `↳ Custom: ${name}`;
+          scriptSelect.value = '__custom__';
+          scriptSelect.style.opacity = '0.6';
+          btnDownloadSrc.disabled = true;  // no server URL to fetch
+          btnDownloadDev.disabled = false;
+        } else {
+          if (existingCustomOpt) scriptSelect.removeChild(existingCustomOpt);
+          scriptSelect.style.opacity = '';
+          setDownloadEnabled(!!scriptSelect.value);
+        }
       },
       onScriptError: (msg) => {
         setStatus(`Error: ${msg}`, 'error');
@@ -1486,24 +2053,34 @@
 
     async function populateScriptSelect() {
       const manifest = await loader.fetchManifest(BASE_URL);
-      if (manifest.length === 0) return;
-      manifest.forEach(entry => {
-        _manifestMap.set(entry.file, entry);
-        const opt = document.createElement('option');
-        opt.value = entry.file;
-        opt.textContent = `${entry.name}${entry.version ? ' (' + entry.version + ')' : ''}`;
-        opt.title = entry.description || '';
-        scriptSelect.appendChild(opt);
-      });
-      // Auto-select first
-      if (manifest.length > 0 && !scriptSelect.value) {
+      if (manifest.length > 0) {
+        manifest.forEach(entry => {
+          _manifestMap.set(entry.file, entry);
+          const opt = document.createElement('option');
+          opt.value = entry.file;
+          opt.textContent = `${entry.name}${entry.version ? ' (' + entry.version + ')' : ''}`;
+          opt.title = entry.description || '';
+          scriptSelect.appendChild(opt);
+        });
         scriptSelect.value = manifest[0].file;
         setDownloadEnabled(true);
       }
+
+      // External scripts — tehn (monome) — fetched live from Codeberg
+      const group = document.createElement('optgroup');
+      group.label = 'external scripts — tehn (monome)';
+      TEHN_SCRIPTS.forEach(entry => {
+        const opt = document.createElement('option');
+        opt.value = TEHN_RAW_BASE + entry.path;
+        opt.textContent = entry.name;
+        group.appendChild(opt);
+      });
+      scriptSelect.appendChild(group);
     }
 
     // Load a bundled script, auto-fetching its README if the manifest entry has one
     async function loadBundledScript(file) {
+      _customScriptActive = false;
       const entry = _manifestMap.get(file);
       if (entry?.readme) {
         try {
@@ -1516,10 +2093,53 @@
       loader.loadFromServer(file, BASE_URL);
     }
 
+    // Load a tehn external script by fetching its raw Codeberg URL
+    async function loadExternalScript(rawUrl) {
+      _customScriptActive = true;
+      setDownloadEnabled(false);
+      btnDownloadDev.disabled = false;
+      const scriptName = rawUrl.split('/').pop();
+      try {
+        const res = await fetch(rawUrl);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const source = await res.text();
+        _pendingReadme = `# ${scriptName}\n\nBy **tehn** (monome)\n\n` +
+          `[View on Codeberg](${TEHN_REPO_URL}/src/branch/main/grid) · ` +
+          `[Raw file](${rawUrl})\n\n` +
+          `*From the official monome iii-scripts repository. All credit to tehn.*`;
+        loader._currentScriptName = scriptName;
+        await loader._execute(source, scriptName);
+        document.querySelectorAll('.side-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.side-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('tab-guide').classList.add('active');
+        document.getElementById('panel-guide').classList.add('active');
+      } catch (e) {
+        // Likely a CORS block — show Guide tab with manual download instructions
+        _customScriptActive = false;
+        const codebergPage = `${TEHN_REPO_URL}/raw/branch/main/${
+          TEHN_SCRIPTS.find(s => (TEHN_RAW_BASE + s.path) === rawUrl)?.path ?? 'grid'
+        }`;
+        const fallbackMd = `# ${scriptName} — download required\n\n` +
+          `This script couldn\u2019t be fetched directly (browser CORS restriction on Codeberg).\n\n` +
+          `**To load it manually:**\n\n` +
+          `1. [Download \`${scriptName}\`](${rawUrl}) \u2014 right-click \u2192 Save link as\n` +
+          `2. Use the \u{1F4C2} File button to load the saved \`.lua\` file\n\n` +
+          `---\n\nBy **tehn** (monome) \u00b7 [View repo](${TEHN_REPO_URL}/src/branch/main/grid)`;
+        renderReadme(fallbackMd);
+        setStatus(`CORS blocked \u2014 see Guide tab for download link`, 'warn');
+        document.querySelectorAll('.side-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.side-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('tab-guide').classList.add('active');
+        document.getElementById('panel-guide').classList.add('active');
+      }
+    }
+
     // Load button
     document.getElementById('btn-load').addEventListener('click', () => {
       const val = scriptSelect.value;
-      if (val) loadBundledScript(val);
+      if (!val) return;
+      if (val.startsWith('https://')) loadExternalScript(val);
+      else loadBundledScript(val);
     });
 
     // Download buttons
@@ -1532,12 +2152,24 @@
       btnDownloadDev.disabled = !enabled;
     }
 
-    scriptSelect.addEventListener('change', () => setDownloadEnabled(!!scriptSelect.value));
+    scriptSelect.addEventListener('change', () => {
+      const v = scriptSelect.value;
+      if (v !== '__custom__') {
+        const customOpt = document.getElementById('__custom_opt__');
+        if (customOpt) scriptSelect.removeChild(customOpt);
+        scriptSelect.style.opacity = '';
+        _customScriptActive = false;
+      }
+      // External scripts: disable source download (no local file), device download works after load
+      const isExternal = v.startsWith('https://');
+      btnDownloadSrc.disabled = !v || v === '__custom__' || isExternal;
+      btnDownloadDev.disabled = !v || v === '__custom__';
+    });
 
-    // Source download — direct fetch, no transform
+    // Source download — direct fetch, no transform (bundled scripts only)
     btnDownloadSrc.addEventListener('click', () => {
       const val = scriptSelect.value;
-      if (!val) return;
+      if (!val || val.startsWith('https://')) return;
       const url = `${BASE_URL}/scripts/${val}`;
       const a = document.createElement('a');
       a.href = url;
@@ -1581,7 +2213,7 @@
     // File picker
     document.getElementById('file-input').addEventListener('change', e => {
       const file = e.target.files[0];
-      if (file) loader.loadFromFile(file);
+      if (file) { _customScriptActive = true; loader.loadFromFile(file); }
       e.target.value = ''; // Reset so same file can be reloaded
     });
 
@@ -1761,6 +2393,7 @@
       }
 
       // Controls grouped by section
+      const seenControls = new Set();
       if (docs.sections.length > 0) {
         for (const section of docs.sections) {
           if (section.controls.length === 0 && section.functions.length === 0) continue;
@@ -1770,6 +2403,9 @@
           if (section.controls.length > 0) {
             html += '<div>';
             for (const ctrl of section.controls) {
+              const signature = `${ctrl.location}|${ctrl.description}`;
+              if (seenControls.has(signature)) continue;
+              seenControls.add(signature);
               html += `<div class="control-item">
             <div class="control-loc">${ctrl.location}</div>
             <div class="control-desc">${ctrl.description}</div>
@@ -1811,6 +2447,35 @@
       }
 
       panel.innerHTML = html;
+
+      // ── Live Manual shortcut at the top of the docs panel ────────────────────
+      const liveManualBtn = document.createElement('button');
+      liveManualBtn.className = 'btn live-manual-btn';
+      liveManualBtn.title = 'Open Live Manual — interactive control map overlay';
+      liveManualBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="9" x2="21" y2="9"/></svg> Live Manual`;
+      liveManualBtn.addEventListener('click', () => {
+        const toggle = document.getElementById('map-toggle');
+        toggle.checked = !toggle.checked;
+        toggle.dispatchEvent(new Event('change'));
+        liveManualBtn.classList.toggle('active', toggle.checked);
+      });
+      // Sync initial state
+      liveManualBtn.classList.toggle('active', document.getElementById('map-toggle').checked);
+      panel.insertBefore(liveManualBtn, panel.firstChild);
+    }
+
+    function renderHints(docs) {
+      const bar = document.getElementById('hints-bar');
+      let html = '';
+      if (docs && docs.keys && docs.keys.length) {
+        for (const entry of docs.keys) {
+          const keysHtml = entry.keys.map(k => `<span class="hint-key">${k}</span>`).join('/');
+          html += `<span>${keysHtml} ${entry.label}</span>`;
+        }
+      }
+      html += `<span><span class="hint-key">R</span> Reload</span>`;
+      html += `<span><span class="hint-key">Right-click</span> Hold pad</span>`;
+      bar.innerHTML = html;
     }
 
     function renderState(docs) {
@@ -1828,25 +2493,55 @@
     }
 
     // ─── README / GUIDE RENDERER ─────────────────────────────────────────────
+
+    /** Post-process marked HTML: embed YouTube links as iframes inline */
+    function _processReadmeHtml(html) {
+      return html.replace(
+        /<a\s[^>]*href="https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?(?:[^"&]*&)?v=|youtu\.be\/)([\w-]+)[^"]*"[^>]*>[^<]*<\/a>/gi,
+        (match, vid) => `${match}<div class="yt-embed"><iframe src="https://www.youtube-nocookie.com/embed/${vid}" allowfullscreen loading="lazy"></iframe></div>`
+      );
+    }
+
     function renderReadme(markdown) {
       const panel = document.getElementById('panel-guide');
-      const tab = document.getElementById('tab-guide');
+      const tab   = document.getElementById('tab-guide');
+      const mapBody  = document.getElementById('map-readme-body');
+      const mapTitle = document.getElementById('map-readme-title');
+
       if (!markdown) {
         panel.innerHTML = `<div class="empty-state">
           <strong>No Guide Available</strong><br><br>
-          Import a script via ⇱ GitHub, or load a bundled script that includes a README.
+          Import a script via ⇱ Import script repo, or load a bundled script that includes a README.
         </div>`;
         tab.style.color = '';
+        if (mapBody) mapBody.innerHTML = '';
+        if (mapTitle) mapTitle.textContent = '';
         return;
       }
-      const html = window.marked ? window.marked.parse(markdown) : `<pre>${markdown}</pre>`;
+      const rawHtml = window.marked ? window.marked.parse(markdown) : `<pre>${markdown}</pre>`;
+      const html = _processReadmeHtml(rawHtml);
       panel.innerHTML = `<div class="guide-content">${html}</div>`;
-      // Highlight the Guide tab to signal new content
       tab.style.color = 'var(--cyan)';
+
+      // Also populate the inline map-mode readme panel
+      if (mapBody) {
+        mapBody.innerHTML = `<div class="guide-content">${html}</div>`;
+        // Update title from first H1 if present
+        const h1 = mapBody.querySelector('h1');
+        if (mapTitle && h1) mapTitle.textContent = h1.textContent;
+      }
     }
 
-    // ─── GITHUB IMPORT ───────────────────────────────────────────────────────
-    const importer = new GitHubImporter();
+    // ── Toggle for the inline readme panel ────────────────────────────────────
+    document.getElementById('map-readme-toggle').addEventListener('click', () => {
+      const header = document.getElementById('map-readme-toggle');
+      const body   = document.getElementById('map-readme-body');
+      const isOpen = body.classList.toggle('open');
+      header.classList.toggle('open', isOpen);
+    });
+
+    // ─── SCRIPT IMPORT ───────────────────────────────────────────────────────
+    const importer = new ScriptImporter();
     const githubToggle = document.getElementById('btn-github-toggle');
     const importRow = document.getElementById('import-row');
     const githubInput = document.getElementById('github-url-input');
@@ -1864,10 +2559,10 @@
       try {
         const result = await importer.import(val, msg => setStatus(msg, 'info'));
         _pendingReadme = result.readme;
+        _customScriptActive = true;
         // Load as if it came from a file (no server path — use source directly)
         loader._currentScriptName = result.name;
         await loader._execute(result.source, result.name);
-        setDownloadEnabled(true);
         // Activate Guide tab automatically if README was found
         if (result.readme) {
           document.querySelectorAll('.side-tab').forEach(t => t.classList.remove('active'));
@@ -1954,16 +2649,30 @@
       const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
       const winW = window.innerWidth * (isFS ? 0.98 : 0.96);
-      // Reduce vertical deadspace for mobile/fullscreen
-      const deadH = isFS ? 20 : (isMobile ? 100 : 160);
+      
+      const dualActive = _showGhostGrid && _ghostPadEls.length > 0;
+      
+      // Reduce vertical deadspace for mobile/fullscreen. Demand more padding vertically in dual mode!
+      const deadH = isFS ? 20 : (isMobile ? 100 : (dualActive ? 220 : 160));
       const winH = (window.innerHeight - deadH) * (isFS ? 0.98 : 0.96);
 
       const availW = isFS ? winW : Math.min(pane.clientWidth - 10, winW);
-      const availH = isFS ? winH : Math.min(pane.clientHeight - 10, winH);
 
-      const scaleW = availW / 24;
-      const scaleH = availH / 12.8;
-      return Math.min(scaleW, scaleH);
+      // Account for minimap fixed height (~52px) and ghost grid when dual view is on
+      const minimapH = 52; // approximate fixed pixel height of minimap strip
+      
+      // One grid: ROWS*P + (ROWS-1)*0.4P ≈ 10.8P; add 1P padding → ~11.8
+      // Two grids stacked with gap between: ~11.8*2 + 1 ≈ 24.6; add labels/wrap ≈ 26
+      const singleRowFactor = 12.8;
+      const dualRowFactor   = 32; // Make height constraints much steeper to ensure both grids fit
+      const fixedH = dualActive ? minimapH : 0;
+
+      const availH = (isFS ? winH : Math.min(pane.clientHeight - 10, winH)) - fixedH;
+      const scaleW = availW / (dualActive ? 22 : 24);
+      const scaleH = availH / (dualActive ? dualRowFactor : singleRowFactor);
+      
+      // Strict rule: fit vertical height first and foremost, then width
+      return Math.min(scaleH, scaleW);
     }
 
     function updateSliderLimits() {
@@ -1990,16 +2699,52 @@
     btnFit.addEventListener('click', fitToWindow);
     btnFitFs.addEventListener('click', fitToWindow);
 
+    const btnDualView = document.getElementById('btn-dual-view');
+    btnDualView.classList.toggle('active', _showGhostGrid);
+    btnDualView.addEventListener('click', () => {
+      _showGhostGrid = !_showGhostGrid;
+      btnDualView.classList.toggle('active', _showGhostGrid);
+      // When entering single-view, snap back to live so the main pads are consistent
+      if (!_showGhostGrid) _singleViewScreen = 'live';
+      _buildGhostAndMinimap();
+      if (_mapMode) requestAnimationFrame(_buildMap);
+      fitToWindow();
+    });
+
+    let _mapModeBeforeFs = false; // remember Live Manual state across fullscreen
+
     function toggleFullscreen() {
+      const mapToggle = document.getElementById('map-toggle');
       const isFullscreen = document.body.classList.toggle('fullscreen-mode');
 
       if (isFullscreen) {
+        // Disable Live Manual before entering fullscreen to prevent misplaced overlay
+        _mapModeBeforeFs = _mapMode;
+        if (_mapMode) {
+          mapToggle.checked = false;
+          mapToggle.dispatchEvent(new Event('change'));
+        }
         if (document.documentElement.requestFullscreen) {
           document.documentElement.requestFullscreen().catch(() => { });
         }
       } else {
         if (document.exitFullscreen && document.fullscreenElement) {
           document.exitFullscreen().catch(() => { });
+        }
+        // Restore Live Manual state directly — do NOT dispatch the change event here
+        // because the browser fires a resize on fullscreen exit, which triggers _buildMap
+        // via the resize listener. Dispatching change would schedule a second build and
+        // every element would be doubled.
+        if (_mapModeBeforeFs) {
+          _mapMode = true;
+          mapToggle.checked = true;
+          document.body.classList.add('map-mode');
+          const mapBody = document.getElementById('map-readme-body');
+          if (mapBody && mapBody.innerHTML.trim()) {
+            mapBody.classList.add('open');
+            document.getElementById('map-readme-toggle').classList.add('open');
+          }
+          // _buildMap will be triggered by the imminent resize event
         }
       }
       fitToWindow(); // Refit and update slider limits when entering/exiting
@@ -2054,8 +2799,195 @@
       '#f472b6','#a78bfa',
     ];
 
-    let _mapGroups = []; // [{title, color, controls:[{loc, location, description}]}]
-    let _mapMode   = false;
+    // _mapGroups, _mapMode, _activeGhostScreen, _ghostPadEls, _minimapCtxs, _showGhostGrid
+    // are all declared before MonomeAPI (above) to avoid TDZ errors.
+
+    // Resolve which screen a map group belongs to (module-level, shared by all builders)
+    function _getGroupScreen(g) {
+      if (g.screen === 'live') return 'live';
+      if (g.screen)            return g.screen;
+      return /\b(settings|alt|fruit)\b/i.test(g.sectionTitle) ? 'settings' : 'live';
+    }
+
+    // Ordered unique alt-screen names from doc-extractor AND runtime state
+    function _altScreens() {
+      // 1. Get screens from runtime state (api._screenBuffers is an object of live buffers)
+      const runtimeScreens = (api && api._screenBuffers) ? Object.keys(api._screenBuffers) : [];
+
+      // 2. Get screens from static analysis of @screen tags (for controls on screens not yet rendered)
+      const docScreens = [];
+      _mapGroups.forEach(g => {
+        const s = _getGroupScreen(g);
+        if (s !== 'live' && !docScreens.includes(s)) docScreens.push(s);
+      });
+
+      // 3. Combine and return unique screen names, excluding 'live'
+      const all = [...new Set([...runtimeScreens, ...docScreens])];
+      return all.filter(s => s !== 'live');
+    }
+
+    // ── Always-on ghost grid + minimap ──────────────────────────────────────────
+    // Called after every script load. Ghost grid and minimap persist independently
+    // of map-overlay mode — they are hidden only in fullscreen.
+    function _buildGhostAndMinimap() {
+      // ── Tear down old ghost wrap ──
+      const old = document.getElementById('map-ghost-wrap');
+      if (old) old.remove();
+      _ghostPadEls = [];
+      _minimapCtxs = {};
+
+      const altScreens = _altScreens();
+      if (!altScreens.includes(_activeGhostScreen)) _activeGhostScreen = altScreens[0] || null;
+      const allScreens = ['live', ...altScreens];
+
+      // ── Minimap strip ─────────────────────────────────────────────────────────
+      const strip = document.getElementById('minimap-strip');
+      strip.innerHTML = '';
+      // Minimap is always visible once a script is loaded
+      strip.hidden = false;
+
+      allScreens.forEach((screenName, idx) => {
+        const tile = document.createElement('div');
+        // Active = the currently shown ghost screen; if ghost is hidden, highlight the single-view screen
+        const isActive = _showGhostGrid
+          ? screenName === _activeGhostScreen
+          : screenName === _singleViewScreen;
+        tile.className = 'minimap-tile' + (isActive ? ' active' : '');
+        tile.dataset.screen = screenName;
+
+        const canvas = document.createElement('canvas');
+        canvas.width  = COLS;
+        canvas.height = ROWS;
+        canvas.className = 'minimap-canvas';
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#111';
+        ctx.fillRect(0, 0, COLS, ROWS);
+
+        // All screens get real-time canvas updates via onLedUpdate
+        _minimapCtxs[screenName] = ctx;
+
+        const numLabel = document.createElement('div');
+        numLabel.className = 'minimap-num';
+        numLabel.textContent = idx + 1;
+
+        const nameLabel = document.createElement('div');
+        nameLabel.className = 'minimap-label';
+        nameLabel.textContent = screenName;
+
+        tile.appendChild(numLabel);
+        tile.appendChild(canvas);
+        tile.appendChild(nameLabel);
+
+        tile.addEventListener('click', () => {
+          // This mapping is specific to multiplescreen-test.lua.
+          // A more generic solution would require a new API for scripts to declare screen-switching controls.
+          const screenButtonMap = {
+            'live':  { x: 7, y: 8 },
+            'edit1': { x: 8, y: 8 },
+            'edit2': { x: 9, y: 8 },
+            'edit3': { x: 10, y: 8 },
+          };
+
+          const button = screenButtonMap[screenName];
+          // Only apply this interactive fix for the script it's designed for.
+          if (loader.currentScriptName === 'multiplescreen-test.lua' && button) {
+            // For this script, simulate a press-and-release to trigger its internal screen-switching logic.
+            // This ensures the script's state stays in sync with the emulator view.
+            loader.api.handlePadEvent(button.x, button.y, 1);
+            loader.api.handlePadEvent(button.x, button.y, 0); // z=0 for release
+          } else {
+            // Fallback for other scripts: just switch the view, no state change.
+            // This may lead to the desync issue, but it's the previous behavior.
+            if (loader.currentScriptName !== 'multiplescreen-test.lua') {
+              console.warn(`Minimap: No screen switch button mapping for '${screenName}' in script '${loader.currentScriptName}'. Switching view only.`);
+            }
+            api.onDisplayScreen(screenName);
+          }
+        });
+
+        strip.appendChild(tile);
+      });
+
+      // Flush current screen buffers so newly created minimap canvases show live data
+      // rather than starting blank. Also ensures the correct screen appears on the main
+      // pads after a rebuild (especially in single-view mode).
+      api.grid_refresh();
+
+      // ── Ghost grid ────────────────────────────────────────────────────────────
+      if (altScreens.length === 0 || !_showGhostGrid) return;
+
+      const emulatorPane = document.querySelector('.emulator-pane');
+      const ghostWrap = document.createElement('div');
+      ghostWrap.id = 'map-ghost-wrap';
+      ghostWrap.className = 'map-ghost-wrap';
+
+      if (altScreens.length > 1) {
+        const tabRow = document.createElement('div');
+        tabRow.className = 'map-ghost-tabs';
+        altScreens.forEach(screenName => {
+          const btn = document.createElement('button');
+          btn.className = 'map-ghost-tab' + (screenName === _activeGhostScreen ? ' active' : '');
+          btn.textContent = screenName;
+          btn.addEventListener('click', () => {
+            _activeGhostScreen = screenName;
+            _buildGhostAndMinimap();
+            if (_mapMode) requestAnimationFrame(_buildMap);
+          });
+          tabRow.appendChild(btn);
+        });
+        ghostWrap.appendChild(tabRow);
+      }
+
+      const ghostLbl = document.createElement('div');
+      ghostLbl.className = 'grid-label';
+      const screenIdx = _altScreens().indexOf(_activeGhostScreen) + 2; // live=1, first alt=2...
+      ghostLbl.textContent = `${screenIdx} · ${_activeGhostScreen || 'Settings View'}`;
+
+      const ghostPanel = document.createElement('div');
+      ghostPanel.className = 'grid-panel';
+
+      const ghostGridEl = document.createElement('div');
+      ghostGridEl.id = 'map-ghost-grid';
+      ghostGridEl.className = 'map-ghost-grid';
+      for (let gy = 1; gy <= ROWS; gy++) {
+        for (let gx = 1; gx <= COLS; gx++) {
+          const p = document.createElement('div');
+          p.className = 'pad';
+          ghostGridEl.appendChild(p);
+        }
+      }
+      // Route ghost grid clicks to event_grid with the ghost screen as context
+      ghostGridEl.addEventListener('mousedown', e => {
+        const pad = e.target.closest('.pad');
+        if (!pad) return;
+        const idx = Array.from(ghostGridEl.children).indexOf(pad);
+        if (idx < 0) return;
+        const gx = (idx % COLS) + 1;
+        const gy = Math.floor(idx / COLS) + 1;
+        loader.api.setFocusedScreen(_activeGhostScreen || 'settings');
+        loader.api.handlePadEvent(gx, gy, 1);
+      });
+      ghostGridEl.addEventListener('mouseup', e => {
+        const pad = e.target.closest('.pad');
+        if (!pad) return;
+        const idx = Array.from(ghostGridEl.children).indexOf(pad);
+        if (idx < 0) return;
+        const gx = (idx % COLS) + 1;
+        const gy = Math.floor(idx / COLS) + 1;
+        loader.api.setFocusedScreen(_activeGhostScreen || 'settings');
+        loader.api.handlePadEvent(gx, gy, 0);
+      });
+      ghostPanel.appendChild(ghostGridEl);
+      ghostWrap.appendChild(ghostLbl);
+      ghostWrap.appendChild(ghostPanel);
+      // Insert before minimap-strip so order is: live grid → ghost grid → minimap
+      const minimapStrip = document.getElementById('minimap-strip');
+      emulatorPane.insertBefore(ghostWrap, minimapStrip);
+      _ghostPadEls = [...ghostGridEl.querySelectorAll('.pad')];
+      // Flush buffers now that ghost pad elements exist so the ghost grid is
+      // immediately populated (not blank until the next script-driven grid_refresh).
+      api.grid_refresh();
+    }
 
     function _buildMapGroups(docs) {
       _mapGroups = [];
@@ -2075,8 +3007,10 @@
           if (loc.xMin === 1 && loc.xMax === COLS && loc.yMin === 1 && loc.yMax === ROWS) return;
 
           const ctrl = { loc, location: c.location, description: c.description };
-          // Named groups share a key; ungrouped controls each get a unique singleton key
-          const key = c.group ? `g:${c.group}` : `s:${c.location}`;
+          // Named groups share a key only within the same screen; groups with the same
+          // name on different screens must remain separate to preserve unique docs.
+          const groupScreen = c.screen || (/\b(settings|alt|fruit)\b/i.test(sec.title) ? 'settings' : 'live');
+          const key = c.group ? `g:${groupScreen}:${c.group}` : `s:${groupScreen}:${c.location}`;
 
           if (!groupAccum.has(key)) {
             groupAccum.set(key, {
@@ -2099,12 +3033,60 @@
     }
 
     function _clearMap() {
-      document.querySelectorAll('.map-frame').forEach(el => el.remove());
+      document.querySelectorAll('.map-frame, .map-pad-label').forEach(el => el.remove());
       document.getElementById('map-lines-svg').innerHTML = '';
       document.getElementById('map-col-left').innerHTML  = '';
       document.getElementById('map-col-right').innerHTML = '';
-      const ghost = document.getElementById('map-ghost-wrap');
-      if (ghost) ghost.remove();
+      _padGroupMap.clear();
+      // Ghost wrap and minimap persist independently of map-overlay mode
+    }
+
+    /**
+     * Derive a short text label (≤5 chars) for a single pad cell within a control's loc range.
+     * Returns '' when no useful label can be determined.
+     */
+    function _padLabel(description, groupTitle, px, py, loc) {
+      const desc   = (description || '').trim();
+      const rangeW = loc.xMax - loc.xMin + 1;
+      const posIdx = px - loc.xMin; // 0-based column index within range
+
+      // 1. Keyboard: extract sequence of note names and map by column position
+      //    Matches "C D E F G A B" or "C# D# F# G# A#" etc.
+      const noteList = [...desc.matchAll(/(?<![A-Za-z])([A-G]#?)(?![A-Za-z])/g)].map(m => m[1]);
+      if (noteList.length >= 2) return noteList[posIdx] ?? '';
+
+      // 2. D-PAD arrow keywords — only when the description IS the direction word (possibly
+      //    followed by whitespace/punctuation), not just contains it inside a list
+      if (rangeW === 1 && /^(UP|DOWN|LEFT|RIGHT)\s*$/i.test(desc.replace(/[—–].*/, '').trim())) {
+        if (/^UP/i.test(desc))    return '↑';
+        if (/^DOWN/i.test(desc))  return '↓';
+        if (/^LEFT/i.test(desc))  return '←';
+        if (/^RIGHT/i.test(desc)) return '→';
+      }
+
+      // 3. Numeric delta: +10 BPM, −1 BPM, etc.
+      const deltaMatch = desc.match(/([+\-−][0-9]+)\s*BPM/i);
+      if (deltaMatch) return deltaMatch[1].replace('−', '-');
+
+      // 4. Multiple ALL-CAPS words (2–5 chars) matching the range width exactly
+      //    → per-cell labels (e.g. "MAJ / MIN / PMA / PMI / DOR / LYD / CUS" for 7 cells)
+      const capsWords = [...desc.matchAll(/\b([A-Z]{2,5})\b/g)].map(m => m[1]);
+      if (capsWords.length > 1 && capsWords.length === rangeW) return capsWords[posIdx] ?? '';
+
+      // 5. Single ALL-CAPS word → show only on the first (or only) cell
+      //    Skip trailing unit/context words that don't describe the control itself
+      const unitWords = new Set(['LED', 'BPM', 'RGB', 'OFF', 'ON', 'MIDI']);
+      if (capsWords.length === 1 && posIdx === 0 && !unitWords.has(capsWords[0])) return capsWords[0];
+
+      // 6. Single-cell fallback: first meaningful word of description, max 4 chars
+      //    Give preference to "play" → "PLAY" over later words like "stop"
+      if (rangeW === 1) {
+        if (/\bplay\b/i.test(desc)) return 'PLAY';
+        const firstWord = desc.replace(/[—–\/\-\(].*/, '').trim().split(/\s+/)[0] || '';
+        return firstWord.slice(0, 3).toUpperCase();
+      }
+
+      return '';
     }
 
     function _buildMap() {
@@ -2117,47 +3099,8 @@
       const leftCol      = document.getElementById('map-col-left');
       const rightCol     = document.getElementById('map-col-right');
 
-      // Explicit @screen wins; fall back to section name heuristic only when unset
-      function isSettingsGroup(g) {
-        if (g.screen === 'live')     return false;
-        if (g.screen === 'settings') return true;
-        return /\b(settings|alt|fruit)\b/i.test(g.sectionTitle);
-      }
-
-      // ── Ghost grid (shown only when at least one group is settings-screen) ──
-      let ghostPadEls = [];
-      const needsGhost = _mapGroups.some(isSettingsGroup);
-
-      if (needsGhost) {
-        const ghostWrap = document.createElement('div');
-        ghostWrap.id = 'map-ghost-wrap';
-        ghostWrap.className = 'map-ghost-wrap';
-
-        const ghostLbl = document.createElement('div');
-        ghostLbl.className = 'grid-label';
-        // Use first settings-section title as the ghost grid label
-        const settingsSec = _mapGroups.find(isSettingsGroup);
-        ghostLbl.textContent = settingsSec ? settingsSec.sectionTitle : 'Settings View';
-
-        const ghostPanel = document.createElement('div');
-        ghostPanel.className = 'grid-panel';
-
-        const ghostGridEl = document.createElement('div');
-        ghostGridEl.id = 'map-ghost-grid';
-        ghostGridEl.className = 'map-ghost-grid';
-        for (let gy = 1; gy <= ROWS; gy++) {
-          for (let gx = 1; gx <= COLS; gx++) {
-            const p = document.createElement('div');
-            p.className = 'pad';
-            ghostGridEl.appendChild(p);
-          }
-        }
-        ghostPanel.appendChild(ghostGridEl);
-        ghostWrap.appendChild(ghostLbl);
-        ghostWrap.appendChild(ghostPanel);
-        emulatorPane.appendChild(ghostWrap);
-        ghostPadEls = [...ghostGridEl.querySelectorAll('.pad')];
-      }
+      // Ghost grid is built by _buildGhostAndMinimap(); use module-level _ghostPadEls
+      const ghostPadEls = _ghostPadEls;
 
       // ── Wait for ghost layout, then build overlay ───────────────────────────
       requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -2183,9 +3126,42 @@
           };
         }
 
+        // ── Collect documented positions per screen (for cross-screen wires) ─
+        const _docPosByScreen = {};
+        // Maps 'x,y' → {hl, uhl, color, ctrl, group} for live-screen groups
+        const liveGroupByPos = new Map();
+        // Maps 'screen:x,y' → {ctrl, group} for alt-screen groups
+        const altGroupByPos = new Map();
+        _mapGroups.forEach(g => {
+          const s = _getGroupScreen(g);
+          if (!_docPosByScreen[s]) _docPosByScreen[s] = new Set();
+          g.controls.forEach(c => {
+            for (let px = c.loc.xMin; px <= c.loc.xMax; px++) {
+              for (let py = c.loc.yMin; py <= c.loc.yMax; py++) {
+                const pos = `${px},${py}`;
+                _docPosByScreen[s].add(pos);
+                const isLive = s === 'live';
+                if (isLive) {
+                  const padInfo = liveGroupByPos.get(pos);
+                  if (!padInfo) {
+                    liveGroupByPos.set(pos, { ctrl: c, group: g, color: g.color });
+                  }
+                } else {
+                  const key = `${s}:${pos}`;
+                  if (!altGroupByPos.has(key)) {
+                    altGroupByPos.set(key, { ctrl: c, group: g });
+                  }
+                }
+              }
+            }
+          });
+        });
+
         // ── One label card per map group ──────────────────────────────────────
         _mapGroups.forEach(group => {
-          const isGhost = isSettingsGroup(group);
+          const groupScreen = _getGroupScreen(group);
+          if (groupScreen !== 'live' && (!_showGhostGrid || groupScreen !== _activeGhostScreen)) return;
+          const isGhost = groupScreen !== 'live';
           const avgX = group.controls.reduce((s, c) => s + (c.loc.xMin + c.loc.xMax) / 2, 0) / group.controls.length;
           const side = avgX <= 8.5 ? 'left' : 'right';
           const col  = side === 'left' ? leftCol : rightCol;
@@ -2232,6 +3208,22 @@
 
             allFrames.push({ frame, r });
             allPaths.push({ path, r });
+
+            // ── Micro-labels: one text overlay per pad cell in this control ──
+            for (let px = ctrl.loc.xMin; px <= ctrl.loc.xMax; px++) {
+              for (let py = ctrl.loc.yMin; py <= ctrl.loc.yMax; py++) {
+                const txt = _padLabel(ctrl.description, group.title, px, py, ctrl.loc);
+                if (!txt) continue;
+                const padEl = getPad(px, py, isGhost);
+                if (!padEl) continue;
+                const pR = padEl.getBoundingClientRect();
+                const lel = document.createElement('div');
+                lel.className = 'map-pad-label';
+                lel.textContent = txt;
+                lel.style.cssText = `left:${(pR.left + pR.right) / 2 - mainRect.left}px;top:${(pR.top + pR.bottom) / 2 - mainRect.top}px;`;
+                main.appendChild(lel);
+              }
+            }
           });
 
           // ── Draw bezier fan lines after label is in DOM ───────────────────
@@ -2253,25 +3245,173 @@
           // ── Hover: highlight card + all frames + all paths ────────────────
           const hl = () => {
             lbl.classList.add('hl');
+            lbl.style.boxShadow = `0 0 0 1px ${group.color}55, 0 2px 16px rgba(0,0,0,0.6)`;
             allFrames.forEach(({ frame }) => { frame.classList.add('hl'); frame.style.boxShadow = `0 0 14px ${group.color}55`; });
             allPaths.forEach(({ path }) => path.classList.add('hl'));
           };
           const uhl = () => {
             lbl.classList.remove('hl');
+            lbl.style.boxShadow = '';
             allFrames.forEach(({ frame }) => { frame.classList.remove('hl'); frame.style.boxShadow = ''; });
             allPaths.forEach(({ path }) => path.classList.remove('hl'));
           };
           lbl.addEventListener('mouseenter', hl);
           lbl.addEventListener('mouseleave', uhl);
+
+          // ── Register pads in _padGroupMap for grid hover delegation ───────
+          const prefix = isGhost ? 'g' : 'l';
+          group.controls.forEach(ctrl => {
+            for (let px = ctrl.loc.xMin; px <= ctrl.loc.xMax; px++) {
+              for (let py = ctrl.loc.yMin; py <= ctrl.loc.yMax; py++) {
+                _padGroupMap.set(`${prefix}:${(py - 1) * COLS + (px - 1)}`, { hl, uhl });
+                // Also build live→hl map for cross-screen ghost frame linking.
+                // Preserve any previously stored control metadata from the doc-position pass.
+                if (!isGhost) {
+                  const pos = `${px},${py}`;
+                  const existing = liveGroupByPos.get(pos) || {};
+                  liveGroupByPos.set(pos, { ...existing, hl, uhl, color: group.color });
+                }
+              }
+            }
+          });
         });
+
+        // ── Cross-screen wires + ghost frames for live controls on alt screens ─
+        if (_showGhostGrid && ghostPadEls.length > 0) {
+          const livePositions = _docPosByScreen['live'] || new Set();
+          const crossPositions = [];
+          Object.entries(_docPosByScreen).forEach(([screen, posSet]) => {
+            if (screen === 'live') return;
+            posSet.forEach(pos => {
+              if (!livePositions.has(pos)) return;
+              const liveInfo = liveGroupByPos.get(pos);
+              const altInfo = altGroupByPos.get(`${screen}:${pos}`);
+              if (!liveInfo || !altInfo) return;
+              const sameControl = liveInfo.ctrl.description === altInfo.ctrl.description
+                || liveInfo.group.title === altInfo.group.title;
+              if (sameControl) crossPositions.push(pos);
+            });
+          });
+
+          // Only draw cross-screen wires + ghost frames for positions documented on
+          // BOTH @screen live and an alt screen where the same control semantics exist.
+          crossPositions.forEach(pos => {
+            const [px, py] = pos.split(',').map(Number);
+            const lPad = getPad(px, py, false);
+            const gPad = getPad(px, py, true);
+            if (!lPad || !gPad) return;
+
+            const lR = lPad.getBoundingClientRect();
+            const gR = gPad.getBoundingClientRect();
+
+            // Ghost frame at same position on secondary grid
+            const groupInfo = liveGroupByPos.get(pos);
+            if (groupInfo) {
+              const gFrame = document.createElement('div');
+              gFrame.className = 'map-frame';
+              const fr = {
+                left:   gR.left   - mainRect.left - 4,
+                top:    gR.top    - mainRect.top  - 4,
+                right:  gR.right  - mainRect.left + 4,
+                bottom: gR.bottom - mainRect.top  + 4,
+              };
+              gFrame.style.cssText = `left:${fr.left}px;top:${fr.top}px;width:${fr.right-fr.left}px;height:${fr.bottom-fr.top}px;border-color:${groupInfo.color};opacity:0.25;border-style:dotted;`;
+              main.appendChild(gFrame);
+              // Mirror micro-label onto the ghost frame using same logic as live side
+              // Find which live control owns this position to get its description
+              const liveCtrl = (() => {
+                for (const g of _mapGroups) {
+                  if (_getGroupScreen(g) !== 'live') continue;
+                  for (const c of g.controls) {
+                    if (px >= c.loc.xMin && px <= c.loc.xMax && py >= c.loc.yMin && py <= c.loc.yMax)
+                      return { ctrl: c, group: g };
+                  }
+                }
+                return null;
+              })();
+              if (liveCtrl) {
+                const txt = _padLabel(liveCtrl.ctrl.description, liveCtrl.group.title, px, py, liveCtrl.ctrl.loc);
+                if (txt) {
+                  const lel = document.createElement('div');
+                  lel.className = 'map-pad-label';
+                  lel.textContent = txt;
+                  lel.style.cssText = `left:${(gR.left + gR.right) / 2 - mainRect.left}px;top:${(gR.top + gR.bottom) / 2 - mainRect.top}px;opacity:0.6;`;
+                  main.appendChild(lel);
+                }
+              }
+              // Hook into the live group's highlight
+              _padGroupMap.set(`g:${(py - 1) * COLS + (px - 1)}`, {
+                hl:  () => { groupInfo.hl(); gFrame.style.opacity='1'; gFrame.style.borderStyle='solid'; },
+                uhl: () => { groupInfo.uhl(); gFrame.style.opacity='0.25'; gFrame.style.borderStyle='dotted'; },
+              });
+            }
+
+            // Cross-screen wire
+            const lCx = (lR.left + lR.right) / 2 - mainRect.left;
+            const lCy = lR.bottom - mainRect.top;
+            const gCx = (gR.left + gR.right) / 2 - mainRect.left;
+            const gCy = gR.top - mainRect.top;
+            const midY = (lCy + gCy) / 2;
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('class', 'map-connection map-connection-cross');
+            path.setAttribute('stroke', groupInfo.color || '#7090b0');
+            path.setAttribute('d', `M${lCx},${lCy} C${lCx},${midY} ${gCx},${midY} ${gCx},${gCy}`);
+            svg.appendChild(path);
+          });
+        }
+
       }));
     }
+
+    // ── Grid hover delegation (live pads → highlight group label + lines) ────
+    (function setupGridHover() {
+      function handleOver(e, prefix) {
+        const pad = e.target.closest('.pad');
+        if (!pad) return;
+        const idx = Array.from(pad.parentElement.children).indexOf(pad);
+        _padGroupMap.get(`${prefix}:${idx}`)?.hl();
+      }
+      function handleOut(e, prefix) {
+        const pad = e.target.closest('.pad');
+        if (!pad) return;
+        const idx = Array.from(pad.parentElement.children).indexOf(pad);
+        _padGroupMap.get(`${prefix}:${idx}`)?.uhl();
+      }
+      const liveGrid = document.getElementById('grid-container');
+      liveGrid.addEventListener('mouseover',  e => handleOver(e, 'l'));
+      liveGrid.addEventListener('mouseout',   e => handleOut(e, 'l'));
+      // Ghost grid is dynamic; we delegate from emulator-pane using the ghost id
+      const emulatorPane = document.querySelector('.emulator-pane');
+      emulatorPane.addEventListener('mouseover', e => {
+        if (!e.target.closest('#map-ghost-grid')) return;
+        handleOver(e, 'g');
+      });
+      emulatorPane.addEventListener('mouseout', e => {
+        if (!e.target.closest('#map-ghost-grid')) return;
+        handleOut(e, 'g');
+      });
+    })();
 
     document.getElementById('map-toggle').addEventListener('change', e => {
       _mapMode = e.target.checked;
       if (_mapMode) {
+        // Auto-enable dual view when entering Live Manual
+        if (!_showGhostGrid) {
+          _showGhostGrid = true;
+          btnDualView.classList.add('active');
+          _buildGhostAndMinimap();
+        }
         document.body.classList.add('map-mode');
-        requestAnimationFrame(() => requestAnimationFrame(_buildMap));
+        // Open readme panel automatically if content is present
+        const mapBody = document.getElementById('map-readme-body');
+        if (mapBody && mapBody.innerHTML.trim()) {
+          mapBody.classList.add('open');
+          document.getElementById('map-readme-toggle').classList.add('open');
+        }
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          _buildMap();
+          fitToWindow(); // Refit so both grids are fully visible
+        }));
       } else {
         document.body.classList.remove('map-mode');
         _clearMap();
@@ -2281,8 +3421,113 @@
     // Rebuild frames/lines when zoom or window changes (pad positions shift)
     zoomSlider.addEventListener('input',    () => { if (_mapMode) requestAnimationFrame(_buildMap); });
     zoomSliderFs.addEventListener('input',  () => { if (_mapMode) requestAnimationFrame(_buildMap); });
-    window.addEventListener('resize',       () => { if (_mapMode) requestAnimationFrame(_buildMap); });
+    let _buildMapResizeTimer = null;
+    window.addEventListener('resize', () => {
+      if (_mapMode) {
+        clearTimeout(_buildMapResizeTimer);
+        _buildMapResizeTimer = setTimeout(() => requestAnimationFrame(_buildMap), 80);
+      }
+    });
 
+  </script>
+
+  <style>
+    /* ── ABOUT MODAL ──────────────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      transform: translateY(10px);
+      transition: transform 0.2s;
+    }
+    .modal-overlay.active .modal-container {
+      transform: translateY(0);
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h2 {
+      font-size: 16px;
+      margin: 0;
+      color: var(--text);
+    }
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+  </style>
+
+  <div id="about-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2>About & Documentation</h2>
+        <button class="btn sm" id="btn-close-about">✕</button>
+      </div>
+      <div class="modal-body guide-content" id="about-modal-body">
+        <div style="text-align:center; padding: 40px;">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const btnAbout = document.getElementById('btn-about');
+    const modalAbout = document.getElementById('about-modal');
+    const btnCloseAbout = document.getElementById('btn-close-about');
+    const aboutBody = document.getElementById('about-modal-body');
+
+    btnAbout.addEventListener('click', async () => {
+      modalAbout.classList.add('active');
+      if (aboutBody.innerHTML.includes('Loading...')) {
+        try {
+          const res = await fetch('emulator-docs/index.md');
+          if (!res.ok) throw new Error('Network error');
+          const text = await res.text();
+          aboutBody.innerHTML = marked.parse(text);
+        } catch (e) {
+          aboutBody.innerHTML = '<p class="log-err">Failed to load docs/index.md. Ensure you test via a web server.</p>';
+        }
+      }
+    });
+
+    btnCloseAbout.addEventListener('click', () => {
+      modalAbout.classList.remove('active');
+    });
+
+    modalAbout.addEventListener('click', (e) => {
+      if (e.target === modalAbout) {
+        modalAbout.classList.remove('active');
+      }
+    });
   </script>
 
 </body>

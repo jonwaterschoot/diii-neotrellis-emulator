@@ -47,6 +47,7 @@ export class DocExtractor {
       sections: [],
       functions: [],
       controls: [],
+      keys: [],
       state: []
     };
 
@@ -85,10 +86,11 @@ export class DocExtractor {
         continue;
       }
 
-      // Screen marker: -- @screen live|settings|game|alt
-      const screenMatch = trimmed.match(/^--\s*@screen\s+(live|settings|game|alt)\b/i);
+      // Screen marker: -- @screen <name>  (any word; live/game = primary grid)
+      const screenMatch = trimmed.match(/^--\s*@screen\s+([\w][\w-]*)/i);
       if (screenMatch) {
-        currentScreen = /live|game/i.test(screenMatch[1]) ? 'live' : 'settings';
+        const raw = screenMatch[1].toLowerCase();
+        currentScreen = /^(live|game)$/.test(raw) ? 'live' : raw;
         continue;
       }
 
@@ -127,6 +129,16 @@ export class DocExtractor {
           }
           continue;
         }
+      }
+
+      // Keyboard shortcut hint: -- @key KEYS: Label
+      // KEYS may be slash-separated (e.g. 1/2) — each segment becomes its own badge.
+      const keyMatch = trimmed.match(/^--\s*@key\s+([^:]+):\s*(.+)/);
+      if (keyMatch) {
+        const keysRaw = keyMatch[1].trim();
+        const label   = keyMatch[2].trim();
+        result.keys.push({ keys: keysRaw.split('/').map(k => k.trim()), label });
+        continue;
       }
 
       // Control map comment pattern: -- x=N..M: description  OR -- Row N: description

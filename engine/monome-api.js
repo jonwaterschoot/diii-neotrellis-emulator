@@ -6,6 +6,7 @@
  * API Contract (what a Lua script can call):
  *   grid_led(x, y, lum)            – set pad at (x,y) to mono brightness 0–15
  *   grid_led_rgb(x, y, r, g, b)    – set pad at (x,y) to RGB (0–255 each)
+ *   grid_color(r, g, b)            – set global tint for grid_led output
  *   grid_led_all(lum)              – set all pads to brightness
  *   grid_refresh()                 – flush frame buffer to DOM
  *   grid_color_intensity(val)      – set master brightness multiplier
@@ -31,9 +32,15 @@ export class MonomeAPI {
     this.cols = opts.cols || 16;
     this.rows = opts.rows || 8;
     this.onLedUpdate = opts.onLedUpdate || (() => {});
+    this.onDisplayScreen = opts.onDisplayScreen || (() => {});
 
-    // Frame buffer: flat array of {r,g,b} per cell, indexed (y-1)*cols + (x-1)
-    this.frameBuffer = new Array(this.cols * this.rows).fill(null).map(() => ({ r: 0, g: 0, b: 0 }));
+    // Per-screen frame buffers. 'live' is always present; others created on demand.
+    // grid_set_screen(name) switches which buffer _setCell writes to.
+    this._screenBuffers = {
+      live: new Array(this.cols * this.rows).fill(null).map(() => ({ r: 0, g: 0, b: 0 }))
+    };
+    this._currentScreen = 'live';
+    this._globalTint = { r: 255, g: 255, b: 255 };
     this.masterBright = 12; // 1–15 scale
 
     // MIDI
@@ -45,8 +52,24 @@ export class MonomeAPI {
 
     // Volume/attack/release controlled by emulator UI
     this.volume = 0.7;
-    this.attack = 0.005;
-    this.release = 0.08;
+    this.adsr = {
+      attack: 0.005,
+      decay: 0.1,
+      sustain: 0.6,
+      release: 0.2,
+    };
+
+    // FX controlled by emulator UI
+    this.reverb = {
+      amount: 0.2,
+      decay: 1.5,
+      stereo: true,
+    };
+    this.delay = {
+      amount: 0.2,
+      time: 0.25,
+      feedback: 0.3,
+    };
 
     // Metro registry
     this._metros = [];
@@ -54,14 +77,24 @@ export class MonomeAPI {
     // Lua event function – set once the script is loaded
     this._luaEventGrid = null;
     this._startTime = performance.now();
+
+    // Tracks which screen the most recent user interaction came from
+    this._focusedScreen = 'live';
   }
+
+  setFocusedScreen(name) { this._focusedScreen = name; }
+  getFocusedScreen() { return this._focusedScreen; }
 
   // ─── GRID LED API ─────────────────────────────────────────────────────────
 
   /** Set single pad to monochrome brightness (0–15) */
   grid_led(x, y, lum) {
-    const v = Math.max(0, Math.min(255, Math.floor((lum / 15) * 255)));
-    this._setCell(x, y, v, v, v);
+    const level = Math.max(0, Math.min(15, Math.floor(lum || 0)));
+    const scale = level / 15;
+    const r = Math.max(0, Math.min(255, Math.floor(this._globalTint.r * scale)));
+    const g = Math.max(0, Math.min(255, Math.floor(this._globalTint.g * scale)));
+    const b = Math.max(0, Math.min(255, Math.floor(this._globalTint.b * scale)));
+    this._setCell(x, y, r, g, b);
   }
 
   /** Set single pad to RGB color (0–255 each) */
@@ -69,25 +102,54 @@ export class MonomeAPI {
     this._setCell(x, y, r, g, b);
   }
 
-  /** Clear all pads to a brightness level (0–15), default 0 */
-  grid_led_all(lum) {
-    const v = Math.max(0, Math.min(255, Math.floor(((lum || 0) / 15) * 255)));
-    for (let i = 0; i < this.frameBuffer.length; i++) {
-      this.frameBuffer[i].r = v;
-      this.frameBuffer[i].g = v;
-      this.frameBuffer[i].b = v;
-    }
+  /**
+   * Explicitly signal the emulator which screen should be visible.
+   * In single-view this switches the main grid; in dual-view it switches the ghost grid.
+   * Scripts call this after changing display state (e.g. opening a settings page).
+   */
+  display_screen(name) {
+    this.onDisplayScreen(name);
   }
 
-  /** Flush frame buffer to DOM via callback */
+  /** Switch which screen buffer subsequent grid_led / grid_led_rgb / grid_led_all calls write to */
+  grid_set_screen(name) {
+    if (!this._screenBuffers[name]) {
+      this._screenBuffers[name] = new Array(this.cols * this.rows).fill(null).map(() => ({ r: 0, g: 0, b: 0 }));
+    }
+    this._currentScreen = name;
+  }
+
+  /** Set a global tint for subsequent grid_led() / grid_led_all() output. */
+  grid_color(r, g, b) {
+    this._globalTint = {
+      r: Math.max(0, Math.min(255, Math.floor(r || 0))),
+      g: Math.max(0, Math.min(255, Math.floor(g || 0))),
+      b: Math.max(0, Math.min(255, Math.floor(b || 0)))
+    };
+  }
+
+  /** Clear all pads of the current screen to a brightness level (0–15), default 0 */
+  grid_led_all(lum) {
+    const level = Math.max(0, Math.min(15, Math.floor(lum || 0)));
+    const scale = level / 15;
+    const r = Math.max(0, Math.min(255, Math.floor(this._globalTint.r * scale)));
+    const g = Math.max(0, Math.min(255, Math.floor(this._globalTint.g * scale)));
+    const b = Math.max(0, Math.min(255, Math.floor(this._globalTint.b * scale)));
+    const buf = this._screenBuffers[this._currentScreen];
+    for (let i = 0; i < buf.length; i++) { buf[i].r = r; buf[i].g = g; buf[i].b = b; }
+  }
+
+  /** Flush ALL screen buffers to the DOM — each screen fires onLedUpdate with its name */
   grid_refresh() {
     const bs = this.masterBright / 12;
-    const out = this.frameBuffer.map(cell => ({
-      r: Math.min(255, Math.floor(cell.r * bs)),
-      g: Math.min(255, Math.floor(cell.g * bs)),
-      b: Math.min(255, Math.floor(cell.b * bs)),
-    }));
-    this.onLedUpdate(out, this.cols, this.rows);
+    for (const [screenName, buf] of Object.entries(this._screenBuffers)) {
+      const out = buf.map(cell => ({
+        r: Math.min(255, Math.floor(cell.r * bs)),
+        g: Math.min(255, Math.floor(cell.g * bs)),
+        b: Math.min(255, Math.floor(cell.b * bs)),
+      }));
+      this.onLedUpdate(out, this.cols, this.rows, screenName);
+    }
   }
 
   /** Set master brightness multiplier (1–15) */
@@ -98,9 +160,8 @@ export class MonomeAPI {
   _setCell(x, y, r, g, b) {
     if (x < 1 || x > this.cols || y < 1 || y > this.rows) return;
     const i = (y - 1) * this.cols + (x - 1);
-    this.frameBuffer[i].r = r;
-    this.frameBuffer[i].g = g;
-    this.frameBuffer[i].b = b;
+    const buf = this._screenBuffers[this._currentScreen];
+    buf[i].r = r; buf[i].g = g; buf[i].b = b;
   }
 
   // ─── MIDI + AUDIO ──────────────────────────────────────────────────────────
@@ -150,6 +211,41 @@ export class MonomeAPI {
     this._masterGain = this._audioCtx.createGain();
     this._masterGain.gain.value = this.volume;
     this._masterGain.connect(this._audioCtx.destination);
+
+    // Create FX chain
+    this._reverbNode = this._audioCtx.createConvolver();
+    this._reverbGain = this._audioCtx.createGain();
+    this._reverbGain.gain.value = this.reverb.amount;
+    this._reverbNode.connect(this._reverbGain).connect(this._masterGain);
+    this._generateReverbImpulse();
+
+    this._delayNode = this._audioCtx.createDelay(1.0);
+    this._delayGain = this._audioCtx.createGain();
+    this._delayFeedback = this._audioCtx.createGain();
+    this._delayGain.gain.value = this.delay.amount;
+    this._delayNode.delayTime.value = this.delay.time;
+    this._delayFeedback.gain.value = this.delay.feedback;
+
+    this._delayNode.connect(this._delayFeedback);
+    this._delayFeedback.connect(this._delayNode);
+    this._delayNode.connect(this._delayGain).connect(this._masterGain);
+  }
+
+  _generateReverbImpulse() {
+    const sr = this._audioCtx.sampleRate;
+    const len = sr * this.reverb.decay;
+    const impulse = this._audioCtx.createBuffer(this.reverb.stereo ? 2 : 1, len, sr);
+    const dataL = impulse.getChannelData(0);
+    for (let i = 0; i < len; i++) {
+      dataL[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.5);
+    }
+    if (this.reverb.stereo) {
+      const dataR = impulse.getChannelData(1);
+      for (let i = 0; i < len; i++) {
+        dataR[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.5);
+      }
+    }
+    this._reverbNode.buffer = impulse;
   }
 
   midi_note_on(note, vel) {
@@ -181,13 +277,25 @@ export class MonomeAPI {
     const freq = 440 * Math.pow(2, (note - 69) / 12);
     const osc = this._audioCtx.createOscillator();
     const g = this._audioCtx.createGain();
+    const now = this._audioCtx.currentTime;
+    const attackTime = now + this.adsr.attack;
+    const decayTime = attackTime + this.adsr.decay;
+    const peakGain = (vel / 127) * 0.4;
+    const sustainGain = peakGain * this.adsr.sustain;
+
     osc.type = 'triangle';
     osc.frequency.value = freq;
-    g.gain.setValueAtTime(0, this._audioCtx.currentTime);
-    g.gain.linearRampToValueAtTime((vel / 127) * 0.4, this._audioCtx.currentTime + this.attack);
-    g.gain.exponentialRampToValueAtTime((vel / 127) * 0.15, this._audioCtx.currentTime + this.attack + 0.08);
+    g.gain.setValueAtTime(0, now);
+    g.gain.linearRampToValueAtTime(peakGain, attackTime);
+    g.gain.linearRampToValueAtTime(sustainGain, decayTime);
+    
     osc.connect(g);
+    
+    // Connect to dry and wet chains
     g.connect(this._masterGain);
+    g.connect(this._reverbNode);
+    g.connect(this._delayNode);
+    
     osc.start();
     const tid = setTimeout(() => this._synthOff(note), 3000);
     this._activeNodes.set(note, { osc, g, tid });
@@ -197,10 +305,11 @@ export class MonomeAPI {
     const n = this._activeNodes.get(note);
     if (!n) return;
     clearTimeout(n.tid);
-    const rel = this.release;
-    n.g.gain.cancelScheduledValues(this._audioCtx.currentTime);
-    n.g.gain.setValueAtTime(Math.max(0.0001, n.g.gain.value), this._audioCtx.currentTime);
-    n.g.gain.exponentialRampToValueAtTime(0.0001, this._audioCtx.currentTime + rel);
+    const rel = this.adsr.release;
+    const now = this._audioCtx.currentTime;
+    n.g.gain.cancelScheduledValues(now);
+    n.g.gain.setValueAtTime(n.g.gain.value, now);
+    n.g.gain.exponentialRampToValueAtTime(0.0001, now + rel);
     setTimeout(() => {
       try { n.osc.stop(); } catch (e) {}
       n.osc.disconnect();
@@ -296,7 +405,11 @@ export class MonomeAPI {
   reset() {
     this.stopAllMetros();
     this.stopAllNotes();
-    this.grid_led_all(0);
+    // Clear all screen buffers and reset to live screen
+    this._screenBuffers = {
+      live: new Array(this.cols * this.rows).fill(null).map(() => ({ r: 0, g: 0, b: 0 }))
+    };
+    this._currentScreen = 'live';
     this._luaEventGrid = null;
     this._startTime = performance.now();
   }

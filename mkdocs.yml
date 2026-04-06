@@ -1,0 +1,53 @@
+site_name: diii-neotrellis-emulator Documentation
+site_description: Browser-based emulator for Monome and NeoTrellis Lua scripts
+site_author: jonwaterschoot
+site_url: https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/
+
+docs_dir: docs
+
+nav:
+  - Home: index.md
+  - Project Overview:
+    - Main README: main-readme.md
+    - Roadmap: roadmap.md
+  - Emulator Usage:
+    - Walkthrough: walkthrough.md
+    - Script Standards: script-standards.md
+  - Hardware & Firmware:
+    - Firmware Installation: firmware-installation.md
+    - Building Firmware: building-firmware.md
+  - Scripts:
+    - Serpentine Sequencer: serpentine-sequencer.md
+    - Multi-Screen Test: multi-screen-test.md
+    - Changelog: changelog.md
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+  palette:
+    - scheme: slate
+      primary: custom
+      accent: custom
+  font:
+    text: Manrope
+    code: Roboto Mono
+extra_css:
+  - extra.css
+
+plugins:
+  - search
+  - include-markdown
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - admonition
+  - codehilite
+  - footnotes
+  - meta
+  - tables
