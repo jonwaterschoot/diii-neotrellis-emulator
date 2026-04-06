@@ -183,6 +183,18 @@
       
     
     
+      <div class="md-header__source">
+        <a href="https://jonwaterschoot.github.io/diii-neotrellis-emulator/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Launch Emulator
+  </div>
+</a>
+      </div>
+    
   </nav>
   
 </header>
@@ -331,6 +343,18 @@
     diii-neotrellis-emulator Documentation
   </label>
   
+    <div class="md-nav__source">
+      <a href="https://jonwaterschoot.github.io/diii-neotrellis-emulator/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Launch Emulator
+  </div>
+</a>
+    </div>
+  
   <ul class="md-nav__list" data-md-scrollfix>
     
       
@@ -455,6 +479,34 @@
     
   
     Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../todo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    To Do
   
 
     
@@ -998,7 +1050,7 @@
 <h1 id="neotrellis-grid-iii-code-for-raspberry-pi-picorp2040-boards">Neotrellis Grid + iii Code for Raspberry Pi Pico/RP2040 boards<a class="headerlink" href="#neotrellis-grid-iii-code-for-raspberry-pi-picorp2040-boards" title="Permanent link">&para;</a></h1>
 <p>This version is rewritten to use the Raspberry Pi Pico VS Code Extension and includes the monome iii scripting mode.  </p>
 <p>Install the Raspberry Pi Pico VS Code Extension from the Extensions tab in VSCode.  </p>
-<p><img alt="alt text" src="../uf2s/PicoVSCodeExtn.png" /></p>
+<p><img alt="alt text" src="https://github.com/jonwaterschoot/diii-neotrellis-emulator/raw/main/uf2s/PicoVSCodeExtn.png" /></p>
 <h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h3>
 <p>Look at the <code># UPDATE HERE FOR YOUR BOARD AND BUILD</code> sections of <code>CMakeLists.txt</code> to configure for your specific board. This <em>should</em> be the only configuration changes needed.  </p>
 <div class="codehilite"><pre><span></span><code><span class="err">#</span><span class="w"> </span><span class="nx">SET</span><span class="w"> </span><span class="nx">BOARD</span><span class="w"> </span><span class="nx">TYPE</span>
@@ -1135,7 +1187,7 @@
 <p>This tint applies to <code>grid_led()</code> / <code>grid_led_all()</code> output, while <code>grid_led_rgb()</code> provides true independent per-pixel color.</p>
 <p><code>grid_led_rgb(x, y, r, g, b)</code> sets a true per-pixel RGB color (0–255 per channel), bypassing the global tint. This allows multicolor scripts without any multiplexing or constant refresh. Use the same if guard:</p>
 <p><code>if grid_led_rgb then grid_led_rgb(x, y, 255, 0, 0) end</code></p>
-<p>See <a href="../uf2s/grid_led_rgb.md">grid_led_rgb.md</a> for full details, behavior notes, and examples.</p>
+<p>See <a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/uf2s/grid_led_rgb.md">grid_led_rgb.md</a> for full details, behavior notes, and examples.</p>
 <h3 id="writing-cross-device-scripts-monochrome-fallback">Writing cross-device scripts — monochrome fallback<a class="headerlink" href="#writing-cross-device-scripts-monochrome-fallback" title="Permanent link">&para;</a></h3>
 <p>Scripts that call <code>grid_led_rgb</code> run in full color on NeoTrellis. On a standard iii device <code>grid_led_rgb</code> is <code>nil</code>, so those calls are safely skipped — but that means <strong>every pixel stays dark</strong>. A well-written script degrades gracefully by translating its color intent into a <code>grid_led</code> brightness level.</p>
 <p>The recommended pattern is a single <code>spx</code> wrapper function at the top of your script:</p>
@@ -1160,7 +1212,7 @@
 <p>Then replace every direct <code>grid_led_rgb</code> / <code>grid_led</code> call in your draw code with <code>spx(x, y, r, g, b)</code>. The color ratios you choose for NeoTrellis become the brightness contrast on monochrome grids automatically — a bright green active state and a dark green inactive state will render as level 15 and level 4 respectively.</p>
 <p><strong>Why level 4?</strong> Confirmed through hardware testing on NeoTrellis via the viii app (WebSerial/mext protocol). The mext protocol uses a 0-15 brightness scale; levels 1–3 fall below the physical LED threshold and appear off. Level 4 (~27% of maximum) is the lowest level that renders as visibly dim-but-intentional. Bright active states typically land at level 10–15, giving clear contrast.</p>
 <p><strong>Testing with viii</strong>: <a href="https://github.com/dessertplanet/viii">dessertplanet/viii</a> is a browser app that connects to a physical Monome-compatible grid over WebSerial and runs iii Lua scripts directly. It exposes only <code>grid_led</code> (0-15), not <code>grid_led_rgb</code> — making it the ideal tool to verify your monochrome fallback before deploying to hardware, without needing a second device.</p>
-<p>See <a href="../scripts/color_fallback_demo.lua">color_fallback_demo.lua</a> for a minimal, runnable example of this pattern.</p>
+<p>See <a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/colorfallback/color_fallback_demo.lua">color_fallback_demo.lua</a> for a minimal, runnable example of this pattern.</p>
 <p>Please don't bother monome or the lines forum with regards to these particular features.</p>
 
 

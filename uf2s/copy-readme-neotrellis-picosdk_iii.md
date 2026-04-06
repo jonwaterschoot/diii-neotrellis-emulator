@@ -6,7 +6,7 @@ This version is rewritten to use the Raspberry Pi Pico VS Code Extension and inc
 
 Install the Raspberry Pi Pico VS Code Extension from the Extensions tab in VSCode.  
 
-![alt text](PicoVSCodeExtn.png)
+![alt text](https://github.com/jonwaterschoot/diii-neotrellis-emulator/raw/main/uf2s/PicoVSCodeExtn.png)
 
 ### Configuration
 
@@ -139,7 +139,7 @@ This tint applies to `grid_led()` / `grid_led_all()` output, while `grid_led_rgb
 
 ```if grid_led_rgb then grid_led_rgb(x, y, 255, 0, 0) end```
 
-See [grid_led_rgb.md](grid_led_rgb.md) for full details, behavior notes, and examples.
+See [grid_led_rgb.md](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/uf2s/grid_led_rgb.md) for full details, behavior notes, and examples.
 
 ### Writing cross-device scripts — monochrome fallback
 
@@ -172,6 +172,6 @@ Then replace every direct `grid_led_rgb` / `grid_led` call in your draw code wit
 
 **Testing with viii**: [dessertplanet/viii](https://github.com/dessertplanet/viii) is a browser app that connects to a physical Monome-compatible grid over WebSerial and runs iii Lua scripts directly. It exposes only `grid_led` (0-15), not `grid_led_rgb` — making it the ideal tool to verify your monochrome fallback before deploying to hardware, without needing a second device.
 
-See [color_fallback_demo.lua](../scripts/color_fallback_demo.lua) for a minimal, runnable example of this pattern.
+See [color_fallback_demo.lua](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/colorfallback/color_fallback_demo.lua) for a minimal, runnable example of this pattern.
 
 Please don't bother monome or the lines forum with regards to these particular features.

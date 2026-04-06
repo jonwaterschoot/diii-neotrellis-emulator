@@ -121,4 +121,4 @@ Each fruit is toggled on/off via x=11–16, y=1 in Settings. Tapping a fruit tog
 
 ## Changelog
 
-See [CHANGELOG.md](temparchive/CHANGELOG.md) for version history.
+See [CHANGELOG.md](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/temparchive/CHANGELOG.md) for version history.
