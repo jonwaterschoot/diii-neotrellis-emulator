@@ -1,0 +1,10 @@
+{
+  "project_name": "sandman",
+  "project_url": "https://github.com/jonwaterschoot/diii-neotrellis-emulator",
+  "author": "jonwaterschoot",
+  "description": "A living portrait: falling sand, leaves and water that become music. Portrait orientation (8x16), 3 grain types, physics simulation, and step sequencer.",
+  "discussion_url": "https://llllllll.co/t/sandman",
+  "documentation_url": "https://raw.githubusercontent.com/jonwaterschoot/diii-neotrellis-emulator/main/scripts/sandman/README.md",
+  "tags": ["neotrellis", "sequencer", "generative", "ambient", "portrait"],
+  "lua_file": "sandman.lua"
+}

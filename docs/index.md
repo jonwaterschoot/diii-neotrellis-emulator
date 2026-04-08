@@ -42,6 +42,7 @@ This is a universal development tool that runs **real `.lua` scripts natively** 
 - [Building the Firmware](building-firmware.md)
 
 **Scripts**
+- [Sandman](sandman.md)
 - [Serpentine Sequencer](serpentine-sequencer.md)
 - [Multi-Screen Test](multi-screen-test.md)
 - [Serpentine Changelog](changelog.md)

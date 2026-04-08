@@ -248,16 +248,18 @@ export class MonomeAPI {
     this._reverbNode.buffer = impulse;
   }
 
-  midi_note_on(note, vel) {
+  midi_note_on(note, vel, ch = 1) {
     note = note & 0x7F;
     vel = vel & 0x7F;
-    if (this.midiOut) this.midiOut.send([0x90, note, vel]);
+    const status = 0x90 + ((ch - 1) & 0x0F);
+    if (this.midiOut) this.midiOut.send([status, note, vel]);
     this._synthOn(note, vel);
   }
 
-  midi_note_off(note) {
+  midi_note_off(note, ch = 1) {
     note = note & 0x7F;
-    if (this.midiOut) this.midiOut.send([0x80, note, 0]);
+    const status = 0x80 + ((ch - 1) & 0x0F);
+    if (this.midiOut) this.midiOut.send([status, note, 0]);
     this._synthOff(note);
   }
 

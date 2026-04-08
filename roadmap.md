@@ -14,6 +14,10 @@
 ### UI / UX Enhancements
 - [ ] Show an icon when key is on hold down. / current is a yellow border, and main serpentine grid has a yellow color, so not very visible.
 
+- [ ] A better structure in the scripts list sorted with divisions and sub-divisions. and maybe a search / filter bar. 
+- [ ] Allow other pixel dimensions than 16x8 (common sizes: 8*8, 16*16, but also custom sizes like 32*32, etc.)
+
+
 ### Documentation & Script UI Integration
 
 - [x] tasks done
