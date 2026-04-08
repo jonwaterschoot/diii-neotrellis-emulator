@@ -1,0 +1,10 @@
+{
+  "project_name": "my-script",
+  "project_url": "https://github.com/your-username/your-repo",
+  "author": "Your Name",
+  "description": "One-liner description shown in the script selector",
+  "discussion_url": "https://llllllll.co/t/your-thread/12345",
+  "documentation_url": "https://raw.githubusercontent.com/your-username/your-repo/main/README.md",
+  "tags": ["neotrellis", "sequencer"],
+  "lua_file": "myscript.lua"
+}

@@ -277,14 +277,14 @@ export class LuaLoader {
       api.grid_color_intensity(getInt(L2, 1)); return 0;
     });
 
-    // midi_note_on(note, vel)
+    // midi_note_on(note, vel, ch)
     setGlobal('midi_note_on', (L2) => {
-      api.midi_note_on(getInt(L2, 1), getInt(L2, 2)); return 0;
+      api.midi_note_on(getInt(L2, 1), getInt(L2, 2), getInt(L2, 3) || 1); return 0;
     });
 
-    // midi_note_off(note)
+    // midi_note_off(note, ch)
     setGlobal('midi_note_off', (L2) => {
-      api.midi_note_off(getInt(L2, 1)); return 0;
+      api.midi_note_off(getInt(L2, 1), getInt(L2, 2) || 1); return 0;
     });
 
     // midi_panic()

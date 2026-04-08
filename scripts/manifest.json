@@ -1,5 +1,14 @@
 [
   {
+    "name": "Sandman",
+    "file": "sandman/sandman.lua",
+    "readme": "sandman/README.md",
+    "description": "A living portrait: falling sand, leaves and water that become music. Portrait orientation, physics simulation, step sequencer.",
+    "author": "jonwaterschoot",
+    "version": "0.1.0",
+    "gridSize": [16, 8]
+  },
+  {
     "name": "Serpentine Dev",
     "file": "serpentineSeqr/serpentine_dev.lua",
     "readme": "serpentineSeqr/README.md",
