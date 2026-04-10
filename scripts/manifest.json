@@ -6,7 +6,8 @@
     "description": "A living portrait: falling sand, leaves and water that become music. Portrait orientation, physics simulation, step sequencer.",
     "author": "jonwaterschoot",
     "version": "0.1.0",
-    "gridSize": [16, 8]
+    "gridSize": [16, 8],
+    "orientation": "portrait"
   },
   {
     "name": "Serpentine Dev",

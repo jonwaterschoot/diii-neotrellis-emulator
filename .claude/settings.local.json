@@ -2,7 +2,22 @@
   "permissions": {
     "allow": [
       "Bash(python3 -)",
-      "Bash(python3 -c ':*)"
+      "Bash(python3 -c ':*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:codeberg.org)",
+      "Bash(gh api:*)",
+      "Bash(python minify.py \"fix monochrome floor: raise minimum brightness level from 2 to 4 — level 2 is physically invisible on NeoTrellis hardware via viii/mext; level 4 is confirmed visible \\(matches lowest master_bright step\\)\")",
+      "Bash(python minify.py \"strip SEM mode, collapse autopilot to 2-state toggle\")",
+      "Bash(ls -1 serpentine_v1-*.lua)",
+      "Bash(xargs wc:*)",
+      "Bash(python minify.py \"strip arp lifespan slider and dead arp_first_note variable\")",
+      "Bash(python minify.py \"H1-H4 humanize levels, fix BPM handover\")",
+      "Bash(python minify.py \"fix humanize display: force alt_disp_timer=0 so hum_flash shows reliably\")",
+      "WebFetch(domain:monome.org)",
+      "Bash(python minify.py)",
+      "Bash(python3 -c \"import sys,json; [print\\(f['name']\\) for f in json.load\\(sys.stdin\\)]\")"
     ]
   }
 }

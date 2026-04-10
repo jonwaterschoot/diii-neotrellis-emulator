@@ -23,6 +23,9 @@
 - [x] tasks done
 
 ### External Scripts
+
+- when loading external script aftyer import show it's repo link in hte docs section and above the readme, explaining that it was live pulled from that repo
+
 - [/] Allow other sources like Codeberg (prelink scripts from tehn at `https://codeberg.org/tehn/iii-scripts/src/branch/main/grid`).
   - [x] *Note: These do not adhere to our structure standard and license is unsure, so just link them and give due credit (e.g., subcategory "external scripts -tehn-").*
     - currently integrated by loading links in the preset list, but this is not ideal. Links are visble in the console, but thats not loading by default
