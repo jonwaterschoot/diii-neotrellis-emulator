@@ -1,6 +1,6 @@
 /**
- * monome-api.js
- * JS shim layer that maps the Monome/NeoTrellis hardware API to browser equivalents.
+ * grid-api.js
+ * JS shim layer that maps the NeoTrellis/iii firmware grid API to browser equivalents.
  * This module is injected into the Fengari Lua runtime as globals before script execution.
  *
  * API Contract (what a Lua script can call):

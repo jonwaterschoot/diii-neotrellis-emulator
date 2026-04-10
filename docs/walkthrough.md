@@ -30,7 +30,7 @@ emulator/
 │   ├── serpentine_dev.lua  ← Live dev copy (synced from parent folder)
 │   └── serpentine.lua      ← Stable reference copy
 └── engine/
-    ├── monome-api.js       ← Hardware shim layer
+    ├── grid-api.js       ← Hardware shim layer
     ├── lua-loader.js       ← Fengari execution bridge + hot-reload WS client
     └── doc-extractor.js    ← LDoc-style comment parser
 ```
@@ -87,7 +87,7 @@ All MonomeAPI functions are injected as C-closures that delegate to the JS
 > const { lua, lualib, lauxlib, to_luastring } = window.fengari;
 > ```
 
-### 3. Grid Rendering (`engine/monome-api.js`)
+### 3. Grid Rendering (`engine/grid-api.js`)
 
 | Lua call | JS result |
 |---|---|
@@ -219,7 +219,7 @@ using a triangle-wave oscillator with configurable volume, attack, and release
 
 ## Extending the Hardware Shim
 
-To add a new API function for a Lua script to call, edit `engine/monome-api.js`
+To add a new API function for a Lua script to call, edit `engine/grid-api.js`
 to add the JS-side implementation, then register it in `engine/lua-loader.js`
 using `setGlobal`:
 
@@ -233,7 +233,7 @@ setGlobal('my_new_fn', (L2) => {
 ```
 
 ```js
-// In monome-api.js:
+// In grid-api.js:
 my_new_fn(val) {
   // JS implementation
 }

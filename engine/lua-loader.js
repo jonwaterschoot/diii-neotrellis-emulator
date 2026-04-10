@@ -18,7 +18,7 @@ const extractor = new DocExtractor();
 export class LuaLoader {
   /**
    * @param {Object} opts
-   * @param {MonomeAPI} opts.api   – the monome-api instance
+   * @param {MonomeAPI} opts.api   – the grid-api instance
    * @param {Function} opts.onScriptLoad   – called after a script loads successfully: (name, docs)
    * @param {Function} opts.onScriptError  – called on runtime error: (errorMessage)
    * @param {Function} opts.onStatusChange – called with status text updates: (msg, level)
