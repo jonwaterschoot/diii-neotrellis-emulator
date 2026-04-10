@@ -41,6 +41,8 @@
       /* Grid scaling tokens */
       --pad-size: 32px;
       --pad-gap: 6px;
+      --grid-cols: 16;
+      --grid-rows: 8;
     }
 
     *,
@@ -174,6 +176,39 @@
       padding: 3px 8px;
       font-size: 11px;
     }
+
+    /* ── GRID PRESET DROPDOWN ────────────────────────────────────────── */
+    .grid-preset-wrap { position: relative; }
+    .grid-preset-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 4px;
+      min-width: 110px;
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      gap: 2px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .grid-preset-menu.open { display: flex; }
+    .grid-preset-menu button {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 5px 10px;
+      text-align: left;
+      cursor: pointer;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .grid-preset-menu button:hover { background: var(--surface); }
+    .grid-preset-menu button.active { color: var(--accent); }
 
     .file-pick-label {
       display: flex;
@@ -463,6 +498,18 @@
     .map-label:hover .map-lbl-desc,
     .map-label.hl .map-lbl-desc { color: var(--text); }
 
+    /* ── HIDDEN SCREENS HINT ────────────────────────────────────────────── */
+    .map-hidden-hint {
+      margin-top: 6px;
+      padding: 4px 8px;
+      font-size: 10px;
+      color: var(--muted);
+      opacity: 0.55;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      letter-spacing: 0.03em;
+    }
+
     /* ── GHOST GRID (Alt Screen View) ───────────────────────────────────── */
     .map-ghost-wrap {
       display: flex;
@@ -477,8 +524,8 @@
     .map-ghost-wrap:hover { opacity: 1; }
     .map-ghost-grid {
       display: grid;
-      grid-template-columns: repeat(16, var(--pad-size));
-      grid-template-rows: repeat(8, var(--pad-size));
+      grid-template-columns: repeat(var(--grid-cols), var(--pad-size));
+      grid-template-rows: repeat(var(--grid-rows), var(--pad-size));
       gap: var(--pad-gap);
     }
     .map-ghost-grid .pad { pointer-events: auto; }
@@ -722,6 +769,22 @@
     }
 
     /* ── GRID ───────────────────────────────────────────────────────── */
+    /* Row that holds the live grid (and ghost grid in dual view) */
+    .grids-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+    }
+    /* Side-by-side layout for narrow grids (8-wide) in dual view */
+    .grids-row.side-by-side {
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 20px;
+    }
+
     .grid-wrapper {
       display: flex;
       flex-direction: column;
@@ -754,8 +817,8 @@
 
     #grid-container {
       display: grid;
-      grid-template-columns: repeat(16, var(--pad-size));
-      grid-template-rows: repeat(8, var(--pad-size));
+      grid-template-columns: repeat(var(--grid-cols), var(--pad-size));
+      grid-template-rows: repeat(var(--grid-rows), var(--pad-size));
       gap: var(--pad-gap);
     }
 
@@ -1429,6 +1492,19 @@
         </div>
 
         <div class="script-row" style="gap: 8px;">
+          <label style="font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;">Grid</label>
+          <div class="grid-preset-wrap" id="grid-preset-wrap">
+            <button class="btn sm" id="btn-grid-preset" title="Select grid size preset">16 × 8 ▾</button>
+            <div class="grid-preset-menu" id="grid-preset-menu">
+              <button data-cols="8" data-rows="8">8 × 8</button>
+              <button data-cols="16" data-rows="8" class="active">16 × 8</button>
+              <button data-cols="8" data-rows="16">8 × 16</button>
+              <button data-cols="16" data-rows="16">16 × 16</button>
+            </div>
+          </div>
+          <button class="btn sm" id="btn-rotate" title="Rotate grid 90° clockwise">↻ 0°</button>
+        </div>
+        <div class="script-row" style="gap: 8px;">
           <label
             style="font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;">Zoom</label>
           <input type="range" id="zoom-slider" min="12" max="80" value="32" style="width: 70px;">
@@ -1605,12 +1681,15 @@
         }
       </style>
 
-      <!-- Grid -->
-      <div class="grid-wrapper">
-        <div class="grid-label" id="grid-label">16 × 8 Grid</div>
-        <div class="grid-panel">
-          <div id="grid-container"></div>
+      <!-- Grid row: holds live grid + ghost grid side by side when narrow -->
+      <div id="grids-row" class="grids-row">
+        <div class="grid-wrapper">
+          <div class="grid-label" id="grid-label">16 × 8 Grid</div>
+          <div class="grid-panel">
+            <div id="grid-container"></div>
+          </div>
         </div>
+        <!-- ghost grid inserted here dynamically by _buildGhostAndMinimap -->
       </div>
 
       <!-- State bar -->
@@ -1696,7 +1775,7 @@
   </footer>
 
   <script type="module">
-    import { MonomeAPI } from './engine/monome-api.js';
+    import { MonomeAPI } from './engine/grid-api.js';
     import { LuaLoader } from './engine/lua-loader.js';
     import { LuaMinifier } from './engine/lua-minifier.js';
     import { ScriptImporter } from './engine/script-importer.js';
@@ -1719,36 +1798,87 @@
     ];
 
     // ─── GRID DOM ──────────────────────────────────────────────────────────────
-    const COLS = 16, ROWS = 8;
-    const gridContainer = document.getElementById('grid-container');
-    const pads = [];  // flat array [row * COLS + col], 0-indexed
+    let COLS = 16, ROWS = 8;
+    let gridRotation = 0;  // 0=0°, 1=90°CW, 2=180°, 3=270°CW
+    let _logicalToVisualIdx = [];  // frame[logicalIdx] → pads[visualIdx]
+    let _visualToLogicalIdx = [];  // pads[visualIdx] → frame[logicalIdx]
 
-    for (let y = 1; y <= ROWS; y++) {
-      for (let x = 1; x <= COLS; x++) {
-        const pad = document.createElement('div');
-        pad.className = 'pad';
-        pad.id = `pad-${x}-${y}`;
-        pad.addEventListener('mousedown', e => {
-          if (e.button === 2 || pad.classList.contains('locked')) return; // right-click handled by contextmenu; locked pad ignores new presses
-          loader.api.setFocusedScreen(_showGhostGrid ? 'live' : _singleViewScreen);
-          loader.api.handlePadEvent(x, y, 1);
-        });
-        pad.addEventListener('mouseup', e => {
-          if (e.button === 2 || pad.classList.contains('locked')) return; // right-click handled by contextmenu
-          loader.api.setFocusedScreen(_showGhostGrid ? 'live' : _singleViewScreen);
-          loader.api.handlePadEvent(x, y, 0);
-        });
-        pad.addEventListener('contextmenu', e => {
-          e.preventDefault();
-          const locked = pad.classList.toggle('locked');
-          loader.api.setFocusedScreen(_showGhostGrid ? 'live' : _singleViewScreen);
-          // contextmenu is the sole sender of press/release for right-click holds
-          loader.api.handlePadEvent(x, y, locked ? 1 : 0);
-        });
-        gridContainer.appendChild(pad);
-        pads.push(pad);
+    const gridContainer = document.getElementById('grid-container');
+    const pads = [];  // flat array in visual order (row-major in rotated display)
+
+    // Visual columns/rows — swap at 90° / 270°
+    function vCOLS() { return gridRotation % 2 === 0 ? COLS : ROWS; }
+    function vROWS() { return gridRotation % 2 === 0 ? ROWS : COLS; }
+
+    // Map visual position (1-indexed) → logical Lua coords (1-indexed)
+    function toLogical(vx, vy) {
+      if (gridRotation === 0) return [vx, vy];
+      if (gridRotation === 1) return [vy, ROWS - vx + 1];             // 90° CW
+      if (gridRotation === 2) return [COLS - vx + 1, ROWS - vy + 1]; // 180°
+      return [COLS - vy + 1, vx];                                      // 270° CW
+    }
+
+    // Build logical-index → visual-index lookup (and its inverse)
+    function buildIndexLookups() {
+      const vc = vCOLS(), vr = vROWS();
+      const l2v = new Array(COLS * ROWS).fill(-1);
+      const v2l = new Array(COLS * ROWS).fill(-1);
+      for (let vy = 1; vy <= vr; vy++) {
+        for (let vx = 1; vx <= vc; vx++) {
+          const [lx, ly] = toLogical(vx, vy);
+          const visIdx = (vy - 1) * vc + (vx - 1);
+          const logIdx = (ly - 1) * COLS + (lx - 1);
+          l2v[logIdx] = visIdx;
+          v2l[visIdx] = logIdx;
+        }
+      }
+      return [l2v, v2l];
+    }
+
+    // Update CSS grid template to match current visual dimensions
+    function applyGridCss() {
+      const vc = vCOLS(), vr = vROWS();
+      document.documentElement.style.setProperty('--grid-cols', vc);
+      document.documentElement.style.setProperty('--grid-rows', vr);
+    }
+
+    // (Re)build main-grid pad elements for current COLS/ROWS/gridRotation
+    function rebuildGrid() {
+      gridContainer.innerHTML = '';
+      pads.length = 0;
+      [_logicalToVisualIdx, _visualToLogicalIdx] = buildIndexLookups();
+      applyGridCss();
+
+      const vc = vCOLS(), vr = vROWS();
+      for (let vy = 1; vy <= vr; vy++) {
+        for (let vx = 1; vx <= vc; vx++) {
+          const [x, y] = toLogical(vx, vy);
+          const pad = document.createElement('div');
+          pad.className = 'pad';
+          pad.id = `pad-${x}-${y}`;
+          pad.addEventListener('mousedown', e => {
+            if (e.button === 2 || pad.classList.contains('locked')) return;
+            loader.api.setFocusedScreen(_showGhostGrid ? 'live' : _singleViewScreen);
+            loader.api.handlePadEvent(x, y, 1);
+          });
+          pad.addEventListener('mouseup', e => {
+            if (e.button === 2 || pad.classList.contains('locked')) return;
+            loader.api.setFocusedScreen(_showGhostGrid ? 'live' : _singleViewScreen);
+            loader.api.handlePadEvent(x, y, 0);
+          });
+          pad.addEventListener('contextmenu', e => {
+            e.preventDefault();
+            const locked = pad.classList.toggle('locked');
+            loader.api.setFocusedScreen(_showGhostGrid ? 'live' : _singleViewScreen);
+            loader.api.handlePadEvent(x, y, locked ? 1 : 0);
+          });
+          gridContainer.appendChild(pad);
+          pads.push(pad);
+        }
       }
     }
+
+    rebuildGrid();
 
     // ─── STATUS ────────────────────────────────────────────────────────────────
     const statusDot = document.getElementById('status-dot');
@@ -1792,6 +1922,7 @@
     const api = new MonomeAPI({
       cols: COLS,
       rows: ROWS,
+      onOutOfBounds: () => { showOutOfBoundsWarning(); },
       onLedUpdate: (frame, cols, rows, screenName = 'live') => {
         // Route to the appropriate pad array based on which screen just refreshed.
         // Dual-view: live → main pads, alt → ghost pads.
@@ -1808,7 +1939,8 @@
 
         for (let i = 0; i < frame.length; i++) {
           let { r, g, b } = frame[i];
-          const pad = padEls[i];
+          const visualIdx = _logicalToVisualIdx[i] ?? i;
+          const pad = padEls[visualIdx];
           if (!pad) continue;
           if (r === 0 && g === 0 && b === 0) {
             pad.style.background = 'var(--pad-empty)';
@@ -1851,6 +1983,7 @@
             strip.querySelectorAll('.minimap-tile').forEach(t =>
               t.classList.toggle('active', t.dataset.screen === name));
           }
+          if (_mapMode) requestAnimationFrame(_buildMap);
           api.grid_refresh();
         } else if (name !== 'live') {
           // Dual-view: switch ghost grid to the requested alt screen if needed.
@@ -2008,7 +2141,24 @@
       onStatusChange: setStatus,
       onScriptLoad: (name, docs) => {
         document.getElementById('topbar-script-label').textContent = name;
-        document.getElementById('grid-label').textContent = `1 · ${COLS} × ${ROWS} · ${name}`;
+
+        // Apply @orientation annotation from Lua source for non-manifest scripts
+        // (manifest scripts have orientation applied before load in loadBundledScript)
+        if (_customScriptActive || !_manifestMap.has(name)) {
+          const annotOrientation = _parseOrientationAnnotation(loader.currentSource);
+          if (annotOrientation) {
+            const annotRot = _orientationToRotation(annotOrientation, COLS, ROWS);
+            if (annotRot !== gridRotation) {
+              gridRotation = annotRot;
+              rebuildGrid();
+              _syncGridPresetUI();
+              fitToWindow();
+              setStatus(`Grid rotated to ${annotRot * 90}° from @orientation annotation`, 'info');
+            }
+          }
+        }
+
+        updateGridLabel(name);
         renderDocs(docs);
         renderState(docs);
         renderHints(docs);
@@ -2082,6 +2232,16 @@
     async function loadBundledScript(file) {
       _customScriptActive = false;
       const entry = _manifestMap.get(file);
+      // Auto-apply grid size and orientation from manifest
+      if (Array.isArray(entry?.gridSize) && entry.gridSize.length === 2) {
+        const [mCols, mRows] = entry.gridSize;
+        const mRot = _orientationToRotation(entry.orientation, mCols, mRows);
+        if (mCols !== COLS || mRows !== ROWS || mRot !== gridRotation) {
+          applyGridPreset(mCols, mRows, true, mRot); // skipReload — script not loaded yet
+          const rotStr = mRot ? ` · ${mRot * 90}°` : '';
+          setStatus(`Grid set to ${mCols}×${mRows}${rotStr} from script manifest`, 'info');
+        }
+      }
       if (entry?.readme) {
         try {
           const res = await fetch(`${BASE_URL}/scripts/${entry.readme}`);
@@ -2563,6 +2723,12 @@
         // Load as if it came from a file (no server path — use source directly)
         loader._currentScriptName = result.name;
         await loader._execute(result.source, result.name);
+        // If the script errored, onScriptLoad never fired so renderReadme was never called.
+        // _pendingReadme is consumed (set to null) by onScriptLoad on success.
+        if (_pendingReadme !== null) {
+          renderReadme(_pendingReadme);
+          _pendingReadme = null;
+        }
         // Activate Guide tab automatically if README was found
         if (result.readme) {
           document.querySelectorAll('.side-tab').forEach(t => t.classList.remove('active'));
@@ -2634,9 +2800,8 @@
     });
 
     function updateGridScale(size) {
-      const maxPossible = getMaxFitSize();
-      const finalSize = Math.min(size, maxPossible);
-
+      // Apply directly — slider max controls the ceiling; manual zoom is allowed to exceed auto-fit
+      const finalSize = Math.max(6, size);
       document.documentElement.style.setProperty('--pad-size', `${finalSize}px`);
       const gap = finalSize * 0.4;
       document.documentElement.style.setProperty('--pad-gap', `${gap}px`);
@@ -2649,55 +2814,167 @@
       const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
       const winW = window.innerWidth * (isFS ? 0.98 : 0.96);
-      
+
       const dualActive = _showGhostGrid && _ghostPadEls.length > 0;
-      
-      // Reduce vertical deadspace for mobile/fullscreen. Demand more padding vertically in dual mode!
-      const deadH = isFS ? 20 : (isMobile ? 100 : (dualActive ? 220 : 160));
+      const vc = vCOLS(), vr = vROWS();
+      // Side-by-side layout: dual view active and grid is narrow (≤8 cols)
+      const isSideBySide = dualActive && vc <= 8;
+
+      // Vertical deadspace: side-by-side needs no extra (only one grid tall)
+      const deadH = isFS ? 20 : (isMobile ? 100 : (dualActive && !isSideBySide ? 220 : 160));
       const winH = (window.innerHeight - deadH) * (isFS ? 0.98 : 0.96);
 
       const availW = isFS ? winW : Math.min(pane.clientWidth - 10, winW);
 
-      // Account for minimap fixed height (~52px) and ghost grid when dual view is on
-      const minimapH = 52; // approximate fixed pixel height of minimap strip
-      
-      // One grid: ROWS*P + (ROWS-1)*0.4P ≈ 10.8P; add 1P padding → ~11.8
-      // Two grids stacked with gap between: ~11.8*2 + 1 ≈ 24.6; add labels/wrap ≈ 26
-      const singleRowFactor = 12.8;
-      const dualRowFactor   = 32; // Make height constraints much steeper to ensure both grids fit
-      const fixedH = dualActive ? minimapH : 0;
-
+      // Minimap strip height (only relevant for stacked dual view)
+      const minimapH = 52;
+      const fixedH = (dualActive && !isSideBySide) ? minimapH : 0;
       const availH = (isFS ? winH : Math.min(pane.clientHeight - 10, winH)) - fixedH;
-      const scaleW = availW / (dualActive ? 22 : 24);
-      const scaleH = availH / (dualActive ? dualRowFactor : singleRowFactor);
-      
-      // Strict rule: fit vertical height first and foremost, then width
+
+      // Each pad occupies 1P + 0.4P gap; panel padding adds ~1.6P per grid
+      const singleRowFactor = vr * 1.4 + 1.6;
+      const dualRowFactor   = singleRowFactor * 2 + 6.4;
+
+      let scaleW, scaleH;
+      if (isSideBySide) {
+        // Two grids sit side by side — constrained by total horizontal width
+        scaleW = availW / (vc * 2.8 + 3.7);
+        scaleH = availH / singleRowFactor;
+      } else {
+        scaleW = availW / (vc * 1.4 + (dualActive ? 2.6 : 1.6));
+        scaleH = availH / (dualActive ? dualRowFactor : singleRowFactor);
+      }
+
       return Math.min(scaleH, scaleW);
     }
 
     function updateSliderLimits() {
-      const maxFit = getMaxFitSize();
-      // Set the max attribute so the slider always has full precision
-      zoomSlider.max = maxFit;
-      zoomSliderFs.max = maxFit;
-      // Also sync current value to ensure it's still clamped
-      updateGridScale(parseFloat(zoomSlider.value));
+      // Fixed ceiling — slider goes up to 120px regardless of auto-fit value.
+      // Manual zoom is intentionally allowed to exceed the viewport fit limit.
+      zoomSlider.max = 120;
+      zoomSliderFs.max = 120;
+      // Only auto-downscale when the user hasn't manually set zoom
+      if (!isManualZoom) {
+        const maxFit = getMaxFitSize();
+        updateGridScale(Math.min(parseFloat(zoomSlider.value), maxFit));
+      }
     }
 
     function fitToWindow() {
       const maxFit = getMaxFitSize();
       const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
       const reasonableMax = isMobile ? 120 : 64;
-      const targetSize = Math.floor(Math.min(maxFit, reasonableMax));
-
-      updateSliderLimits();
-      updateGridScale(Math.max(6, targetSize));
+      const targetSize = Math.max(6, Math.floor(Math.min(maxFit, reasonableMax)));
+      updateGridScale(targetSize);
+      syncSliders(targetSize);
       isManualZoom = false;
     }
 
     btnFit.addEventListener('click', fitToWindow);
     btnFitFs.addEventListener('click', fitToWindow);
+
+    // ─── GRID SIZE / ROTATION ──────────────────────────────────────────────────
+
+    let _outOfBoundsModalShown = false;
+
+    function showOutOfBoundsWarning() {
+      if (_outOfBoundsModalShown) return;
+      _outOfBoundsModalShown = true;
+      document.getElementById('oob-grid-size').textContent = `${COLS} × ${ROWS} grid`;
+      document.getElementById('oob-modal').classList.add('active');
+    }
+
+    function updateGridLabel(scriptName) {
+      const vc = vCOLS(), vr = vROWS();
+      const rotSuffix = gridRotation > 0 ? ` · ${gridRotation * 90}°` : '';
+      const el = document.getElementById('grid-label');
+      if (scriptName) {
+        el.textContent = `1 · ${vc} × ${vr}${rotSuffix} · ${scriptName}`;
+      } else {
+        el.textContent = `${vc} × ${vr} Grid${rotSuffix}`;
+      }
+    }
+
+    function _syncGridPresetUI() {
+      const vc = vCOLS(), vr = vROWS();
+      document.getElementById('btn-grid-preset').textContent = `${vc} × ${vr} ▾`;
+      document.getElementById('btn-rotate').textContent = `↻ ${gridRotation * 90}°`;
+      document.querySelectorAll('#grid-preset-menu button').forEach(btn => {
+        btn.classList.toggle('active',
+          parseInt(btn.dataset.cols) === COLS && parseInt(btn.dataset.rows) === ROWS);
+      });
+    }
+
+    /**
+     * Convert a semantic orientation string to a rotation index (0-3).
+     * NeoTrellis/Monome portrait convention = 90° CCW (USB cable at top),
+     * which is rotation index 3 (270° CW). This puts x=COLS at the visual top.
+     *
+     * "portrait"  on a landscape grid (cols > rows) → 3 (90° CCW)
+     * "portrait"  on an already-portrait grid        → 0 (already tall, no rotate)
+     * "landscape" or undefined                        → 0
+     */
+    function _orientationToRotation(orientation, cols, rows) {
+      if (orientation === 'portrait') {
+        return cols > rows ? 3 : 0;
+      }
+      return 0;
+    }
+
+    /**
+     * Scan the first 30 lines of Lua source for an @orientation annotation.
+     * Returns the orientation string (e.g. "portrait") or null.
+     * Usage in Lua:  -- @orientation portrait
+     * "portrait" = 90° CCW (USB at top), x=COLS at visual top of portrait display.
+     */
+    function _parseOrientationAnnotation(source) {
+      if (!source) return null;
+      const lines = source.split('\n').slice(0, 30);
+      for (const line of lines) {
+        const m = line.match(/--\s*@orientation\s+(\w+)/);
+        if (m) return m[1].toLowerCase();
+      }
+      return null;
+    }
+
+    function applyGridPreset(cols, rows, skipReload = false, targetRotation = 0) {
+      COLS = cols;
+      ROWS = rows;
+      gridRotation = targetRotation;
+      _outOfBoundsModalShown = false;
+      // Update API dimensions and reset buffers
+      api.cols = cols;
+      api.rows = rows;
+      api.reset();
+      // Rebuild grid DOM + ghost + minimap
+      rebuildGrid();
+      _buildGhostAndMinimap();
+      if (_mapMode) requestAnimationFrame(_buildMap);
+      _syncGridPresetUI();
+      updateGridLabel(loader?.currentScriptName || null);
+      fitToWindow();
+      // Auto-reload active script so it sees the new grid_size_x/y values
+      if (!skipReload && loader?.currentScriptName) loader.reload(BASE_URL);
+    }
+
+    function rotateGrid() {
+      gridRotation = (gridRotation + 1) % 4;
+      _outOfBoundsModalShown = false;
+      rebuildGrid();
+      _buildGhostAndMinimap();
+      if (_mapMode) requestAnimationFrame(_buildMap);
+      _syncGridPresetUI();
+      updateGridLabel(loader?.currentScriptName || null);
+      fitToWindow();
+    }
+
+    // Toggle .side-by-side on #grids-row when dual view is active and grid is narrow (≤8 cols)
+    function _syncSideBySide() {
+      const row = document.getElementById('grids-row');
+      if (!row) return;
+      const dualActive = _showGhostGrid && _ghostPadEls.length > 0;
+      row.classList.toggle('side-by-side', dualActive && vCOLS() <= 8);
+    }
 
     const btnDualView = document.getElementById('btn-dual-view');
     btnDualView.classList.toggle('active', _showGhostGrid);
@@ -2756,15 +3033,11 @@
     // ... (rest of keyboard/orientation code)
 
     window.addEventListener('resize', () => {
-      handleOrientation();
-      updateSliderLimits(); // Ensure precision matches new window size
-
-      // Responsively downscale if current size exceeds new window bounds
-      const currentSize = parseFloat(zoomSlider.value);
-      const maxNow = getMaxFitSize();
-      if (currentSize > maxNow || !isManualZoom) {
-        updateGridScale(Math.min(currentSize, maxNow));
+      if (!isManualZoom) {
+        // Auto-fit: recompute fit size for the new window dimensions
+        fitToWindow();
       }
+      // When manually zoomed, keep current size — user can scroll if needed
     });
     window.addEventListener('orientationchange', handleOrientation);
 
@@ -2914,29 +3187,14 @@
       api.grid_refresh();
 
       // ── Ghost grid ────────────────────────────────────────────────────────────
-      if (altScreens.length === 0 || !_showGhostGrid) return;
+      if (altScreens.length === 0 || !_showGhostGrid) {
+        _syncSideBySide();
+        return;
+      }
 
-      const emulatorPane = document.querySelector('.emulator-pane');
       const ghostWrap = document.createElement('div');
       ghostWrap.id = 'map-ghost-wrap';
       ghostWrap.className = 'map-ghost-wrap';
-
-      if (altScreens.length > 1) {
-        const tabRow = document.createElement('div');
-        tabRow.className = 'map-ghost-tabs';
-        altScreens.forEach(screenName => {
-          const btn = document.createElement('button');
-          btn.className = 'map-ghost-tab' + (screenName === _activeGhostScreen ? ' active' : '');
-          btn.textContent = screenName;
-          btn.addEventListener('click', () => {
-            _activeGhostScreen = screenName;
-            _buildGhostAndMinimap();
-            if (_mapMode) requestAnimationFrame(_buildMap);
-          });
-          tabRow.appendChild(btn);
-        });
-        ghostWrap.appendChild(tabRow);
-      }
 
       const ghostLbl = document.createElement('div');
       ghostLbl.className = 'grid-label';
@@ -2949,10 +3207,15 @@
       const ghostGridEl = document.createElement('div');
       ghostGridEl.id = 'map-ghost-grid';
       ghostGridEl.className = 'map-ghost-grid';
-      for (let gy = 1; gy <= ROWS; gy++) {
-        for (let gx = 1; gx <= COLS; gx++) {
+      // Build ghost pads in visual order (same rotation as main grid)
+      const gvc = vCOLS(), gvr = vROWS();
+      for (let gvy = 1; gvy <= gvr; gvy++) {
+        for (let gvx = 1; gvx <= gvc; gvx++) {
+          const [glx, gly] = toLogical(gvx, gvy);
           const p = document.createElement('div');
           p.className = 'pad';
+          p.dataset.lx = glx;
+          p.dataset.ly = gly;
           ghostGridEl.appendChild(p);
         }
       }
@@ -2960,30 +3223,29 @@
       ghostGridEl.addEventListener('mousedown', e => {
         const pad = e.target.closest('.pad');
         if (!pad) return;
-        const idx = Array.from(ghostGridEl.children).indexOf(pad);
-        if (idx < 0) return;
-        const gx = (idx % COLS) + 1;
-        const gy = Math.floor(idx / COLS) + 1;
+        const gx = parseInt(pad.dataset.lx);
+        const gy = parseInt(pad.dataset.ly);
+        if (!gx || !gy) return;
         loader.api.setFocusedScreen(_activeGhostScreen || 'settings');
         loader.api.handlePadEvent(gx, gy, 1);
       });
       ghostGridEl.addEventListener('mouseup', e => {
         const pad = e.target.closest('.pad');
         if (!pad) return;
-        const idx = Array.from(ghostGridEl.children).indexOf(pad);
-        if (idx < 0) return;
-        const gx = (idx % COLS) + 1;
-        const gy = Math.floor(idx / COLS) + 1;
+        const gx = parseInt(pad.dataset.lx);
+        const gy = parseInt(pad.dataset.ly);
+        if (!gx || !gy) return;
         loader.api.setFocusedScreen(_activeGhostScreen || 'settings');
         loader.api.handlePadEvent(gx, gy, 0);
       });
       ghostPanel.appendChild(ghostGridEl);
       ghostWrap.appendChild(ghostLbl);
       ghostWrap.appendChild(ghostPanel);
-      // Insert before minimap-strip so order is: live grid → ghost grid → minimap
-      const minimapStrip = document.getElementById('minimap-strip');
-      emulatorPane.insertBefore(ghostWrap, minimapStrip);
+      // Insert into #grids-row so side-by-side layout works for narrow grids
+      const gridsRow = document.getElementById('grids-row');
+      gridsRow.appendChild(ghostWrap);
       _ghostPadEls = [...ghostGridEl.querySelectorAll('.pad')];
+      _syncSideBySide();
       // Flush buffers now that ghost pad elements exist so the ghost grid is
       // immediately populated (not blank until the next script-driven grid_refresh).
       api.grid_refresh();
@@ -3108,21 +3370,36 @@
         const livePadEls = [...document.querySelectorAll('#grid-container .pad')];
 
         function getPad(x, y, isGhost) {
-          const idx = (y - 1) * COLS + (x - 1);
-          return (isGhost ? ghostPadEls : livePadEls)[idx] || null;
+          const logIdx = (y - 1) * COLS + (x - 1);
+          const visIdx = _logicalToVisualIdx[logIdx] ?? -1;
+          if (visIdx < 0) return null;
+          return (isGhost ? ghostPadEls : livePadEls)[visIdx] || null;
         }
 
         function getFrameRect(loc, isGhost) {
-          const tl = getPad(loc.xMin, loc.yMin, isGhost);
-          const br = getPad(loc.xMax, loc.yMax, isGhost);
-          if (!tl || !br) return null;
-          const tlR = tl.getBoundingClientRect();
-          const brR = br.getBoundingClientRect();
+          // Sample all four logical corners: after rotation they may land anywhere
+          // visually, so we take the min/max bounding box rather than assuming
+          // (xMin,yMin) is top-left and (xMax,yMax) is bottom-right.
+          const corners = [
+            getPad(loc.xMin, loc.yMin, isGhost),
+            getPad(loc.xMin, loc.yMax, isGhost),
+            getPad(loc.xMax, loc.yMin, isGhost),
+            getPad(loc.xMax, loc.yMax, isGhost),
+          ].filter(Boolean);
+          if (!corners.length) return null;
+          let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
+          corners.forEach(pad => {
+            const r = pad.getBoundingClientRect();
+            if (r.left   < left)   left   = r.left;
+            if (r.top    < top)    top    = r.top;
+            if (r.right  > right)  right  = r.right;
+            if (r.bottom > bottom) bottom = r.bottom;
+          });
           return {
-            left:   tlR.left   - mainRect.left - 4,
-            top:    tlR.top    - mainRect.top  - 4,
-            right:  brR.right  - mainRect.left + 4,
-            bottom: brR.bottom - mainRect.top  + 4,
+            left:   left   - mainRect.left - 4,
+            top:    top    - mainRect.top  - 4,
+            right:  right  - mainRect.left + 4,
+            bottom: bottom - mainRect.top  + 4,
           };
         }
 
@@ -3158,12 +3435,51 @@
         });
 
         // ── One label card per map group ──────────────────────────────────────
+        // In single-view the "main" screen is whatever _singleViewScreen is;
+        // in dual-view it is always 'live' (alt screen goes to the ghost grid).
+        const mainScreen = _showGhostGrid ? 'live' : _singleViewScreen;
+
+        // Count how many groups belong to a screen other than the one being shown,
+        // so we can show a hint at the bottom of the column.
+        const hiddenScreens = new Set();
+
         _mapGroups.forEach(group => {
           const groupScreen = _getGroupScreen(group);
-          if (groupScreen !== 'live' && (!_showGhostGrid || groupScreen !== _activeGhostScreen)) return;
-          const isGhost = groupScreen !== 'live';
-          const avgX = group.controls.reduce((s, c) => s + (c.loc.xMin + c.loc.xMax) / 2, 0) / group.controls.length;
-          const side = avgX <= 8.5 ? 'left' : 'right';
+          if (groupScreen !== mainScreen && (!_showGhostGrid || groupScreen !== _activeGhostScreen)) {
+            if (!_showGhostGrid) hiddenScreens.add(groupScreen);
+            return;
+          }
+          // isGhost: true only in dual-view when the group belongs to the ghost grid
+          const isGhost = _showGhostGrid && groupScreen !== mainScreen;
+          // Convert each control's logical centre to visual X *and* Y, accounting for
+          // rotation, so the label card always appears on the side where the controls sit.
+          let sumVisX = 0, sumVisY = 0;
+          group.controls.forEach(c => {
+            const lcx = (c.loc.xMin + c.loc.xMax) / 2;
+            const lcy = (c.loc.yMin + c.loc.yMax) / 2;
+            let vx, vy;
+            if      (gridRotation === 0) { vx = lcx;            vy = lcy; }
+            else if (gridRotation === 1) { vx = ROWS - lcy + 1; vy = lcx; }            // 90° CW
+            else if (gridRotation === 2) { vx = COLS - lcx + 1; vy = ROWS - lcy + 1; } // 180°
+            else                         { vx = lcy;             vy = COLS - lcx + 1; } // 270° CW
+            sumVisX += vx; sumVisY += vy;
+          });
+          const avgVisX = sumVisX / group.controls.length;
+          const avgVisY = sumVisY / group.controls.length;
+
+          const xMid = vCOLS() / 2 + 0.5;
+          let side;
+          if (Math.abs(avgVisX - xMid) >= 0.25 || (gridRotation !== 1 && gridRotation !== 3)) {
+            // Clear horizontal bias, or landscape rotation: decide by visual X (ties → left)
+            side = avgVisX <= xMid ? 'left' : 'right';
+          } else {
+            // Portrait with horizontally-centred controls: use visual Y as tiebreaker.
+            // 270° CW (90° CCW): high logical-X → top of portrait (low visY) → right panel.
+            // 90° CW:            high logical-X → bottom of portrait (high visY) → right panel.
+            const yMid = vROWS() / 2 + 0.5;
+            if (gridRotation === 3) side = avgVisY <= yMid ? 'right' : 'left';
+            else                    side = avgVisY >  yMid ? 'right' : 'left';
+          }
           const col  = side === 'left' ? leftCol : rightCol;
 
           // ── Label card ────────────────────────────────────────────────────
@@ -3276,6 +3592,16 @@
           });
         });
 
+        // ── Hidden-screens hint (single-view only) ────────────────────────────
+        if (!_showGhostGrid && hiddenScreens.size > 0) {
+          const hint = document.createElement('div');
+          hint.className = 'map-hidden-hint';
+          hint.textContent = `+ ${[...hiddenScreens].join(', ')}`;
+          hint.title = `Controls on other screens: ${[...hiddenScreens].join(', ')}`;
+          // Attach to whichever col already has content, or left if both empty
+          (leftCol.children.length >= rightCol.children.length ? rightCol : leftCol).appendChild(hint);
+        }
+
         // ── Cross-screen wires + ghost frames for live controls on alt screens ─
         if (_showGhostGrid && ghostPadEls.length > 0) {
           const livePositions = _docPosByScreen['live'] || new Set();
@@ -3368,14 +3694,16 @@
       function handleOver(e, prefix) {
         const pad = e.target.closest('.pad');
         if (!pad) return;
-        const idx = Array.from(pad.parentElement.children).indexOf(pad);
-        _padGroupMap.get(`${prefix}:${idx}`)?.hl();
+        const visIdx = Array.from(pad.parentElement.children).indexOf(pad);
+        const logIdx = _visualToLogicalIdx[visIdx] ?? visIdx;
+        _padGroupMap.get(`${prefix}:${logIdx}`)?.hl();
       }
       function handleOut(e, prefix) {
         const pad = e.target.closest('.pad');
         if (!pad) return;
-        const idx = Array.from(pad.parentElement.children).indexOf(pad);
-        _padGroupMap.get(`${prefix}:${idx}`)?.uhl();
+        const visIdx = Array.from(pad.parentElement.children).indexOf(pad);
+        const logIdx = _visualToLogicalIdx[visIdx] ?? visIdx;
+        _padGroupMap.get(`${prefix}:${logIdx}`)?.uhl();
       }
       const liveGrid = document.getElementById('grid-container');
       liveGrid.addEventListener('mouseover',  e => handleOver(e, 'l'));
@@ -3391,6 +3719,39 @@
         handleOut(e, 'g');
       });
     })();
+
+    // ─── GRID PRESET DROPDOWN ──────────────────────────────────────────────────
+    const btnGridPreset = document.getElementById('btn-grid-preset');
+    const gridPresetMenu = document.getElementById('grid-preset-menu');
+
+    btnGridPreset.addEventListener('click', e => {
+      e.stopPropagation();
+      gridPresetMenu.classList.toggle('open');
+    });
+
+    gridPresetMenu.addEventListener('click', e => {
+      const btn = e.target.closest('button[data-cols]');
+      if (!btn) return;
+      gridPresetMenu.classList.remove('open');
+      const cols = parseInt(btn.dataset.cols);
+      const rows = parseInt(btn.dataset.rows);
+      if (cols !== COLS || rows !== ROWS) applyGridPreset(cols, rows);
+    });
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#grid-preset-wrap')) gridPresetMenu.classList.remove('open');
+    });
+
+    document.getElementById('btn-rotate').addEventListener('click', rotateGrid);
+
+    // ─── OUT-OF-BOUNDS MODAL ───────────────────────────────────────────────────
+    const oobModal = document.getElementById('oob-modal');
+    document.getElementById('btn-close-oob').addEventListener('click', () => {
+      oobModal.classList.remove('active');
+    });
+    oobModal.addEventListener('click', e => {
+      if (e.target === oobModal) oobModal.classList.remove('active');
+    });
 
     document.getElementById('map-toggle').addEventListener('change', e => {
       _mapMode = e.target.checked;
@@ -3486,6 +3847,20 @@
       color: var(--text);
     }
   </style>
+
+  <!-- Out-of-bounds grid warning modal -->
+  <div id="oob-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width:420px;">
+      <div class="modal-header">
+        <h2 style="font-size:14px;">Script exceeds grid boundaries</h2>
+        <button class="btn sm" id="btn-close-oob">✕</button>
+      </div>
+      <div class="modal-body" style="font-size:13px; line-height:1.6;">
+        <p>The loaded script is writing to pad coordinates outside the current <strong id="oob-grid-size">grid</strong>.</p>
+        <p style="margin-top:10px; color:var(--muted);">Those pads are silently ignored. Use the <strong>Grid</strong> selector in the toolbar to switch to a larger preset, or check if the script declares a <code>gridSize</code> in its manifest.</p>
+      </div>
+    </div>
+  </div>
 
   <div id="about-modal" class="modal-overlay">
     <div class="modal-container">

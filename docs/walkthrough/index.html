@@ -718,10 +718,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-grid-rendering-enginemonome-apijs" class="md-nav__link">
+  <a href="#3-grid-rendering-enginegrid-apijs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Grid Rendering (engine/monome-api.js)
+        3. Grid Rendering (engine/grid-api.js)
       
     </span>
   </a>
@@ -1152,7 +1152,7 @@ from LDoc comments</p>
 <span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">serpentine_dev</span><span class="o">.</span><span class="n">lua</span><span class="w">  </span><span class="err">←</span><span class="w"> </span><span class="n">Live</span><span class="w"> </span><span class="n">dev</span><span class="w"> </span><span class="n">copy</span><span class="w"> </span><span class="p">(</span><span class="n">synced</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">parent</span><span class="w"> </span><span class="n">folder</span><span class="p">)</span>
 <span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">serpentine</span><span class="o">.</span><span class="n">lua</span><span class="w">      </span><span class="err">←</span><span class="w"> </span><span class="n">Stable</span><span class="w"> </span><span class="n">reference</span><span class="w"> </span><span class="n">copy</span>
 <span class="err">└──</span><span class="w"> </span><span class="n">engine</span><span class="o">/</span>
-<span class="w">    </span><span class="err">├──</span><span class="w"> </span><span class="n">monome</span><span class="o">-</span><span class="n">api</span><span class="o">.</span><span class="n">js</span><span class="w">       </span><span class="err">←</span><span class="w"> </span><span class="n">Hardware</span><span class="w"> </span><span class="n">shim</span><span class="w"> </span><span class="n">layer</span>
+<span class="w">    </span><span class="err">├──</span><span class="w"> </span><span class="n">grid</span><span class="o">-</span><span class="n">api</span><span class="o">.</span><span class="n">js</span><span class="w">       </span><span class="err">←</span><span class="w"> </span><span class="n">Hardware</span><span class="w"> </span><span class="n">shim</span><span class="w"> </span><span class="n">layer</span>
 <span class="w">    </span><span class="err">├──</span><span class="w"> </span><span class="n">lua</span><span class="o">-</span><span class="n">loader</span><span class="o">.</span><span class="n">js</span><span class="w">       </span><span class="err">←</span><span class="w"> </span><span class="n">Fengari</span><span class="w"> </span><span class="n">execution</span><span class="w"> </span><span class="n">bridge</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">hot</span><span class="o">-</span><span class="n">reload</span><span class="w"> </span><span class="n">WS</span><span class="w"> </span><span class="n">client</span>
 <span class="w">    </span><span class="err">└──</span><span class="w"> </span><span class="n">doc</span><span class="o">-</span><span class="n">extractor</span><span class="o">.</span><span class="n">js</span><span class="w">    </span><span class="err">←</span><span class="w"> </span><span class="n">LDoc</span><span class="o">-</span><span class="n">style</span><span class="w"> </span><span class="n">comment</span><span class="w"> </span><span class="n">parser</span>
 </code></pre></div>
@@ -1199,7 +1199,7 @@ destructure it as:
 <code>js
 const { lua, lualib, lauxlib, to_luastring } = window.fengari;</code></p>
 </blockquote>
-<h3 id="3-grid-rendering-enginemonome-apijs">3. Grid Rendering (<code>engine/monome-api.js</code>)<a class="headerlink" href="#3-grid-rendering-enginemonome-apijs" title="Permanent link">&para;</a></h3>
+<h3 id="3-grid-rendering-enginegrid-apijs">3. Grid Rendering (<code>engine/grid-api.js</code>)<a class="headerlink" href="#3-grid-rendering-enginegrid-apijs" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1369,7 +1369,7 @@ using a triangle-wave oscillator with configurable volume, attack, and release
 (sliders below the grid).</p>
 <hr />
 <h2 id="extending-the-hardware-shim">Extending the Hardware Shim<a class="headerlink" href="#extending-the-hardware-shim" title="Permanent link">&para;</a></h2>
-<p>To add a new API function for a Lua script to call, edit <code>engine/monome-api.js</code>
+<p>To add a new API function for a Lua script to call, edit <code>engine/grid-api.js</code>
 to add the JS-side implementation, then register it in <code>engine/lua-loader.js</code>
 using <code>setGlobal</code>:</p>
 <div class="codehilite"><pre><span></span><code><span class="c1">// In lua-loader.js _execute(), after other setGlobal calls:</span>
@@ -1380,7 +1380,7 @@ using <code>setGlobal</code>:</p>
 <span class="p">});</span>
 </code></pre></div>
 
-<div class="codehilite"><pre><span></span><code><span class="c1">// In monome-api.js:</span>
+<div class="codehilite"><pre><span></span><code><span class="c1">// In grid-api.js:</span>
 <span class="nx">my_new_fn</span><span class="p">(</span><span class="nx">val</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="c1">// JS implementation</span>
 <span class="p">}</span>

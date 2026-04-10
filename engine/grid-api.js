@@ -1,6 +1,6 @@
 /**
- * monome-api.js
- * JS shim layer that maps the Monome/NeoTrellis hardware API to browser equivalents.
+ * grid-api.js
+ * JS shim layer that maps the NeoTrellis/iii firmware grid API to browser equivalents.
  * This module is injected into the Fengari Lua runtime as globals before script execution.
  *
  * API Contract (what a Lua script can call):
@@ -33,6 +33,8 @@ export class MonomeAPI {
     this.rows = opts.rows || 8;
     this.onLedUpdate = opts.onLedUpdate || (() => {});
     this.onDisplayScreen = opts.onDisplayScreen || (() => {});
+    this.onOutOfBounds = opts.onOutOfBounds || null;
+    this._outOfBoundsWriteCount = 0;
 
     // Per-screen frame buffers. 'live' is always present; others created on demand.
     // grid_set_screen(name) switches which buffer _setCell writes to.
@@ -150,6 +152,10 @@ export class MonomeAPI {
       }));
       this.onLedUpdate(out, this.cols, this.rows, screenName);
     }
+    if (this._outOfBoundsWriteCount > 0 && this.onOutOfBounds) {
+      this.onOutOfBounds(this._outOfBoundsWriteCount);
+      this._outOfBoundsWriteCount = 0;
+    }
   }
 
   /** Set master brightness multiplier (1–15) */
@@ -158,7 +164,10 @@ export class MonomeAPI {
   }
 
   _setCell(x, y, r, g, b) {
-    if (x < 1 || x > this.cols || y < 1 || y > this.rows) return;
+    if (x < 1 || x > this.cols || y < 1 || y > this.rows) {
+      if (r > 0 || g > 0 || b > 0) this._outOfBoundsWriteCount++;
+      return;
+    }
     const i = (y - 1) * this.cols + (x - 1);
     const buf = this._screenBuffers[this._currentScreen];
     buf[i].r = r; buf[i].g = g; buf[i].b = b;
@@ -414,5 +423,6 @@ export class MonomeAPI {
     this._currentScreen = 'live';
     this._luaEventGrid = null;
     this._startTime = performance.now();
+    this._outOfBoundsWriteCount = 0;
   }
 }

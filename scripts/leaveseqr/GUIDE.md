@@ -320,8 +320,7 @@ Any other H2 is rendered as plain markdown.
 
 ## Quick reference
 
-- **Full standard:** [Script Standards](https://jonwaterschoot.github.io/diii-neotrellis-emulator/script-standards/) — hosted docs, always up to date
-  - Raw file (for offline use / LLMs): [`SCRIPT_STANDARD.md`](https://raw.githubusercontent.com/jonwaterschoot/diii-neotrellis-emulator/main/SCRIPT_STANDARD.md)
+- **Full standard:** [`SCRIPT_STANDARD.md`](./SCRIPT_STANDARD.md) — a copy lives in this folder
 - **Reference script:** [`serpentine_dev.lua`](../serpentineSeqr/serpentine_dev.lua) (parent repo) · [view on GitHub](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/serpentine_dev.lua)
 - **Reference README:** [`serpentineSeqr/README.md`](../serpentineSeqr/README.md) (parent repo) · [view on GitHub](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/README.md)
 

@@ -8,8 +8,7 @@ The emulator runs in a browser and mirrors the API surface of a Raspberry Pi Pic
 Scripts also target real hardware, so compatibility matters.
 
 This instruction file is the canonical reference for code generation.
-Cross-reference the full specification at:
-https://raw.githubusercontent.com/jonwaterschoot/diii-neotrellis-emulator/main/SCRIPT_STANDARD.md
+Cross-reference `SCRIPT_STANDARD.md` at the repo root for the full specification.
 
 ---
 
@@ -267,7 +266,7 @@ Before returning any generated code, verify:
 
 | File | Role |
 |------| ------|
-| [`SCRIPT_STANDARD.md`](https://raw.githubusercontent.com/jonwaterschoot/diii-neotrellis-emulator/main/SCRIPT_STANDARD.md) | Canonical parser spec — fetch from GitHub for always-current version |
+| `SCRIPT_STANDARD.md` (this folder) | Canonical parser spec — copy included for standalone use |
 | `serpentineSeqr/serpentine_dev.lua` (parent repo · [GitHub](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/serpentine_dev.lua)) | Full reference implementation |
 | `serpentineSeqr/README.md` (parent repo · [GitHub](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/README.md)) | Reference README |
 | `engine/doc-extractor.js` (parent repo · [GitHub](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/engine/doc-extractor.js)) | Parser source |

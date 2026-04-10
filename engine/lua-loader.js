@@ -18,7 +18,7 @@ const extractor = new DocExtractor();
 export class LuaLoader {
   /**
    * @param {Object} opts
-   * @param {MonomeAPI} opts.api   – the monome-api instance
+   * @param {MonomeAPI} opts.api   – the grid-api instance
    * @param {Function} opts.onScriptLoad   – called after a script loads successfully: (name, docs)
    * @param {Function} opts.onScriptError  – called on runtime error: (errorMessage)
    * @param {Function} opts.onStatusChange – called with status text updates: (msg, level)
@@ -302,9 +302,21 @@ export class LuaLoader {
       lua.lua_pushnumber(L2, api.wrap(getInt(L2, 1), getInt(L2, 2), getInt(L2, 3))); return 1;
     });
 
+    // clamp(v, lo, hi) → number  (iii firmware built-in)
+    setGlobal('clamp', (L2) => {
+      const v = getNum(L2, 1), lo = getNum(L2, 2), hi = getNum(L2, 3);
+      lua.lua_pushnumber(L2, Math.max(lo, Math.min(hi, v))); return 1;
+    });
+
+    // ps(fmt, ...) — iii firmware status-bar printf, silently ignored in emulator
+    setGlobal('ps', (_L2) => 0);
+
     // math.random / math.randomseed  (already in lualib, but ensure it's active)
     // metro table: metro.init(fn, interval)
     this._injectMetro(L, lua, lauxlib, api);
+
+    // pset_init / pset_write / pset_read  (iii preset persistence, backed by localStorage)
+    this._injectPset(L, lua, lauxlib);
 
     // ── Execute the Lua source ──────────────────────────────────────────
 
@@ -410,5 +422,131 @@ export class LuaLoader {
     lua.lua_settable(L, -3); // metro.init = <cfn>
 
     lua.lua_setglobal(L, luaStr('metro'));
+  }
+
+  // ─── PSET (preset persistence, backed by localStorage) ──────────────────
+
+  _injectPset(L, lua, lauxlib) {
+    const { to_luastring } = window.fengari;
+    const luaStr = (s) => to_luastring(s);
+    let _psetNs = 'pset';   // namespace set by pset_init
+
+    const setGlobal = (name, fn) => {
+      lua.lua_pushcfunction(L, (L2) => {
+        try { return fn(L2) || 0; } catch (e) {
+          lua.lua_pushstring(L2, luaStr(String(e)));
+          lua.lua_error(L2);
+          return 0;
+        }
+      });
+      lua.lua_setglobal(L, luaStr(name));
+    };
+
+    // ── Lua table ↔ JS object helpers ──────────────────────────────────
+
+    /** Recursively convert a Lua table at absolute stack index to a JS object */
+    const luaTableToJS = (L2, absIdx) => {
+      const result = {};
+      lua.lua_pushnil(L2);
+      while (lua.lua_next(L2, absIdx) !== 0) {
+        // key at -2, value at -1
+        let key;
+        const kt = lua.lua_type(L2, -2);
+        if (kt === lua.LUA_TNUMBER) {
+          key = lua.lua_tonumber(L2, -2);
+        } else if (kt === lua.LUA_TSTRING) {
+          key = lua.lua_tojsstring(L2, -2);
+        } else {
+          lua.lua_pop(L2, 1);
+          continue;
+        }
+        const vt = lua.lua_type(L2, -1);
+        let val;
+        if (vt === lua.LUA_TNUMBER) {
+          val = lua.lua_tonumber(L2, -1);
+        } else if (vt === lua.LUA_TSTRING) {
+          val = lua.lua_tojsstring(L2, -1);
+        } else if (vt === lua.LUA_TBOOLEAN) {
+          val = lua.lua_toboolean(L2, -1) !== 0;
+        } else if (vt === lua.LUA_TTABLE) {
+          const top = lua.lua_gettop(L2);
+          val = luaTableToJS(L2, top);
+        } else {
+          val = null;
+        }
+        result[key] = val;
+        lua.lua_pop(L2, 1); // pop value, keep key for next iteration
+      }
+      return result;
+    };
+
+    /** Recursively push a JS object as a Lua table onto L2's stack */
+    const jsToLuaTable = (L2, obj) => {
+      lua.lua_newtable(L2);
+      for (const [k, v] of Object.entries(obj)) {
+        // push key: numeric strings become Lua numbers (restores 1-based arrays)
+        const numKey = Number(k);
+        if (!isNaN(numKey) && String(numKey) === k) {
+          lua.lua_pushnumber(L2, numKey);
+        } else {
+          lua.lua_pushstring(L2, luaStr(k));
+        }
+        // push value
+        if (v === null || v === undefined) {
+          lua.lua_pushboolean(L2, 0);
+        } else if (typeof v === 'boolean') {
+          lua.lua_pushboolean(L2, v ? 1 : 0);
+        } else if (typeof v === 'number') {
+          lua.lua_pushnumber(L2, v);
+        } else if (typeof v === 'string') {
+          lua.lua_pushstring(L2, luaStr(v));
+        } else if (typeof v === 'object') {
+          jsToLuaTable(L2, v);
+        } else {
+          lua.lua_pushboolean(L2, 0);
+        }
+        lua.lua_settable(L2, -3);
+      }
+    };
+
+    // ── pset_init(name) ─────────────────────────────────────────────────
+    setGlobal('pset_init', (L2) => {
+      if (lua.lua_isstring(L2, 1)) {
+        _psetNs = lua.lua_tojsstring(L2, 1);
+      }
+      return 0;
+    });
+
+    // ── pset_write(slot, table) ──────────────────────────────────────────
+    setGlobal('pset_write', (L2) => {
+      const slot = Math.round(lua.lua_tonumber(L2, 1));
+      if (lua.lua_type(L2, 2) !== lua.LUA_TTABLE) return 0;
+      const data = luaTableToJS(L2, 2);
+      try {
+        localStorage.setItem(`${_psetNs}_slot_${slot}`, JSON.stringify(data));
+      } catch (e) {
+        console.warn('[pset_write] localStorage error:', e);
+      }
+      return 0;
+    });
+
+    // ── pset_read(slot) → table | nil ───────────────────────────────────
+    setGlobal('pset_read', (L2) => {
+      const slot = Math.round(lua.lua_tonumber(L2, 1));
+      let raw;
+      try { raw = localStorage.getItem(`${_psetNs}_slot_${slot}`); } catch (e) {}
+      if (!raw) {
+        lua.lua_pushnil(L2);
+        return 1;
+      }
+      try {
+        const obj = JSON.parse(raw);
+        jsToLuaTable(L2, obj);
+        return 1;
+      } catch (e) {
+        lua.lua_pushnil(L2);
+        return 1;
+      }
+    });
   }
 }
