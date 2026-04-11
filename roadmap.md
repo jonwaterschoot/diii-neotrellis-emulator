@@ -15,7 +15,7 @@
 - [ ] Show an icon when key is on hold down. / current is a yellow border, and main serpentine grid has a yellow color, so not very visible.
 
 - [ ] A better structure in the scripts list sorted with divisions and sub-divisions. and maybe a search / filter bar. 
-- [ ] Allow other pixel dimensions than 16x8 (common sizes: 8*8, 16*16, but also custom sizes like 32*32, etc.)
+- [x] Allow other pixel dimensions than 16x8 (common sizes: 8*8, 16*16, but also custom sizes like 32*32, etc.)
 
 
 ### Documentation & Script UI Integration
@@ -24,7 +24,7 @@
 
 ### External Scripts
 
-- when loading external script aftyer import show it's repo link in hte docs section and above the readme, explaining that it was live pulled from that repo
+- when loading external script aftyer import show it's repo link in the docs section and above the readme, explaining that it was live pulled from that repo
 
 - [/] Allow other sources like Codeberg (prelink scripts from tehn at `https://codeberg.org/tehn/iii-scripts/src/branch/main/grid`).
   - [x] *Note: These do not adhere to our structure standard and license is unsure, so just link them and give due credit (e.g., subcategory "external scripts -tehn-").*
@@ -33,7 +33,7 @@
 
 ## Documentation & Project Structure
 
-- [ ] Prepare an empty project with the structure that is easy to clone (super clear instructions on the difference between cloning and starting a new repo based on the template).
+- [x] Prepare an empty project with the structure that is easy to clone (super clear instructions on the difference between cloning and starting a new repo based on the template).
 - [ ] Create a changelog for the emulator app.
 
 ## Future Exploration / Ports

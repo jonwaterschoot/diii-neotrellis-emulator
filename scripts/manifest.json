@@ -1,5 +1,14 @@
 [
   {
+    "name": "LeaveSeqr",
+    "file": "leaveseqr/leaveseqr.lua",
+    "readme": "leaveseqr/README.md",
+    "description": "Ambient leaf physics sequencer: leaves fall through air, float on water, sink to mud — two generative tracks with triop bass echoes.",
+    "author": "jonwaterschoot",
+    "version": "0.1.0",
+    "gridSize": [16, 8]
+  },
+  {
     "name": "Sandman",
     "file": "sandman/sandman.lua",
     "readme": "sandman/README.md",

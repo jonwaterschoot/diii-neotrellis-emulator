@@ -1782,6 +1782,7 @@
 
     // ─── STATE ─────────────────────────────────────────────────────────────────
     let _pendingReadme = null;      // set before _execute so onScriptLoad can pick it up
+    let _pendingImportedOrientation = null; // inferred from external repo source/README before _execute
     let _customScriptActive = false; // true when loaded from disk or external repo (not bundled)
     const _manifestMap = new Map(); // file → manifest entry (for readme lookup)
 
@@ -2146,17 +2147,20 @@
         // (manifest scripts have orientation applied before load in loadBundledScript)
         if (_customScriptActive || !_manifestMap.has(name)) {
           const annotOrientation = _parseOrientationAnnotation(loader.currentSource);
-          if (annotOrientation) {
-            const annotRot = _orientationToRotation(annotOrientation, COLS, ROWS);
-            if (annotRot !== gridRotation) {
-              gridRotation = annotRot;
+          const hintedOrientation = annotOrientation || _pendingImportedOrientation;
+          if (hintedOrientation) {
+            const hintedRot = _orientationToRotation(hintedOrientation, COLS, ROWS);
+            if (hintedRot !== gridRotation) {
+              gridRotation = hintedRot;
               rebuildGrid();
               _syncGridPresetUI();
               fitToWindow();
-              setStatus(`Grid rotated to ${annotRot * 90}° from @orientation annotation`, 'info');
+              const hintSource = annotOrientation ? '@orientation annotation' : 'imported README/script hints';
+              setStatus(`Grid rotated to ${hintedRot * 90}° from ${hintSource}`, 'info');
             }
           }
         }
+        _pendingImportedOrientation = null;
 
         updateGridLabel(name);
         renderDocs(docs);
@@ -2256,6 +2260,7 @@
     // Load a tehn external script by fetching its raw Codeberg URL
     async function loadExternalScript(rawUrl) {
       _customScriptActive = true;
+      _pendingImportedOrientation = null;
       setDownloadEnabled(false);
       btnDownloadDev.disabled = false;
       const scriptName = rawUrl.split('/').pop();
@@ -2267,6 +2272,7 @@
           `[View on Codeberg](${TEHN_REPO_URL}/src/branch/main/grid) · ` +
           `[Raw file](${rawUrl})\n\n` +
           `*From the official monome iii-scripts repository. All credit to tehn.*`;
+        _pendingImportedOrientation = _inferImportedOrientation(source, _pendingReadme);
         loader._currentScriptName = scriptName;
         await loader._execute(source, scriptName);
         document.querySelectorAll('.side-tab').forEach(t => t.classList.remove('active'));
@@ -2276,6 +2282,7 @@
       } catch (e) {
         // Likely a CORS block — show Guide tab with manual download instructions
         _customScriptActive = false;
+        _pendingImportedOrientation = null;
         const codebergPage = `${TEHN_REPO_URL}/raw/branch/main/${
           TEHN_SCRIPTS.find(s => (TEHN_RAW_BASE + s.path) === rawUrl)?.path ?? 'grid'
         }`;
@@ -2719,6 +2726,7 @@
       try {
         const result = await importer.import(val, msg => setStatus(msg, 'info'));
         _pendingReadme = result.readme;
+        _pendingImportedOrientation = _inferImportedOrientation(result.source, result.readme);
         _customScriptActive = true;
         // Load as if it came from a file (no server path — use source directly)
         loader._currentScriptName = result.name;
@@ -2739,6 +2747,7 @@
         importRow.classList.remove('active');
         githubInput.value = '';
       } catch (e) {
+        _pendingImportedOrientation = null;
         setStatus(`Import failed: ${e.message}`, 'error');
       } finally {
         btnGithubImport.disabled = false;
@@ -2910,12 +2919,16 @@
      * NeoTrellis/Monome portrait convention = 90° CCW (USB cable at top),
      * which is rotation index 3 (270° CW). This puts x=COLS at the visual top.
      *
-     * "portrait"  on a landscape grid (cols > rows) → 3 (90° CCW)
-     * "portrait"  on an already-portrait grid        → 0 (already tall, no rotate)
-     * "landscape" or undefined                        → 0
+     * "portrait" or "portrait-ccw" on a landscape grid → 3 (90° CCW)
+     * "portrait-cw"              on a landscape grid   → 1 (90° CW)
+     * any portrait value         on an already-tall grid → 0
+     * "landscape" or undefined                         → 0
      */
     function _orientationToRotation(orientation, cols, rows) {
-      if (orientation === 'portrait') {
+      if (orientation === 'portrait-cw') {
+        return cols > rows ? 1 : 0;
+      }
+      if (orientation === 'portrait' || orientation === 'portrait-ccw') {
         return cols > rows ? 3 : 0;
       }
       return 0;
@@ -2923,17 +2936,40 @@
 
     /**
      * Scan the first 30 lines of Lua source for an @orientation annotation.
-     * Returns the orientation string (e.g. "portrait") or null.
-     * Usage in Lua:  -- @orientation portrait
-     * "portrait" = 90° CCW (USB at top), x=COLS at visual top of portrait display.
+     * Returns the orientation string (e.g. "portrait", "portrait-cw") or null.
+     * Usage in Lua:  -- @orientation portrait-cw
+     * "portrait" defaults to the monome-style 90° CCW layout.
      */
     function _parseOrientationAnnotation(source) {
       if (!source) return null;
       const lines = source.split('\n').slice(0, 30);
       for (const line of lines) {
-        const m = line.match(/--\s*@orientation\s+(\w+)/);
+        const m = line.match(/--\s*@orientation\s+([\w-]+)/);
         if (m) return m[1].toLowerCase();
       }
+      return null;
+    }
+
+    function _inferImportedOrientation(source, readme) {
+      const text = `${source || ''}\n${readme || ''}`.toLowerCase();
+      if (!text.trim()) return null;
+
+      const portraitCwHints = [
+        /\b90\s*(?:deg(?:rees?)?|°)?\s*(?:clockwise|cw)\b/,
+        /\busb(?:\s+port|\s+cable)?\s+(?:is\s+|on\s+|faces?\s+)?the\s+right\b/,
+        /\bcable\s+(?:is\s+|on\s+|faces?\s+)?the\s+right\b/,
+      ];
+      if (portraitCwHints.some(re => re.test(text))) return 'portrait-cw';
+
+      const portraitCcwHints = [
+        /\b90\s*(?:deg(?:rees?)?|°)?\s*(?:counter\s*-?\s*clockwise|anticlockwise|anti\s*-?\s*clockwise|ccw)\b/,
+        /\busb(?:\s+port|\s+cable)?\s+(?:is\s+|on\s+|faces?\s+)?the\s+left\b/,
+        /\bcable\s+(?:is\s+|on\s+|faces?\s+)?the\s+left\b/,
+        /\bcable\s+(?:at|on)\s+top\b/,
+        /\busb(?:\s+port|\s+cable)?\s+(?:at|on)\s+top\b/,
+      ];
+      if (portraitCcwHints.some(re => re.test(text))) return 'portrait-ccw';
+
       return null;
     }
 
