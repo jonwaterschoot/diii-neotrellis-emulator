@@ -79,10 +79,29 @@ The hierarchy is: **Section → Group → Control**
 -- @screen menu             ← another named alt screen — gets its own tab in the ghost grid
 
 -- @group Group Name        ← start a named group; controls below belong to it
+-- @detail First line of extended description for this group.
+-- @detail Additional lines accumulate — each @detail line appends to the previous.
 -- x=N, y=M: Description   ← sub-control inside the group
 -- x=N, y=M: Description
 -- @group                   ← empty @group clears the group; next controls are singletons
 -- x=N, y=M: Description   ← singleton — gets its own overlay card
+```
+
+**`@detail text`** attaches an extended description to the group declared immediately
+above it. Multiple consecutive `@detail` lines are concatenated with a newline, so
+you can write multi-line explanations. The detail is cleared whenever a new `@group`
+or `@section` tag is encountered, so each group gets its own isolated annotation.
+The detail is surfaced in the live manual panel in the emulator as supplementary copy
+below the group's control list.
+
+```lua
+-- @group Water Tracks
+-- @detail Each row is an independent sequencer track with its own playhead.
+-- @detail When a leaf sits on a playhead position, it triggers a note.
+-- @detail Track length, speed, MIDI channel, and octave are set on the Seq screen.
+-- Row 5: TR1 — Water surface, base octave
+-- Row 6: TR2 — Underwater mid, one octave down
+-- Row 7: TR3 — Underwater deep, two octaves down
 ```
 
 **`@section`** defines a major logical grouping (e.g. "Grid Layout", "Settings View").
@@ -314,6 +333,8 @@ The `R` key (Reload) is always shown as an app-level entry at the end; do not re
 | `-- @treturn type desc` | Typed return value | `-- @treturn boolean True if alive` |
 | `-- @param name desc` | Untyped parameter | `-- @param x Column` |
 | `-- @section Name` | Groups following controls | `-- @section Spawner Engine` |
+| `-- @group Name` | Starts a named group | `-- @group D-PAD` |
+| `-- @detail text` | Extended description for the current group (multi-line, accumulates) | `-- @detail Leaves drift slowly downward.` |
 | `-- @key KEYS: Label` | Keyboard shortcut hint | `-- @key ↑↓←→: Steer` |
 | `-- x=N: desc` | Control map (single cell) | `-- x=1, y=8: ALT toggle` |
 | `-- Row N: desc` | Control map (full row) | `-- Row 6: Black keys` |
@@ -329,6 +350,7 @@ These can be added to `doc-extractor.js` incrementally as needed.
 
 | File | Role |
 |------|------|
-| [scripts/serpentineSeqr/serpentine_dev.lua](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/serpentine_dev.lua) | Reference `.lua` with inline LDoc header and control map comments |
-| [scripts/serpentineSeqr/serpentineseqr_docs.md](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/serpentineseqr_docs.md) | Reference README (to be renamed and kept alongside the `.lua`) |
+| [scripts/serpentineSeqr/serpentine_dev.lua](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/serpentine_dev.lua) | Reference `.lua` — LDoc header, `@section`/`@screen`/`@group` control map |
+| [scripts/serpentineSeqr/serpentineseqr_docs.md](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/serpentineseqr_docs.md) | Reference README (rename to `README.md` when packaging for external import) |
+| [scripts/leaveseqr/leaveseqr.lua](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/leaveseqr/leaveseqr.lua) | Full example of `@detail` usage — multi-line group descriptions across all screens |
 | [engine/doc-extractor.js](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/engine/doc-extractor.js) | Parser — extracts header + control map from `.lua` source |

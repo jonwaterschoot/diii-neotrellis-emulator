@@ -34,6 +34,8 @@ export class MonomeAPI {
     this.onLedUpdate = opts.onLedUpdate || (() => {});
     this.onDisplayScreen = opts.onDisplayScreen || (() => {});
     this.onOutOfBounds = opts.onOutOfBounds || null;
+    /** Called with (direction:'in'|'out', bytes:Uint8Array|number[], timestampMs:number) for every MIDI message */
+    this.onMidiMonitor = opts.onMidiMonitor || null;
     this._outOfBoundsWriteCount = 0;
 
     // Per-screen frame buffers. 'live' is always present; others created on demand.
@@ -72,6 +74,14 @@ export class MonomeAPI {
       time: 0.25,
       feedback: 0.3,
     };
+
+    // Filter controlled by MIDI CC/UI
+    this.filter = {
+      enabled: false,
+      cc: 74,
+      cutoff: 1.0,
+    };
+    this._filterNode = null;
 
     // Metro registry
     this._metros = [];
@@ -189,27 +199,36 @@ export class MonomeAPI {
     }
   }
 
+  setFilterCutoff(val) {
+    this.filter.cutoff = Math.max(0, Math.min(1, val));
+    if (this._filterNode && this._audioCtx) {
+      const freq = 20 * Math.pow(1000, this.filter.cutoff);
+      this._filterNode.frequency.setTargetAtTime(freq, this._audioCtx.currentTime, 0.05);
+    }
+  }
+
   _handleMidiInput(msg) {
     const [status, data1, data2] = msg.data;
     const type = status & 0xF0;
-    
+
+    // Emit to MIDI monitor (all incoming messages)
+    if (this.onMidiMonitor) this.onMidiMonitor('in', msg.data, performance.now());
+
     // Simplistic mapping: MIDI notes to grid coordinates
-    // This is often script-specific, but we can provide a default mapping
-    // for a 16x8 grid (e.g. Note 36-99)
     if (type === 0x90 || type === 0x80) {
       const isPress = (type === 0x90 && data2 > 0);
-      // Map MIDI note to X,Y (this is a guess, but common for Launchpad/etc)
-      // Assuming 8x8 or 16x8. Let's do a basic chromatic mapping for now or 
-      // just forward it if the script handles it.
-      // Better: if script has grid_event, call it.
-      // But we need X,Y.
-      // Let's assume the user might want a specific mapping later.
-      // For now, let's just log it and maybe map Note 0-127 to some coordinates.
-      // X = note % 16 + 1, Y = floor(note / 16) + 1
       const x = (data1 % 16) + 1;
       const y = Math.floor(data1 / 16) + 1;
       if (x <= this.cols && y <= this.rows) {
         this.handlePadEvent(x, y, isPress ? 1 : 0);
+      }
+    } else if (type === 0xB0) {
+      // Control Change
+      const cc = data1;
+      const val = data2;
+      if (this.filter.enabled && cc === this.filter.cc) {
+        this.setFilterCutoff(val / 127);
+        if (this.onFilterUpdate) this.onFilterUpdate(this.filter.cutoff);
       }
     }
   }
@@ -238,6 +257,17 @@ export class MonomeAPI {
     this._delayNode.connect(this._delayFeedback);
     this._delayFeedback.connect(this._delayNode);
     this._delayNode.connect(this._delayGain).connect(this._masterGain);
+
+    // Create Filter node (placed before FX/Master split)
+    this._filterNode = this._audioCtx.createBiquadFilter();
+    this._filterNode.type = 'lowpass';
+    const initialFreq = 20 * Math.pow(1000, this.filter.cutoff);
+    this._filterNode.frequency.value = initialFreq;
+    
+    // The filter connects to the master and FX nodes
+    this._filterNode.connect(this._masterGain);
+    this._filterNode.connect(this._reverbNode);
+    this._filterNode.connect(this._delayNode);
   }
 
   _generateReverbImpulse() {
@@ -261,21 +291,57 @@ export class MonomeAPI {
     note = note & 0x7F;
     vel = vel & 0x7F;
     const status = 0x90 + ((ch - 1) & 0x0F);
-    if (this.midiOut) this.midiOut.send([status, note, vel]);
+    const bytes = [status, note, vel];
+    if (this.midiOut) this.midiOut.send(bytes);
+    if (this.onMidiMonitor) this.onMidiMonitor('out', bytes, performance.now());
     this._synthOn(note, vel);
   }
 
-  midi_note_off(note, ch = 1) {
+  midi_note_off(note, p2, p3) {
+    let vel, ch;
+    if (p3 === undefined) {
+      // Backward compatibility: midi_note_off(note, ch)
+      vel = 0;
+      ch = p2 || 1;
+    } else {
+      // Standard signature: midi_note_off(note, vel, ch)
+      vel = p2;
+      ch = p3;
+    }
     note = note & 0x7F;
     const status = 0x80 + ((ch - 1) & 0x0F);
-    if (this.midiOut) this.midiOut.send([status, note, 0]);
+    const bytes = [status, note, vel & 0x7F];
+    if (this.midiOut) this.midiOut.send(bytes);
+    if (this.onMidiMonitor) this.onMidiMonitor('out', bytes, performance.now());
     this._synthOff(note);
   }
 
+  midi_cc(cc, val, ch = 1) {
+    cc = cc & 0x7F;
+    val = val & 0x7F;
+    const status = 0xB0 + ((ch - 1) & 0x0F);
+    const bytes = [status, cc, val];
+    if (this.midiOut) this.midiOut.send(bytes);
+    if (this.onMidiMonitor) this.onMidiMonitor('out', bytes, performance.now());
+    // Self-apply: if this CC targets the internal filter, route it there too.
+    // Mirrors what _handleMidiInput does for incoming hardware CC.
+    if (this.filter.enabled && cc === this.filter.cc) {
+      this.setFilterCutoff(val / 127);
+      if (this.onFilterUpdate) this.onFilterUpdate(this.filter.cutoff, val);
+    }
+  }
+
   midi_panic() {
+    const soundOff = [0xB0, 120, 0];
+    const notesOff = [0xB0, 123, 0];
     if (this.midiOut) {
-      this.midiOut.send([0xB0, 120, 0]); // All Sound Off, ch1
-      this.midiOut.send([0xB0, 123, 0]); // All Notes Off, ch1
+      this.midiOut.send(soundOff);
+      this.midiOut.send(notesOff);
+    }
+    if (this.onMidiMonitor) {
+      const t = performance.now();
+      this.onMidiMonitor('out', soundOff, t);
+      this.onMidiMonitor('out', notesOff, t);
     }
     for (const note of [...this._activeNodes.keys()]) {
       this._synthOff(note);
@@ -302,10 +368,15 @@ export class MonomeAPI {
     
     osc.connect(g);
     
-    // Connect to dry and wet chains
-    g.connect(this._masterGain);
-    g.connect(this._reverbNode);
-    g.connect(this._delayNode);
+    // Connect to filter (which connects to master, reverb, delay)
+    if (this._filterNode) {
+        g.connect(this._filterNode);
+    } else {
+        // Fallback if audio not fully initialized or filter removed
+        g.connect(this._masterGain);
+        g.connect(this._reverbNode);
+        g.connect(this._delayNode);
+    }
     
     osc.start();
     const tid = setTimeout(() => this._synthOff(note), 3000);
