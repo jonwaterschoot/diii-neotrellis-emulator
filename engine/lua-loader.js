@@ -292,6 +292,16 @@ export class LuaLoader {
       api.midi_panic(); return 0;
     });
 
+    // midi_cc(cc, val, ch)  — CC automation output
+    setGlobal('midi_cc', (L2) => {
+      api.midi_cc(getInt(L2, 1), getInt(L2, 2), getInt(L2, 3) || 1); return 0;
+    });
+
+    // grid_brightness(val)  — set master brightness (1..15); alias for grid_color_intensity
+    setGlobal('grid_brightness', (L2) => {
+      api.grid_color_intensity(getInt(L2, 1)); return 0;
+    });
+
     // get_time() → number
     setGlobal('get_time', (L2) => {
       lua.lua_pushnumber(L2, api.get_time()); return 1;

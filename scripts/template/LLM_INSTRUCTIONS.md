@@ -71,6 +71,8 @@ Place these in the header block or grouped under `-- @section` tags anywhere in 
 -- @screen live             ← main grid (use "live" for the primary screen)
 -- @screen settings         ← secondary screen name (any lowercase word)
 -- @group Group Name        ← fan of bezier lines in overlay
+-- @detail Extended description for this group (one or more lines, accumulates).
+-- @detail Each @detail line appends to the previous with a newline.
 -- x=N, y=M: Description   ← single cell
 -- x=N..M, y=R: Desc       ← column range
 -- Row N: Desc              ← full row
@@ -81,6 +83,8 @@ Place these in the header block or grouped under `-- @section` tags anywhere in 
 - Descriptions must end after the `:` delimiter
 - Full-grid controls (`x=1..16, y=1..8`) are excluded from the overlay automatically
 - Always declare `@screen live` for main-grid content
+- `@detail` lines must come **after** the `@group` line and **before** any control-map lines for that group
+- The `@detail` annotation resets on the next `@group` or `@section` tag
 
 ---
 
@@ -268,6 +272,7 @@ Before returning any generated code, verify:
 | File | Role |
 |------| ------|
 | [`SCRIPT_STANDARD.md`](https://raw.githubusercontent.com/jonwaterschoot/diii-neotrellis-emulator/main/SCRIPT_STANDARD.md) | Canonical parser spec — fetch from GitHub for always-current version |
-| `serpentineSeqr/serpentine_dev.lua` (parent repo · [GitHub](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/serpentine_dev.lua)) | Full reference implementation |
+| `serpentineSeqr/serpentine_dev.lua` (parent repo · [GitHub](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/serpentine_dev.lua)) | Full reference implementation — header, multi-screen, `@section`/`@group` |
 | `serpentineSeqr/README.md` (parent repo · [GitHub](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/README.md)) | Reference README |
+| `leaveseqr/leaveseqr.lua` (parent repo · [GitHub](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/leaveseqr/leaveseqr.lua)) | Full example of `@detail` usage across three screens |
 | `engine/doc-extractor.js` (parent repo · [GitHub](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/engine/doc-extractor.js)) | Parser source |

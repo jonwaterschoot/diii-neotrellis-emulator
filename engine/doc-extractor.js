@@ -60,6 +60,7 @@ export class DocExtractor {
     let pendingIsDoc = false;
     let currentGroup  = null;   // set by -- @group Name, cleared by -- @group (empty)
     let currentScreen = null;   // set by -- @screen live|settings
+    let currentGroupDetail = null; // set by -- @detail lines after @group, cleared on new @group/@section
 
     for (let i = 0; i < lines.length; i++) {
       const raw = lines[i];
@@ -74,6 +75,7 @@ export class DocExtractor {
         currentSection = { title: sectionMatch[1].trim(), description: '', functions: [], controls: [] };
         currentGroup  = null;
         currentScreen = null;
+        currentGroupDetail = null;
         pendingDoc = [];
         pendingIsDoc = false;
         continue;
@@ -83,6 +85,15 @@ export class DocExtractor {
       const groupMatch = trimmed.match(/^--\s*@group\s*(.*)/);
       if (groupMatch) {
         currentGroup = groupMatch[1].trim() || null;
+        currentGroupDetail = null;  // reset detail for each new group
+        continue;
+      }
+
+      // Detail annotation: -- @detail text  (one or more lines of expanded description for the group)
+      const detailMatch = trimmed.match(/^--\s*@detail\s+(.*)/);
+      if (detailMatch) {
+        const line = detailMatch[1].trim();
+        currentGroupDetail = currentGroupDetail === null ? line : currentGroupDetail + '\n' + line;
         continue;
       }
 
@@ -149,6 +160,7 @@ export class DocExtractor {
           description: controlMatch[2].trim(),
           group:       currentGroup,
           screen:      currentScreen,
+          detail:      currentGroupDetail,
         };
         currentSection.controls.push(ctrlEntry);
         result.controls.push({ section: currentSection.title, ...ctrlEntry });

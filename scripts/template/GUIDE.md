@@ -110,6 +110,27 @@ Add control-map comments **before the first non-comment line** of real code
 
 These become the interactive overlay the emulator draws over the grid.
 
+### Adding extended descriptions with `@detail`
+
+Place one or more `-- @detail` lines **immediately after a `@group` line** to attach
+a longer description to that group. Multiple `@detail` lines accumulate (newline-joined).
+The emulator surfaces these as supplementary copy beneath the group's control list in
+the live manual panel.
+
+```lua
+-- @group Water Tracks
+-- @detail Each row is an independent sequencer track with its own playhead.
+-- @detail When a leaf sits on a playhead position, it triggers a MIDI note.
+-- @detail Track length, speed, channel, and octave are set in the Seq screen.
+-- Row 5: TR1 — Water surface, base octave
+-- Row 6: TR2 — Underwater mid, one octave down
+-- Row 7: TR3 — Underwater deep, two octaves down
+```
+
+> The `@detail` annotation is cleared whenever a new `@group` or `@section` tag is
+> encountered, so each group gets its own description. A `@detail` placed before any
+> `@group` is attached to the first control that follows it.
+
 ---
 
 ## Step 5 — Keep the compatibility stubs
@@ -333,3 +354,4 @@ Any other H2 is rendered as plain markdown.
 - Guard `display_screen()` calls: `if display_screen then display_screen("settings") end`
 - Pico memory is limited: avoid large string tables, deep elseif chains, and anonymous function allocation inside hot loops.
 - The parser stops the header at the first non-comment line — don't put `local` declarations before closing the header block.
+- `@detail` is scoped to the group it follows — a new `@group` or `@section` clears the accumulated detail. Write all `@detail` lines before any control-map lines for that group.

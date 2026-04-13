@@ -498,6 +498,58 @@
     .map-label:hover .map-lbl-desc,
     .map-label.hl .map-lbl-desc { color: var(--text); }
 
+    /* ── DETAIL EXPAND ──────────────────────────────────────────────── */
+    .map-lbl-expand-hint {
+      float: right;
+      font-size: 9px;
+      margin-left: 5px;
+      opacity: 0.45;
+      color: var(--muted);
+      transition: opacity 0.15s, color 0.15s;
+    }
+    .map-label:hover .map-lbl-expand-hint,
+    .map-label.pinned .map-lbl-expand-hint {
+      opacity: 1;
+      color: var(--accent);
+    }
+    .map-lbl-detail {
+      display: none;
+      margin-top: 7px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .map-label.pinned .map-lbl-detail { display: block; }
+    .map-label.pinned { opacity: 1; border-style: solid; }
+    .map-lbl-detail-line {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 2px;
+    }
+    .map-lbl-detail-line:first-child { color: var(--text); font-weight: 500; }
+    .map-lbl-detail-line:last-child { margin-bottom: 0; }
+    .map-label.pinned .map-lbl-detail-line { color: var(--text); }
+
+    /* ── CARD BODY COLLAPSE ─────────────────────────────────────────── */
+    /* Cards show only their title by default; body expands on hover/pin */
+    .map-lbl-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.18s ease;
+    }
+    .map-label:hover .map-lbl-body,
+    .map-label.hl .map-lbl-body,
+    .map-label.pinned .map-lbl-body { max-height: 600px; }
+
+    /* ── HOVER ISOLATION ────────────────────────────────────────────── */
+    /* When any card is active, dim everything else */
+    .main.map-focus .map-label:not(.hl) {
+      opacity: 0.12;
+      transition: opacity 0.12s ease;
+    }
+    .main.map-focus .map-connection:not(.hl) { opacity: 0.03; }
+    .main.map-focus .map-frame:not(.hl) { opacity: 0.08; }
+
     /* ── HIDDEN SCREENS HINT ────────────────────────────────────────────── */
     .map-hidden-hint {
       margin-top: 6px;
@@ -1412,6 +1464,169 @@
         max-height: 40vh;
       }
     }
+
+    /* ── MIDI MONITOR ────────────────────────────────────────────────── */
+    .midi-monitor-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    .midi-monitor-filters {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+    .mm-filter-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      border: 1px solid var(--border2);
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .mm-filter-btn:hover { border-color: var(--text); color: var(--text); }
+    .mm-filter-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(221,164,60,0.1);
+    }
+    .mm-filter-btn.active-in {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(6,182,212,0.1);
+    }
+    .mm-filter-btn.active-out {
+      border-color: var(--green);
+      color: var(--green);
+      background: rgba(34,197,94,0.1);
+    }
+    .mm-filter-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .midi-monitor-actions {
+      display: flex;
+      gap: 4px;
+    }
+    .mm-action-btn {
+      padding: 3px 7px;
+      border-radius: 4px;
+      border: 1px solid var(--border2);
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .mm-action-btn:hover { color: var(--text); border-color: var(--text); }
+    .mm-action-btn.paused { color: var(--amber); border-color: var(--amber); }
+    #midi-monitor-log {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border2) transparent;
+    }
+    .mm-entry {
+      display: grid;
+      grid-template-columns: 42px 22px 1fr auto;
+      gap: 4px 8px;
+      align-items: baseline;
+      padding: 3px 10px 3px 10px;
+      border-bottom: 1px solid rgba(28,37,53,0.6);
+      /* No animation/transition — too expensive at MIDI event rates */
+    }
+    .mm-entry:hover { background: rgba(255,255,255,0.03); }
+    .mm-ts {
+      font-size: 9px;
+      color: var(--muted);
+      text-align: right;
+      white-space: nowrap;
+    }
+    .mm-dir {
+      font-size: 9px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .mm-dir.in  { color: var(--cyan); }
+    .mm-dir.out { color: var(--green); }
+    .mm-type { font-size: 11px; }
+    .mm-type.note-on  { color: var(--green); }
+    .mm-type.note-off { color: #4a6080; }
+    .mm-type.cc       { color: var(--amber); }
+    .mm-type.clock    { color: #33445a; }
+    .mm-type.other    { color: var(--muted); }
+    .mm-bytes {
+      font-size: 9px;
+      color: var(--muted);
+      text-align: right;
+      letter-spacing: 0.5px;
+    }
+    .mm-counters {
+      display: flex;
+      gap: 10px;
+      padding: 4px 10px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .mm-counter-note  { color: var(--green); }
+    .mm-counter-cc    { color: var(--amber); }
+    .mm-counter-clock { color: #33445a; }
+    .mm-counter-in    { color: var(--cyan); }
+    .mm-counter-out   { color: var(--green); }
+    #panel-midi {
+      display: none;
+      flex-direction: column;
+      /* Fill the sidebar height but never exceed the viewport */
+      height: calc(100vh - 160px);
+      max-height: calc(100vh - 160px);
+      overflow: hidden;
+      position: sticky;
+      top: 0;
+    }
+    #panel-midi.active {
+      display: flex;
+      animation: fadeIn 0.2s ease;
+    }
+    /* Latest-entry highlight — applied to the last added row */
+    .mm-entry.latest {
+      background: rgba(6,182,212,0.06);
+      border-left: 2px solid var(--cyan);
+    }
+    /* Auto-prune notice row */
+    .mm-pruned-notice {
+      padding: 3px 10px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--muted);
+      border-bottom: 1px dashed var(--border2);
+      text-align: center;
+      opacity: 0.6;
+    }
   </style>
 </head>
 
@@ -1582,6 +1797,14 @@
                 <label>Amount <input type="range" id="reverb-slider" min="0" max="100" value="20"></label>
                 <label>Decay <input type="range" id="reverb-decay-slider" min="0" max="100" value="50"></label>
             </div>
+            <div class="sm-part">
+                <h5>Filter</h5>
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                  Enabled <input type="checkbox" id="filter-enable-check" style="width:14px; height:14px; accent-color:var(--accent);">
+                </label>
+                <label>CC # <input type="number" id="filter-cc-num" min="0" max="127" value="74" style="width:50px; background:var(--surface2); border:1px solid var(--border); color:var(--text); font-size:11px; padding:2px 4px; border-radius:4px;"></label>
+                <label>Level <input type="range" id="filter-slider" min="0" max="100" value="100"><span id="filter-val" style="min-width:32px;font-family:var(--font-mono);font-size:10px;color:var(--cyan);margin-left:4px;">100 <span style="color:var(--muted);font-size:9px;">/ —</span></span></label>
+            </div>
         </div>
       </div>
       <style>
@@ -1721,6 +1944,7 @@
         <div class="side-tab" data-tab="guide" id="tab-guide">Guide</div>
         <div class="side-tab" data-tab="state" id="tab-state">State</div>
         <div class="side-tab" data-tab="console" id="tab-console">Console</div>
+        <div class="side-tab" data-tab="midi" id="tab-midi">MIDI</div>
       </div>
       <div class="side-content">
 
@@ -1756,6 +1980,49 @@
         </div>
 
       </div>
+
+      <!-- ── MIDI Monitor panel (outside .side-content so it can flex fullheight) ── -->
+      <div id="panel-midi">
+        <!-- Sticky toolbar -->
+        <div class="midi-monitor-bar">
+          <div class="midi-monitor-filters" id="mm-filters">
+            <button class="mm-filter-btn active" id="mm-f-notes" data-filter="notes" title="Note On / Note Off">
+              <span class="mm-filter-dot"></span>Notes
+            </button>
+            <button class="mm-filter-btn active" id="mm-f-cc" data-filter="cc" title="Control Change">
+              <span class="mm-filter-dot"></span>CC
+            </button>
+            <button class="mm-filter-btn" id="mm-f-clock" data-filter="clock" title="MIDI Clock (0xF8)">
+              <span class="mm-filter-dot"></span>Clock
+            </button>
+            <button class="mm-filter-btn active" id="mm-f-other" data-filter="other" title="Other messages">
+              <span class="mm-filter-dot"></span>Other
+            </button>
+            <div style="width:1px;background:var(--border);margin:0 2px;"></div>
+            <button class="mm-filter-btn active active-in" id="mm-f-in" data-filter="in" title="Show incoming MIDI">
+              <span class="mm-filter-dot"></span>In
+            </button>
+            <button class="mm-filter-btn active active-out" id="mm-f-out" data-filter="out" title="Show outgoing MIDI">
+              <span class="mm-filter-dot"></span>Out
+            </button>
+          </div>
+          <div class="midi-monitor-actions">
+            <button class="mm-action-btn" id="mm-btn-pause" title="Pause / Resume capture">⏸ Pause</button>
+            <button class="mm-action-btn" id="mm-btn-clear" title="Clear log">⌫ Clear</button>
+          </div>
+        </div>
+        <!-- Live counters strip -->
+        <div class="mm-counters">
+          <span>📥 <span id="mm-cnt-in" class="mm-counter-in">0</span> in</span>
+          <span>📤 <span id="mm-cnt-out" class="mm-counter-out">0</span> out</span>
+          <span>♩ <span id="mm-cnt-notes" class="mm-counter-note">0</span> notes</span>
+          <span>◈ <span id="mm-cnt-cc" class="mm-counter-cc">0</span> CC</span>
+          <span>⏱ <span id="mm-cnt-clock" class="mm-counter-clock">0</span> clk</span>
+        </div>
+        <!-- Scrollable log -->
+        <div id="midi-monitor-log"></div>
+      </div>
+
     </aside>
     <div id="map-col-right" class="map-col"></div>
 
@@ -1924,6 +2191,7 @@
       cols: COLS,
       rows: ROWS,
       onOutOfBounds: () => { showOutOfBoundsWarning(); },
+      onMidiMonitor: (dir, bytes, ts) => { midiMonitorPush(dir, bytes, ts); },
       onLedUpdate: (frame, cols, rows, screenName = 'live') => {
         // Route to the appropriate pad array based on which screen just refreshed.
         // Dual-view: live → main pads, alt → ghost pads.
@@ -2135,6 +2403,36 @@
         api.delay.feedback = feedback;
         if (api._delayFeedback) api._delayFeedback.gain.value = feedback;
     });
+
+    // Filter controls
+    const filterEnableCheck = document.getElementById('filter-enable-check');
+    const filterCcNum = document.getElementById('filter-cc-num');
+    const filterSlider = document.getElementById('filter-slider');
+
+    filterEnableCheck.addEventListener('change', e => {
+      api.filter.enabled = e.target.checked;
+    });
+    filterCcNum.addEventListener('change', e => {
+      api.filter.cc = parseInt(e.target.value) || 74;
+    });
+    const filterVal = document.getElementById('filter-val');
+    function updateFilterReadout(cutoff, rawVal) {
+      const pct = Math.floor(cutoff * 100);
+      const rawStr = rawVal !== undefined ? rawVal : Math.floor(cutoff * 127);
+      filterVal.innerHTML = `${pct}% <span style="color:var(--muted);font-size:9px;">/ ${rawStr}</span>`;
+    }
+
+    filterSlider.addEventListener('input', e => {
+      const val = e.target.value / 100;
+      api.setFilterCutoff(val);
+      updateFilterReadout(val);
+    });
+
+    // Handle incoming MIDI CC updates for the UI
+    api.onFilterUpdate = (cutoff, rawVal) => {
+      filterSlider.value = Math.floor(cutoff * 100);
+      updateFilterReadout(cutoff, rawVal);
+    };
 
     // ─── LUA LOADER ────────────────────────────────────────────────────────────
     const loader = new LuaLoader({
@@ -2494,6 +2792,244 @@
       midiStatus.textContent = 'MIDI Unsupported';
     }
 
+    // ─── MIDI MONITOR ─────────────────────────────────────────────────────────
+    (function() {
+      const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+      const CC_NAMES = {
+        0:'Bank Sel MSB', 1:'Mod Wheel', 2:'Breath Ctrl', 4:'Foot Ctrl', 5:'Porta Time',
+        6:'Data Entry', 7:'Volume', 8:'Balance', 10:'Pan', 11:'Expr Ctrl',
+        32:'Bank Sel LSB', 33:'Mod Wheel LSB', 64:'Sustain', 65:'Portamento',
+        66:'Sostenuto', 67:'Soft Ped', 68:'Legato', 69:'Hold 2',
+        71:'Resonance', 72:'Release', 73:'Attack', 74:'Brightness', 75:'Ctrl 75',
+        84:'Porta Ctrl', 91:'FX1 Depth', 92:'FX2 Depth', 93:'FX3 Depth',
+        94:'FX4 Depth', 95:'FX5 Depth', 96:'Data+1', 97:'Data-1',
+        120:'All Snd Off', 121:'Ctrl Reset', 123:'All Notes Off', 126:'Mono', 127:'Poly'
+      };
+      function noteName(n) {
+        return NOTE_NAMES[n % 12] + Math.floor(n / 12 - 1);
+      }
+
+      // ── State ──────────────────────────────────────────────────────────
+      let _startTs = performance.now();
+      let _paused = false;
+      const _maxEntries = 150;     // hard cap: prune oldest when exceeded
+      const _autoPruneTarget = 75; // after auto-purge, keep this many
+      const _autoPruneMs = 30_000; // purge every 30 s of idle accumulation
+      let _counts = { in: 0, out: 0, notes: 0, cc: 0, clock: 0 };
+      const _filters = { notes: true, cc: true, clock: false, other: true, in: true, out: true };
+      let _latestEntry = null; // DOM ref to most-recently added row
+
+      const log = document.getElementById('midi-monitor-log');
+      const cntIn    = document.getElementById('mm-cnt-in');
+      const cntOut   = document.getElementById('mm-cnt-out');
+      const cntNotes = document.getElementById('mm-cnt-notes');
+      const cntCC    = document.getElementById('mm-cnt-cc');
+      const cntClock = document.getElementById('mm-cnt-clock');
+
+      // ── rAF batch queue ──────────────────────────────────────────────
+      // All events are pushed here; a single rAF drains them — zero per-event DOM touches.
+      const _queue = [];       // {dir, arr, ts, kind, cls, label, hexStr} or {isClock, count}
+      let _flushTimer = null;
+      let _pendingClockCount = 0;
+      const _panelMidi = document.getElementById('panel-midi');
+
+      function _scheduleFlush() {
+        if (_flushTimer !== null) return;
+        _flushTimer = setTimeout(_flush, 250);  // 4 renders/sec max — imperceptible for a log
+      }
+
+      function _flush() {
+        _flushTimer = null;
+        if (_queue.length === 0 && _pendingClockCount === 0) return;
+
+        // Drain any remaining coalesced clocks
+        if (_pendingClockCount > 0) {
+          _queue.push({ isClock: true, count: _pendingClockCount });
+          _pendingClockCount = 0;
+        }
+
+        // Always update counts — cheap, just numbers
+        for (const item of _queue) {
+          if (item.isClock) {
+            _counts.clock += item.count;
+          } else {
+            if (item.dir === 'in') _counts.in++; else _counts.out++;
+            if (item.kind === 'notes') _counts.notes++;
+            else if (item.kind === 'cc') _counts.cc++;
+          }
+        }
+        _updateCounters();
+
+        // VISIBILITY GATE: skip all DOM node work when panel is not shown.
+        // This is the primary CPU win — zero rendering cost when off-screen.
+        if (!_panelMidi.classList.contains('active')) {
+          _queue.length = 0;
+          return;
+        }
+
+        const frag = document.createDocumentFragment();
+        let addedAny = false;
+
+        for (const item of _queue) {
+          if (item.isClock) {
+            if (_filters.clock) {
+              frag.appendChild(_makeEntry('out', '⏱', 'clock', `Clock ×${item.count}`, ''));
+              addedAny = true;
+            }
+          } else {
+            if (_filters[item.dir] && _filters[item.kind]) {
+              frag.appendChild(_makeEntry(item.dir, item.tsStr, item.cls, item.label, item.hexStr));
+              addedAny = true;
+            }
+          }
+        }
+        _queue.length = 0;
+
+        if (addedAny) {
+          if (_latestEntry) _latestEntry.classList.remove('latest');
+          const autoScroll = log.scrollHeight - log.scrollTop - log.clientHeight < 40;
+          log.appendChild(frag);
+          _pruneEntries();
+          _latestEntry = log.lastElementChild;
+          if (_latestEntry) _latestEntry.classList.add('latest');
+          if (autoScroll) log.scrollTop = log.scrollHeight;
+        }
+      }
+
+
+      // ── Periodic auto-purge (memory safety for long sessions) ────────
+      // Runs every 30 s; if the log has grown past _autoPruneTarget, trim it
+      // and insert a subtle divider so you can see where history was dropped.
+      setInterval(() => {
+        if (log.children.length > _autoPruneTarget) {
+          const keep = _autoPruneTarget;
+          while (log.children.length > keep) log.removeChild(log.firstChild);
+          // Insert a faint divider notice
+          const notice = document.createElement('div');
+          notice.className = 'mm-pruned-notice';
+          const now = new Date().toLocaleTimeString();
+          notice.textContent = `─── auto-pruned at ${now} ───`;
+          log.insertBefore(notice, log.firstChild);
+        }
+      }, _autoPruneMs);
+
+      // ── Filter toggle buttons ────────────────────────────────────────
+      document.querySelectorAll('.mm-filter-btn').forEach(btn => {
+        const f = btn.dataset.filter;
+        btn.addEventListener('click', () => {
+          _filters[f] = !_filters[f];
+          if (f === 'in') {
+            btn.classList.toggle('active-in', _filters[f]);
+            btn.classList.toggle('active', false);
+          } else if (f === 'out') {
+            btn.classList.toggle('active-out', _filters[f]);
+            btn.classList.toggle('active', false);
+          } else {
+            btn.classList.toggle('active', _filters[f]);
+          }
+        });
+      });
+
+      // ── Pause / Clear ────────────────────────────────────────────────
+      const btnPause = document.getElementById('mm-btn-pause');
+      const btnClear = document.getElementById('mm-btn-clear');
+      btnPause.addEventListener('click', () => {
+        _paused = !_paused;
+        btnPause.textContent = _paused ? '▶ Resume' : '⏸ Pause';
+        btnPause.classList.toggle('paused', _paused);
+      });
+      btnClear.addEventListener('click', () => {
+        log.innerHTML = '';
+        _queue.length = 0;
+        _pendingClockCount = 0;
+        _latestEntry = null;
+        _counts = { in: 0, out: 0, notes: 0, cc: 0, clock: 0 };
+        _startTs = performance.now();
+        _updateCounters();
+      });
+
+      function _updateCounters() {
+        cntIn.textContent    = _counts.in;
+        cntOut.textContent   = _counts.out;
+        cntNotes.textContent = _counts.notes;
+        cntCC.textContent    = _counts.cc;
+        cntClock.textContent = _counts.clock;
+      }
+
+      // ── Parse bytes → human label ────────────────────────────────────
+      function _describe(bytes) {
+        const b0 = bytes[0], b1 = bytes[1] ?? 0, b2 = bytes[2] ?? 0;
+        const status = b0 & 0xF0;
+        const ch = (b0 & 0x0F) + 1;
+
+        if (b0 === 0xF8) return { kind: 'clock', cls: 'clock', label: 'Clock ⏱' };
+        if (b0 === 0xFA) return { kind: 'clock', cls: 'clock', label: 'Start ▶' };
+        if (b0 === 0xFB) return { kind: 'clock', cls: 'clock', label: 'Continue ▶▶' };
+        if (b0 === 0xFC) return { kind: 'clock', cls: 'clock', label: 'Stop ■' };
+        if (b0 === 0xFF) return { kind: 'other', cls: 'other', label: 'Reset' };
+        if (b0 === 0xFE) return { kind: 'other', cls: 'other', label: 'Active Sense' };
+        if (b0 >= 0xF0)  return { kind: 'other', cls: 'other', label: `SysEx/RT 0x${b0.toString(16).toUpperCase()}` };
+
+        if (status === 0x90 && b2 > 0) {
+          return { kind: 'notes', cls: 'note-on',  label: `Note On  ${noteName(b1)} vel:${b2} ch${ch}` };
+        }
+        if (status === 0x80 || (status === 0x90 && b2 === 0)) {
+          return { kind: 'notes', cls: 'note-off', label: `Note Off ${noteName(b1)} ch${ch}` };
+        }
+        if (status === 0xB0) {
+          const ccName = CC_NAMES[b1] || `CC${b1}`;
+          return { kind: 'cc', cls: 'cc', label: `${ccName} = ${b2} ch${ch}` };
+        }
+        if (status === 0xA0) return { kind: 'notes', cls: 'note-on', label: `Aftertouch ${noteName(b1)} prs:${b2} ch${ch}` };
+        if (status === 0xC0) return { kind: 'other', cls: 'other', label: `Prog Change ${b1} ch${ch}` };
+        if (status === 0xD0) return { kind: 'other', cls: 'other', label: `Ch Pres ${b1} ch${ch}` };
+        if (status === 0xE0) {
+          const bend = ((b2 << 7) | b1) - 8192;
+          return { kind: 'other', cls: 'other', label: `Pitch Bend ${bend > 0 ? '+' : ''}${bend} ch${ch}` };
+        }
+        return { kind: 'other', cls: 'other', label: `0x${b0.toString(16).toUpperCase()} ${b1} ${b2}` };
+      }
+
+      function _makeEntry(dir, tsStr, cls, label, hexStr) {
+        const row = document.createElement('div');
+        row.className = 'mm-entry';
+        row.innerHTML =
+          `<span class="mm-ts">${tsStr}</span>` +
+          `<span class="mm-dir ${dir}">${dir.toUpperCase()}</span>` +
+          `<span class="mm-type ${cls}">${label}</span>` +
+          `<span class="mm-bytes">${hexStr}</span>`;
+        return row;
+      }
+
+      function _pruneEntries() {
+        while (log.children.length > _maxEntries) log.removeChild(log.firstChild);
+      }
+
+      // ── Public push function wired into MonomeAPI ────────────────────
+      // This is called from MIDI callbacks (off the main thread boundary) — keep it
+      // allocation-light; heavy work happens in _flush() during rAF.
+      window.midiMonitorPush = function(dir, bytes, ts) {
+        if (_paused) return;
+        const arr = Array.from(bytes);
+        const b0 = arr[0];
+        const isClock = (b0 === 0xF8 || b0 === 0xFA || b0 === 0xFB || b0 === 0xFC);
+
+        if (isClock) {
+          // Coalesce clock ticks — don't even enqueue individually
+          _pendingClockCount++;
+          _scheduleFlush();
+          return;
+        }
+
+        const { kind, cls, label } = _describe(arr);
+        const elapsed = ((ts - _startTs) / 1000).toFixed(3);
+        const hexStr = arr.map(b => b.toString(16).padStart(2,'0').toUpperCase()).join(' ');
+
+        _queue.push({ dir, arr, ts, kind, cls, label, hexStr, tsStr: elapsed + 's' });
+        _scheduleFlush();
+      };
+    })();
+
     // ─── KEYBOARD ──────────────────────────────────────────────────────────────
     let tabDown = false;
     document.addEventListener('keydown', e => {
@@ -2531,12 +3067,22 @@
     });
 
     // ─── SIDE TABS ────────────────────────────────────────────────────────────
+    const _sideContent = document.querySelector('.side-content');
+    const _panelMidi   = document.getElementById('panel-midi');
+
     document.querySelectorAll('.side-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.side-tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.side-panel').forEach(p => p.classList.remove('active'));
         tab.classList.add('active');
-        document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+        const isMidi = tab.dataset.tab === 'midi';
+        // Show/hide the scrollable side-content wrapper
+        _sideContent.style.display = isMidi ? 'none' : '';
+        // Show/hide the MIDI monitor panel
+        _panelMidi.classList.toggle('active', isMidi);
+        if (!isMidi) {
+          document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+        }
       });
     });
 
@@ -3094,12 +3640,19 @@
     setTimeout(fitToWindow, 100);
 
     // ─── MAP OVERLAY ─────────────────────────────────────────────────────────
-    // Parses "x=1..8, y=1" or "x=1, y=8" → {xMin,xMax,yMin,yMax} or null
+    // Parses "x=1..8, y=1", "x=1, y=8", or "Row N" / "Row N..M" → {xMin,xMax,yMin,yMax} or null
     function _parseGridLoc(str) {
       const xm = str.match(/x=(\d+)(?:\.\.(\d+))?/);
       const ym = str.match(/y=(\d+)(?:\.\.(\d+))?/);
-      if (!xm || !ym) return null;
-      return { xMin:+xm[1], xMax:+(xm[2]||xm[1]), yMin:+ym[1], yMax:+(ym[2]||ym[1]) };
+      if (xm && ym) {
+        return { xMin:+xm[1], xMax:+(xm[2]||xm[1]), yMin:+ym[1], yMax:+(ym[2]||ym[1]) };
+      }
+      // "Row N" or "Row N..M" → full-width horizontal band
+      const rm = str.match(/[Rr]ow\s+(\d+)(?:\.\.(\d+))?/);
+      if (rm) {
+        return { xMin:1, xMax:COLS, yMin:+rm[1], yMax:+(rm[2]||rm[1]) };
+      }
+      return null;
     }
 
     const _MAP_COLORS = [
@@ -3318,6 +3871,7 @@
               sectionTitle: sec.title,
               color,
               controls:     [],
+              detail:       c.detail || null,
               order:        orderIdx++,
             });
           }
@@ -3523,21 +4077,32 @@
           lbl.className = 'map-label';
           lbl.style.borderColor = group.color + '55';
 
+          const detailHtml = group.detail
+            ? `<div class="map-lbl-detail">${group.detail.split('\n').map(l => `<div class="map-lbl-detail-line">${l}</div>`).join('')}</div>`
+            : '';
+          const expandHint = group.detail ? `<span class="map-lbl-expand-hint">ⓘ</span>` : '';
+
           if (group.isNamed) {
             // Group card: title + sub-control list
             lbl.innerHTML = `
-              <div class="map-lbl-loc" style="color:${group.color}">${group.title}</div>
-              ${group.controls.map(c => `
-                <div class="map-lbl-entry">
-                  <div class="map-lbl-section-badge" style="color:${group.color}99">${c.location}</div>
-                  <div class="map-lbl-desc">${c.description}</div>
-                </div>`).join('')}`;
+              <div class="map-lbl-loc" style="color:${group.color}">${group.title}${expandHint}</div>
+              <div class="map-lbl-body">
+                ${group.controls.map(c => `
+                  <div class="map-lbl-entry">
+                    <div class="map-lbl-section-badge" style="color:${group.color}99">${c.location}</div>
+                    <div class="map-lbl-desc">${c.description}</div>
+                  </div>`).join('')}
+                ${detailHtml}
+              </div>`;
           } else {
             // Singleton card: location as title + description
             lbl.innerHTML = `
-              <div class="map-lbl-loc" style="color:${group.color}">${group.controls[0].location}</div>
-              <div class="map-lbl-entry">
-                <div class="map-lbl-desc">${group.controls[0].description}</div>
+              <div class="map-lbl-loc" style="color:${group.color}">${group.controls[0].location}${expandHint}</div>
+              <div class="map-lbl-body">
+                <div class="map-lbl-entry">
+                  <div class="map-lbl-desc">${group.controls[0].description}</div>
+                </div>
+                ${detailHtml}
               </div>`;
           }
           col.appendChild(lbl);
@@ -3600,15 +4165,23 @@
             lbl.style.boxShadow = `0 0 0 1px ${group.color}55, 0 2px 16px rgba(0,0,0,0.6)`;
             allFrames.forEach(({ frame }) => { frame.classList.add('hl'); frame.style.boxShadow = `0 0 14px ${group.color}55`; });
             allPaths.forEach(({ path }) => path.classList.add('hl'));
+            main.classList.add('map-focus');
           };
           const uhl = () => {
             lbl.classList.remove('hl');
             lbl.style.boxShadow = '';
             allFrames.forEach(({ frame }) => { frame.classList.remove('hl'); frame.style.boxShadow = ''; });
             allPaths.forEach(({ path }) => path.classList.remove('hl'));
+            main.classList.remove('map-focus');
           };
           lbl.addEventListener('mouseenter', hl);
           lbl.addEventListener('mouseleave', uhl);
+
+          // Click to pin/unpin detail panel (only on cards that have detail text)
+          if (group.detail) {
+            lbl.style.cursor = 'pointer';
+            lbl.addEventListener('click', () => lbl.classList.toggle('pinned'));
+          }
 
           // ── Register pads in _padGroupMap for grid hover delegation ───────
           const prefix = isGhost ? 'g' : 'l';

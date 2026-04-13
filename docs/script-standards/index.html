@@ -1157,10 +1157,27 @@ These are extracted by <code>doc-extractor.js</code> and rendered as the map ove
 <span class="c1">-- @screen menu             ← another named alt screen — gets its own tab in the ghost grid</span>
 
 <span class="c1">-- @group Group Name        ← start a named group; controls below belong to it</span>
+<span class="c1">-- @detail First line of extended description for this group.</span>
+<span class="c1">-- @detail Additional lines accumulate — each @detail line appends to the previous.</span>
 <span class="c1">-- x=N, y=M: Description   ← sub-control inside the group</span>
 <span class="c1">-- x=N, y=M: Description</span>
 <span class="c1">-- @group                   ← empty @group clears the group; next controls are singletons</span>
 <span class="c1">-- x=N, y=M: Description   ← singleton — gets its own overlay card</span>
+</code></pre></div>
+
+<p><strong><code>@detail text</code></strong> attaches an extended description to the group declared immediately
+above it. Multiple consecutive <code>@detail</code> lines are concatenated with a newline, so
+you can write multi-line explanations. The detail is cleared whenever a new <code>@group</code>
+or <code>@section</code> tag is encountered, so each group gets its own isolated annotation.
+The detail is surfaced in the live manual panel in the emulator as supplementary copy
+below the group's control list.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">-- @group Water Tracks</span>
+<span class="c1">-- @detail Each row is an independent sequencer track with its own playhead.</span>
+<span class="c1">-- @detail When a leaf sits on a playhead position, it triggers a note.</span>
+<span class="c1">-- @detail Track length, speed, MIDI channel, and octave are set on the Seq screen.</span>
+<span class="c1">-- Row 5: TR1 — Water surface, base octave</span>
+<span class="c1">-- Row 6: TR2 — Underwater mid, one octave down</span>
+<span class="c1">-- Row 7: TR3 — Underwater deep, two octaves down</span>
 </code></pre></div>
 
 <p><strong><code>@section</code></strong> defines a major logical grouping (e.g. "Grid Layout", "Settings View").
@@ -1380,6 +1397,16 @@ The <code>R</code> key (Reload) is always shown as an app-level entry at the end
 <td><code>-- @section Spawner Engine</code></td>
 </tr>
 <tr>
+<td><code>-- @group Name</code></td>
+<td>Starts a named group</td>
+<td><code>-- @group D-PAD</code></td>
+</tr>
+<tr>
+<td><code>-- @detail text</code></td>
+<td>Extended description for the current group (multi-line, accumulates)</td>
+<td><code>-- @detail Leaves drift slowly downward.</code></td>
+</tr>
+<tr>
 <td><code>-- @key KEYS: Label</code></td>
 <td>Keyboard shortcut hint</td>
 <td><code>-- @key ↑↓←→: Steer</code></td>
@@ -1411,11 +1438,15 @@ The <code>R</code> key (Reload) is always shown as an app-level entry at the end
 <tbody>
 <tr>
 <td><a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/serpentine_dev.lua">scripts/serpentineSeqr/serpentine_dev.lua</a></td>
-<td>Reference <code>.lua</code> with inline LDoc header and control map comments</td>
+<td>Reference <code>.lua</code> — LDoc header, <code>@section</code>/<code>@screen</code>/<code>@group</code> control map</td>
 </tr>
 <tr>
 <td><a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/serpentineseqr_docs.md">scripts/serpentineSeqr/serpentineseqr_docs.md</a></td>
-<td>Reference README (to be renamed and kept alongside the <code>.lua</code>)</td>
+<td>Reference README (rename to <code>README.md</code> when packaging for external import)</td>
+</tr>
+<tr>
+<td><a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/leaveseqr/leaveseqr.lua">scripts/leaveseqr/leaveseqr.lua</a></td>
+<td>Full example of <code>@detail</code> usage — multi-line group descriptions across all screens</td>
 </tr>
 <tr>
 <td><a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/engine/doc-extractor.js">engine/doc-extractor.js</a></td>
