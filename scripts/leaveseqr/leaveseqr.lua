@@ -127,7 +127,7 @@ local TS_RISING   = 1
 local TS_SINKING  = 2
 
 -- Physics
-local PHYS_HZ  = 8
+local PHYS_HZ  = 6
 local PHYS_INT = 1.0 / PHYS_HZ
 
 -- Fall / sink probabilities per tick (ambient-slow)
@@ -157,11 +157,19 @@ local SC1={r=75,g=195,b=75}; local SC2={r=18,g=145,b=55}
 local SC3={r=195,g=95,b=18}; local SC4={r=72,g=112,b=152}
 local SEA_COLORS = {SC1, SC2, SC3, SC4}
 local BRI_VALS = {255, 138, 58}
+-- Seq/scale draw constants (pre-allocated at module scope — avoid heap allocs inside draw fns)
+local SEQ_OPT_COLORS = {{140,88,14},{155,45,175},{185,105,18},{55,100,245}}
+local BPM_COL_HI     = {220, 20,  20}   -- outer BPM buttons (x=1, x=4)
+local BPM_COL_MID    = {192, 112, 16}   -- inner BPM buttons (x=2, x=3)
+local SCALE_SEA_DRAW = {{0,150,40},{250,200,0},{200,80,0},{50,100,200}}
+local SCALE_BLK_KEYS = {-1, 1, 3, -1, 6, 8, 10}
 
 -- ===========================================================================
 -- GRID STATE (flat pre-allocated [1..128])
 -- ===========================================================================
-local is_dirty = true
+local is_dirty    = true  -- live screen needs redraw
+local seq_dirty   = true  -- seq screen needs redraw
+local scale_dirty = true  -- scale screen needs redraw
 local GTYPE  = {}
 local GCOL   = {}
 local GMOVED = {}
@@ -178,6 +186,9 @@ local function gidx(x, y)  return (y - 1) * W + x  end
 local function dirty_all()
   local n = supports_multi_screen and W*H*3 or W*H
   for i = 1, n do P_R[i]=-1; P_G[i]=-1; P_B[i]=-1 end
+end
+local function dirty_all_screens()
+  dirty_all(); is_dirty=true; seq_dirty=true; scale_dirty=true
 end
 
 -- ===========================================================================
@@ -338,10 +349,10 @@ local function show_hud(lbl, val, r, g, b)
   hud_label = lbl or ""
   local v_str = tostring(val or "")
   if #v_str > 0 then hud_val = v_str else hud_val = hud_label end
-  
-  hud_color = {r or 255, g or 255, b or 255}
+  -- Mutate pre-allocated table; avoids a heap alloc on every show_hud call
+  hud_color[1] = r or 255; hud_color[2] = g or 255; hud_color[3] = b or 255
   hud_timer = 12  -- 1.5s
-  is_dirty = true
+  is_dirty = true; seq_dirty = true; scale_dirty = true  -- HUD appears on all screens
 end
 
 local function draw_hud()
@@ -535,7 +546,7 @@ local function cycle_screen()
   -- entries just represented the *old* screen; flush them so the new screen gets
   -- a full repaint rather than hitting stale differential matches.
   if not supports_multi_screen then dirty_all() end
-  is_dirty = true
+  is_dirty = true; seq_dirty = true; scale_dirty = true
 end
 
 -- ===========================================================================
@@ -589,8 +600,6 @@ local function draw_track_row(ry, tr)
   local bb = ry == Y_SURF and 26 or 20
 
   for x = 1, W do
-    local gi  = gidx(x, ry)
-    local lt  = GTYPE[gi]
     local r, g, b = br, bg, bb
 
     if seq_opt == 1 then   -- LOOP: highlight range, mark endpoints
@@ -623,14 +632,6 @@ local function draw_track_row(ry, tr)
     -- Playhead flash (orange)
     if seq_running and x == tr.step then
       r=math.min(255,r+100); g=math.min(255,g+68); b=math.min(255,b+6)
-    end
-
-    -- Leaf tint blend
-    if lt ~= T_EMPTY then
-      local c = SEASONS[season][GCOL[gi]]
-      r=math.min(255,r+math.floor(c.r*0.25))
-      g=math.min(255,g+math.floor(c.g*0.25))
-      b=math.min(255,b+math.floor(c.b*0.20))
     end
 
     spx(x, ry, r, g, b)
@@ -734,16 +735,16 @@ local function draw_seq()
   for y = 1, H do for x = 1, W do spx(x, y, 0, 0, 0) end end
 
   -- Row 1: Track Selectors (LEN, DIV, CH, OCT) at x=1..4
-  local oc = {{140,88,14},{155,45,175},{185,105,18},{55,100,245}}
   for x = 1, 4 do
     local on = (x == seq_opt)
-    local v = on and 1.0 or 0.12
-    spx(x, 1, math.floor(oc[x][1]*v), math.floor(oc[x][2]*v), math.floor(oc[x][3]*v))
+    local v  = on and 1.0 or 0.12
+    local oc = SEQ_OPT_COLORS[x]
+    spx(x, 1, math.floor(oc[1]*v), math.floor(oc[2]*v), math.floor(oc[3]*v))
   end
 
   -- Row 2: BPM (x=1..4)
   for x = 1, 4 do
-    local c = (x == 1 or x == 4) and {220, 20, 20} or {192, 112, 16}
+    local c = (x == 1 or x == 4) and BPM_COL_HI or BPM_COL_MID
     spx(x, 2, c[1], c[2], c[3])
   end
 
@@ -776,14 +777,8 @@ local function draw_seq()
   draw_track_row(Y_MID,  t2)
   draw_track_row(Y_DEEP, t3)
 
-  -- y=8: Mud reference (just tint, no interaction)
-  for x = 1, W do
-    local gi = gidx(x, Y_MUD)
-    local t  = GTYPE[gi]
-    local r, g, b = 12, 8, 3
-    if t == T_MUD then r=32; g=22; b=8 end
-    spx(x, Y_MUD, r, g, b)
-  end
+  -- y=8: Mud reference — static tint; no live GTYPE read on the settings screen
+  for x = 1, W do spx(x, Y_MUD, 14, 9, 4) end
 
   draw_ctrl_buttons("seq")
   draw_hud()
@@ -804,9 +799,8 @@ local function draw_scale()
   end
 
   -- y=3: Black keys Row 3 (0 X X 0 X X X) x=1..7
-  local BLK = {-1, 1, 3, -1, 6, 8, 10}
   for x = 1, 7 do
-    local s = BLK[x]
+    local s = SCALE_BLK_KEYS[x]
     if s >= 0 then
       local is_root, is_active = false, false
       if scale_mode == 7 then is_active = custom_scale[s+1]
@@ -841,11 +835,10 @@ local function draw_scale()
   end
 
   -- Row 7: Seasons x=1..4; Mono toggle x=6
-  local sc = {{0,150,40}, {250,200,0}, {200,80,0}, {50,100,200}}
   for x = 1, 4 do
     local on = (x == season)
-    local c = sc[x]
-    local v = on and 1.0 or 0.15
+    local c  = SCALE_SEA_DRAW[x]
+    local v  = on and 1.0 or 0.15
     spx(x, 7, math.floor(c[1]*v), math.floor(c[2]*v), math.floor(c[3]*v))
   end
   -- Mono toggle
@@ -866,16 +859,23 @@ end
 -- ===========================================================================
 
 local function redraw()
-  if not is_dirty then return end
   if supports_multi_screen then
-    draw_live(); draw_seq(); draw_scale()
+    -- Per-screen dirty flags: each screen only redraws when its own state changed.
+    -- Live updates every physics tick; seq updates on step advance or input;
+    -- scale updates only on user input. HUD and cycle events dirty all three.
+    local any = false
+    if is_dirty     then draw_live();  is_dirty     = false; any = true end
+    if seq_dirty    then draw_seq();   seq_dirty    = false; any = true end
+    if scale_dirty  then draw_scale(); scale_dirty  = false; any = true end
+    if any then grid_refresh() end
   else
+    if not is_dirty then return end
     if     cur_screen == "seq"   then draw_seq()
     elseif cur_screen == "scale" then draw_scale()
     else                              draw_live() end
+    grid_refresh()
+    is_dirty = false
   end
-  grid_refresh()
-  is_dirty = false
 end
 
 -- ===========================================================================
@@ -883,6 +883,7 @@ end
 -- ===========================================================================
 
 local release_cols = {}
+for i = 1, W do release_cols[i] = 0 end  -- pre-size array part; prevents Lua resize on every canopy-release tick
 local last_cc = -1
 
 local function physics_tick()
@@ -1115,12 +1116,14 @@ local function physics_tick()
         cc_target = math.random(20, 115); cc_slew = 0.12
       end
     end
-    -- Slew movement
-    cc_val = cc_val + (cc_target - cc_val) * cc_slew
-    local new_cc = math.floor(cc_val)
-    if new_cc ~= last_cc then
-      if midi_cc then midi_cc(CC_NUM, new_cc, 1) end
-      last_cc = new_cc
+    -- Slew: run every other tick to halve float-math cost; 3 Hz is still perceptually smooth
+    if cc_timer % 2 == 0 then
+      cc_val = cc_val + (cc_target - cc_val) * cc_slew
+      local new_cc = math.floor(cc_val)
+      if new_cc ~= last_cc then
+        if midi_cc then midi_cc(CC_NUM, new_cc, 1) end
+        last_cc = new_cc
+      end
     end
   else
     -- Clean seasons: reset CC to 100
@@ -1186,7 +1189,8 @@ local function physics_tick()
 
   if hud_timer > 0 then
     hud_timer = hud_timer - 1
-    if hud_timer == 0 then phy_changed = true end
+    -- HUD appears on all screens; dirty all three when it expires so it clears everywhere
+    if hud_timer == 0 then phy_changed = true; seq_dirty = true; scale_dirty = true end
   end
 
   if phy_changed then is_dirty = true end
@@ -1240,7 +1244,7 @@ local m_seq   -- forward-declared
 local function seq_tick()
   tick_notes()
   if not seq_running then return end
-  beat_count = beat_count + 1
+  beat_count = (beat_count + 1) % 65536  -- cap to prevent unbounded integer growth
 
   for ti = 1, 3 do
     local tr = TRACKS[ti]
@@ -1257,7 +1261,7 @@ local function seq_tick()
     end
   end
 
-  is_dirty = true
+  is_dirty = true; seq_dirty = true  -- playhead advanced on both live and seq screens
 end
 
 -- ===========================================================================
@@ -1326,7 +1330,7 @@ function event_grid(x, y, z)
       notes_off(); echo_off()
       for ti = 1, 3 do TRACKS[ti].accum = 0 end
     end
-    is_dirty = true; return
+    is_dirty = true; seq_dirty = true; return  -- running state reflected on both screens
   end
   
   -- GLOBAL: ALT SWITCH (Bottom-left in some views, but defined explicitly in Scale)
@@ -1380,7 +1384,7 @@ function event_grid(x, y, z)
     elseif y == Y_MID  then seq_track_tap(t2, x)
     elseif y == Y_DEEP then seq_track_tap(t3, x)
     end
-    is_dirty = true; return
+    seq_dirty = true; is_dirty = true; return
   end
 
   -- ── SCALE SCREEN ─────────────────────────────────────────────────────────
@@ -1395,9 +1399,8 @@ function event_grid(x, y, z)
       end
     -- Row 3: Black Keys
     elseif y == 3 then
-      local BLK = {-1, 1, 3, -1, 6, 8, 10}
       if x >= 1 and x <= 7 then
-        local s = BLK[x]
+        local s = SCALE_BLK_KEYS[x]
         if s >= 0 then
           if scale_mode == 7 then custom_scale[s+1] = not custom_scale[s+1]
           else root_note = s end
@@ -1440,7 +1443,7 @@ function event_grid(x, y, z)
         show_hud("DIM", "", 200, 200, 200)
       end
     end
-    is_dirty = true; return
+    scale_dirty = true; is_dirty = true; return
   end
 
   -- ── LIVE SCREEN ──────────────────────────────────────────────────────────
