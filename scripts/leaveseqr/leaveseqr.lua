@@ -225,11 +225,22 @@ local function gen_scale()
 end
 gen_scale()
 
-local function col_to_note(x, oct_off)
+local function col_to_note(x, oct_off, o_min, o_max)
   local deg  = ((x - 1) % SCALE_LEN) + 1
   local eoct = math.floor((x - 1) / SCALE_LEN)
+  
+  -- Calculate target relative octave
+  local target_rel = (oct_off or 0) + eoct
+  
+  -- Strict clamp if bounds provided
+  if o_min and o_max then
+    local start_o = math.min(o_min, o_max)
+    local end_o = math.max(o_min, o_max)
+    target_rel = math.max(start_o, math.min(end_o, target_rel))
+  end
+  
   return math.max(24, math.min(108,
-    12 + (oct_base + (oct_off or 0) + eoct) * 12 + SCALE[deg]))
+    12 + (oct_base + target_rel) * 12 + SCALE[deg]))
 end
 
 -- ===========================================================================
@@ -485,10 +496,10 @@ local beat_count  = 0
 -- x=1..6 → 1/32 1/16 1/8 1/4 1/2 1/1
 local DIV_MULT = {4.0, 2.0, 1.0, 0.5, 0.25, 0.125}
 
--- t1: water surface, base oct; t2: mid water, -1 oct; t3: deep, -2 oct
-local t1 = {y=Y_SURF, step=1, div=3, dir=1, ch=1, accum=0.0, start_step=1, end_step=16, loop_input=0, oct_min=0,  oct_max=0,  oct_input=0}
-local t2 = {y=Y_MID,  step=1, div=4, dir=1, ch=2, accum=0.0, start_step=1, end_step=16, loop_input=0, oct_min=-1, oct_max=-1, oct_input=0}
-local t3 = {y=Y_DEEP, step=1, div=5, dir=1, ch=3, accum=0.0, start_step=1, end_step=16, loop_input=0, oct_min=-2, oct_max=-2, oct_input=0}
+-- t1: surface (high); t2: mid (medium); t3: deep (low)
+local t1 = {y=Y_SURF, step=1, div=3, dir=1, ch=1, accum=0.0, start_step=1, end_step=16, loop_input=0, oct_min=1,  oct_max=1,  oct_input=0}
+local t2 = {y=Y_MID,  step=1, div=4, dir=1, ch=2, accum=0.0, start_step=1, end_step=16, loop_input=0, oct_min=0,  oct_max=0,  oct_input=0}
+local t3 = {y=Y_DEEP, step=1, div=5, dir=1, ch=3, accum=0.0, start_step=1, end_step=16, loop_input=0, oct_min=-1, oct_max=-1, oct_input=0}
 local TRACKS = {t1, t2, t3}
 
 local function advance_track(tr)
@@ -1061,8 +1072,8 @@ local function physics_tick()
             local li = gidx(tr.x, tr.y)
             if GTYPE[li] ~= T_EMPTY then
               -- Trigger eating event: bass echo + soft upper octave unison
-              local base_n = col_to_note(tr.x, -2) -- deep bass (MIDI ~36-48)
-              local hi_n   = col_to_note(tr.x, -1) -- one octave above bass
+              local base_n = col_to_note(tr.x, -2, -2, -2) -- deep bass (MIDI ~36-48), strict clamp
+              local hi_n   = col_to_note(tr.x, -1, -1, -1) -- one octave above bass, strict clamp
               local t_vol  = triop_strength == 1 and 40 or 75
               start_echo(base_n, tr.ch, t_vol)
               play_note(hi_n, math.floor(t_vol * 0.55), 4, tr.ch)  -- soft upper unison
@@ -1204,7 +1215,7 @@ end
 local function trigger_water_note(ti, x)
   local tr = TRACKS[ti]
 
-  -- Pick random octave in range
+  -- Pick random octave in range as the base offset
   local o_min = math.min(tr.oct_min, tr.oct_max)
   local o_max = math.max(tr.oct_min, tr.oct_max)
   local oct_off = (o_min == o_max) and o_min or math.random(o_min, o_max)
@@ -1223,17 +1234,17 @@ local function trigger_water_note(ti, x)
     -- Potential Chords (25% chance)
     if math.random(100) < 25 then
       local off = (math.random(2) == 1) and 2 or 4 -- third or fifth degree
-      play_note(col_to_note(x + off, oct_off), v_base - 10, dur, tr.ch)
+      play_note(col_to_note(x + off, oct_off, o_min, o_max), v_base - 10, dur, tr.ch)
     end
   elseif s == 4 then -- Winter: long and short, potential echoes
     dur = math.random(1, 14); v_base = v_base - 12
     -- Potential Echoes (15% chance)
     if math.random(100) < 15 then
-      start_echo(col_to_note(x, oct_off), tr.ch, v_base - 20)
+      start_echo(col_to_note(x, oct_off, o_min, o_max), tr.ch, v_base - 20)
     end
   end
 
-  play_note(col_to_note(x, oct_off), math.random(v_base-12, v_base+10), dur, tr.ch)
+  play_note(col_to_note(x, oct_off, o_min, o_max), math.random(v_base-12, v_base+10), dur, tr.ch)
 end
 
 -- ===========================================================================
