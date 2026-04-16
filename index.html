@@ -76,6 +76,7 @@
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       flex-wrap: wrap;
+      position: relative;
     }
 
     .topbar-brand {
@@ -132,11 +133,12 @@
       cursor: pointer;
       outline: none;
       transition: border-color 0.15s, background 0.15s;
+      flex-shrink: 0;
     }
 
     select {
       padding: 5px 8px;
-      min-width: 180px;
+      min-width: 140px;
     }
 
     select:focus {
@@ -209,6 +211,36 @@
     }
     .grid-preset-menu button:hover { background: var(--surface); }
     .grid-preset-menu button.active { color: var(--accent); }
+
+    /* Nav Links */
+    .topbar-links {
+      display: flex;
+      gap: 16px;
+      margin-left: 20px;
+      border-left: 1px solid var(--border);
+      padding-left: 20px;
+      align-items: center;
+    }
+
+    .nav-link {
+       color: var(--muted);
+       text-decoration: none;
+       font-size: 11px;
+       font-weight: 500;
+       text-transform: uppercase;
+       letter-spacing: 0.5px;
+       transition: color 0.15s;
+       white-space: nowrap;
+    }
+
+    .nav-link:hover {
+      color: var(--text);
+    }
+
+    .nav-link.about-link {
+      color: var(--accent);
+      font-weight: 600;
+    }
 
     .file-pick-label {
       display: flex;
@@ -748,12 +780,70 @@
     }
 
     @media (max-width: 600px) {
+      .topbar {
+        padding: 8px 12px;
+        gap: 8px;
+      }
+      .topbar-title {
+        font-size: 11px;
+        letter-spacing: 1px;
+      }
+      #menu-toggle {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        margin-right: 4px;
+      }
+      .topbar-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: var(--surface);
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px 20px;
+        margin-left: 0;
+        border-left: none;
+        border-bottom: 1px solid var(--border);
+        z-index: 1000;
+        gap: 12px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+      }
+      .topbar-links.open {
+        display: flex;
+        animation: fadeIn 0.2s ease;
+      }
+      .nav-link {
+        font-size: 13px;
+        padding: 4px 0;
+        width: 100%;
+      }
+      .topbar-controls {
+        gap: 6px;
+      }
+      select {
+        min-width: 120px;
+        font-size: 11px;
+      }
+      .btn {
+        padding: 4px 8px;
+        font-size: 11px;
+      }
       .emulator-pane {
         padding: 8px 4px;
         gap: 8px;
       }
-      /* Hide Live Manual and Dual View on phones — too small for overlay */
-      #map-toggle-btn, #btn-dual-view { display: none !important; }
+      .grid-panel {
+        padding: 12px !important;
+        max-width: 100vw;
+        max-height: 90vh;
+      }
+      /* Hide some non-essential controls on very small screens if they overlap */
+      #btn-download-src, #btn-download-dev { display: none !important; }
+      /* Hide Live Manual — too small for overlay on phones */
+      #map-toggle-btn { display: none !important; }
     }
 
     /* ── MAP README PANEL ───────────────────────────────────────────── */
@@ -1299,28 +1389,114 @@
     #fs-controls {
       display: none;
       position: fixed;
-      z-index: 1000;
+      right: 30px;
+      top: calc(30px + env(safe-area-inset-top, 0px));
+      flex-direction: row;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
+      z-index: 1000;
+      background: rgba(14, 20, 30, 0.4);
+      backdrop-filter: blur(10px);
+      padding: 8px 12px;
+      border-radius: 60px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
       transition: opacity 0.3s;
     }
 
-    #fs-controls .btn,
-    #fs-controls .fs-zoom-group {
-      background: transparent;
-      backdrop-filter: none;
-      border: 1px solid transparent;
-      border-radius: 8px;
-      transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease, box-shadow 0.4s ease;
+    body.fullscreen-mode #fs-controls {
+        display: flex;
     }
 
-    #fs-controls .btn:hover,
-    #fs-controls .fs-zoom-group.active {
-      background: rgba(14, 17, 23, 0.45);
-      backdrop-filter: blur(10px);
-      border-color: rgba(255, 255, 255, 0.1);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    .btn-fs-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 50%;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
     }
+    .btn-fs-icon svg { opacity: 0.7; }
+    .btn-fs-icon:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+    }
+    .btn-fs-icon:hover svg { opacity: 1; }
+    .btn-fs-icon.active {
+      color: var(--accent);
+      background: rgba(var(--accent-rgb), 0.15);
+      border-color: rgba(var(--accent-rgb), 0.3);
+    }
+    .btn-fs-icon.active svg { opacity: 1; }
+    .btn-fs-icon.exit:hover {
+        color: var(--red);
+    }
+
+    /* Modal styling for Fullscreen popups */
+    .fs-modal {
+        display: none;
+        position: fixed;
+        right: 30px; 
+        top: calc(95px + env(safe-area-inset-top, 0px)); /* Flow below the icon bar */
+        background: rgba(14, 20, 30, 0.96);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.8);
+        padding: 16px;
+        z-index: 1001;
+        animation: fadeIn 0.2s ease;
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+        max-width: calc(100vw - 60px);
+    }
+    .fs-modal.open {
+        display: block;
+    }
+
+    #fs-zoom-modal { width: 180px; }
+    
+    body.fullscreen-mode #sound-module-container {
+        display: none;
+        position: fixed;
+        right: 30px;
+        top: calc(95px + env(safe-area-inset-top, 0px)); /* Flow below icon bar */
+        width: 340px;
+        max-width: calc(100vw - 60px);
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
+        z-index: 1001;
+        background: rgba(14, 20, 30, 0.98);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 15px 50px rgba(0,0,0,0.8);
+        border-radius: 14px;
+        animation: fadeIn 0.2s ease;
+    }
+    body.fullscreen-mode #sound-module-container.fs-open {
+        display: block !important;
+    }
+
+    .fs-modal-header {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .fs-modal-body {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .btn-fs-icon.zoom svg { width: 18px; height: 18px; }
 
     /* Style the range slider - Amber Gray Theme */
     input[type=range] {
@@ -1415,32 +1591,36 @@
       }
     }
 
-    /* Phone Landscape (Wide): Right Side Vertical */
-    @media (min-aspect-ratio: 1.6/1) {
+    /* Phone Landscape (Wide): Right Side Vertical controls strip */
+    @media (min-aspect-ratio: 1.4/1) {
       #fs-controls {
         top: 50%;
-        right: 10px;
+        right: 30px;
         transform: translateY(-50%);
-        flex-direction: column-reverse;
+        flex-direction: column-reverse; /* Swap icons order for natural thumb reach */
+        background: rgba(14, 20, 30, 0.6);
+        gap: 16px;
+        padding: 16px 10px;
       }
 
-      .fs-zoom-group {
-        flex-direction: column;
-        gap: 12px;
+      /* Offset modals to the left of the vertical icon strip */
+      .fs-modal,
+      body.fullscreen-mode #sound-module-container {
+        top: 50% !important;
+        right: 120px !important;
+        transform: translateY(-50%) !important;
+        max-height: 94vh !important;
+      }
+
+      #fs-zoom-modal {
+        width: 240px;
       }
 
       #zoom-slider-fs {
-        writing-mode: vertical-lr;
-        direction: rtl;
-        width: 14px !important;
-        height: 100px;
-      }
-
-      .fs-zoom-group {
-        border-left: none;
-        border-top: 1px solid var(--border);
-        padding-left: 0;
-        padding-top: 12px;
+        width: 100% !important;
+        height: 24px;
+        writing-mode: horizontal-tb;
+        direction: ltr;
       }
     }
 
@@ -1631,18 +1811,41 @@
 </head>
 
 <body>
+  <!-- Fullscreen Controls Layer -->
+  <!-- Fullscreen Controls Layer -->
   <div id="fs-controls">
-    <button class="btn sm" id="btn-exit-fs" title="Exit Fullscreen">✕ Close</button>
-    <div class="fs-zoom-group">
-      <label style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Zoom</label>
-      <input type="range" id="zoom-slider-fs" min="8" max="100" value="32" style="width: 70px;">
-      <button class="btn sm" id="btn-fit-fs" title="Fit to window">⤢ Fit</button>
+    <button class="btn-fs-icon" id="btn-zoom-fs" title="Zoom Controls">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="ico-zoom"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    </button>
+    <button class="btn-fs-icon" id="btn-sound-fs" title="Sound Controls">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="ico-speaker"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+    </button>
+    <button class="btn-fs-icon exit" id="btn-exit-fs" title="Exit Full View">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+  </div>
+
+  <div id="fs-zoom-modal" class="fs-modal">
+    <div class="fs-modal-header">View Controls</div>
+    <div class="fs-modal-body">
+      <div class="fs-zoom-group">
+        <label style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Zoom</label>
+        <input type="range" id="zoom-slider-fs" min="8" max="120" value="32" style="width: 100%;">
+      </div>
+      <button class="btn sm" id="btn-fit-fs" title="Fit to window" style="width:100%; justify-content:center;">⤢ Fit to Screen</button>
     </div>
   </div>
 
   <!-- ── TOP BAR ──────────────────────────────────────────────────── -->
   <header class="topbar">
     <div class="topbar-brand">
+      <button id="menu-toggle" class="btn sm" title="Toggle Menu" style="display:none; padding: 4px; border-radius: 4px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+      </button>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="2" y="3" width="4" height="4" rx="1" />
         <rect x="10" y="3" width="4" height="4" rx="1" />
@@ -1655,14 +1858,14 @@
         <rect x="18" y="17" width="4" height="4" rx="1" />
       </svg>
       <div>
-        <div class="topbar-title">Neotrellis/Monome Grid Emulator</div>
+        <div class="topbar-title">Neotrellis Grid</div>
         <div class="topbar-sub" id="topbar-script-label">No script loaded</div>
       </div>
-      <div class="topbar-links" style="display:flex; gap:16px; margin-left: 20px; border-left: 1px solid var(--border); padding-left: 20px; align-items: center;">
-          <a href="#" id="btn-about" class="nav-link" style="color:var(--accent); text-decoration:none; font-size:11px; font-weight:600; text-transform:uppercase;">About / Docs</a>
-          <a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator" target="_blank" class="nav-link" style="color:var(--muted); text-decoration:none; font-size:11px; text-transform:uppercase;">GitHub Repo</a>
-          <a href="https://monome.org/diii/" target="_blank" class="nav-link" style="color:var(--muted); text-decoration:none; font-size:11px; text-transform:lowercase;">diii app</a>
-          <a href="https://dessertplanet.github.io/viii/" target="_blank" class="nav-link" style="color:var(--muted); text-decoration:none; font-size:11px; text-transform:lowercase;">viii app</a>
+      <div id="topbar-links" class="topbar-links">
+          <a href="#" id="btn-about" class="nav-link about-link">About / Docs</a>
+          <a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator" target="_blank" class="nav-link">GitHub</a>
+          <a href="https://monome.org/diii/" target="_blank" class="nav-link">diii</a>
+          <a href="https://dessertplanet.github.io/viii/" target="_blank" class="nav-link">viii</a>
       </div>
     </div>
     <div class="topbar-spacer"></div>
@@ -1761,19 +1964,17 @@
       <div id="sound-module-container" class="minimized">
         <div class="sound-module-header">
           <span>Sound Module</span>
-          <div class="minimized-volume-control">
+          <div class="header-volume-control">
             <label>Vol <input type="range" id="min-vol-slider" min="0" max="100" value="70"></label>
           </div>
           <div class="header-controls">
-            <button class="btn sm" id="sound-toggle-btn" title="Mute/Unmute Sound">🔇</button>
+            <button class="btn sm" id="sound-toggle-btn" title="Mute/Unmute Sound" style="padding: 4px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="ico-speaker"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+            </button>
             <button class="btn sm" id="minimize-sound-btn" title="Expand">+</button>
           </div>
         </div>
         <div class="sound-module-body">
-            <div class="sm-part">
-                <h5>Volume</h5>
-                <label>Level <input type="range" id="vol-slider" min="0" max="100" value="70"></label>
-            </div>
             <div class="sm-part adsr-container">
                 <h5>ADSR</h5>
                 <div class="adsr-controls">
@@ -1800,7 +2001,7 @@
             <div class="sm-part">
                 <h5>Filter</h5>
                 <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                  Enabled <input type="checkbox" id="filter-enable-check" style="width:14px; height:14px; accent-color:var(--accent);">
+                  Enabled <input type="checkbox" id="filter-enable-check" checked style="width:14px; height:14px; accent-color:var(--accent);">
                 </label>
                 <label>CC # <input type="number" id="filter-cc-num" min="0" max="127" value="74" style="width:50px; background:var(--surface2); border:1px solid var(--border); color:var(--text); font-size:11px; padding:2px 4px; border-radius:4px;"></label>
                 <label>Level <input type="range" id="filter-slider" min="0" max="100" value="100"><span id="filter-val" style="min-width:32px;font-family:var(--font-mono);font-size:10px;color:var(--cyan);margin-left:4px;">100 <span style="color:var(--muted);font-size:9px;">/ —</span></span></label>
@@ -1881,23 +2082,33 @@
         .adsr-sliders label {
           gap: 6px;
         }
-        /* Minimized styles */
-        .sound-module-header .minimized-volume-control {
-            display: none;
-        }
-        #sound-module-container.minimized .sound-module-body {
-            display: none;
-        }
-        #sound-module-container.minimized .minimized-volume-control {
+        /* Global header volume styles */
+        .sound-module-header .header-volume-control {
             display: flex;
             align-items: center;
         }
-        #sound-module-container.minimized .minimized-volume-control label {
+        .header-volume-control label {
             font-size: 11px;
             display: flex;
             align-items: center;
             gap: 6px;
             color: var(--muted);
+        }
+
+        /* Fullscreen Modal Styling */
+        body.fullscreen-mode #sound-module-container {
+            display: none;
+            z-index: 1001;
+            animation: fadeIn 0.2s ease;
+        }
+
+        body.fullscreen-mode #sound-module-container.fs-open {
+            display: block !important;
+        }
+
+        /* Override body flow when minimized/fullscreen */
+        #sound-module-container.minimized .sound-module-body {
+            display: none;
         }
         #sound-module-container.minimized .sound-module-header {
             margin-bottom: 0;
@@ -2266,7 +2477,6 @@
     });
 
     // Audio slider bindings
-    const volSlider = document.getElementById('vol-slider');
     const minVolSlider = document.getElementById('min-vol-slider');
 
     function syncVolume(value) {
@@ -2275,12 +2485,10 @@
         if (api._masterGain && !isMuted) {
             api._masterGain.gain.value = volume;
         }
-        volSlider.value = value;
-        minVolSlider.value = value;
+        if (minVolSlider) minVolSlider.value = value;
     }
 
-    volSlider.addEventListener('input', e => syncVolume(e.target.value));
-    minVolSlider.addEventListener('input', e => syncVolume(e.target.value));
+    if (minVolSlider) minVolSlider.addEventListener('input', e => syncVolume(e.target.value));
 
 
     const adsrCanvas = document.getElementById('adsr-canvas');
@@ -2352,19 +2560,65 @@
     // Sound module controls
     const soundModuleContainer = document.getElementById('sound-module-container');
     const minimizeBtn = document.getElementById('minimize-sound-btn');
+    const soundFsBtn = document.getElementById('btn-sound-fs');
+    const zoomFsBtn = document.getElementById('btn-zoom-fs');
+    const zoomFsModal = document.getElementById('fs-zoom-modal');
+
     minimizeBtn.addEventListener('click', () => {
         soundModuleContainer.classList.toggle('minimized');
         minimizeBtn.textContent = soundModuleContainer.classList.contains('minimized') ? '+' : '--';
     });
 
+    soundFsBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        const isOpen = soundModuleContainer.classList.toggle('fs-open');
+        soundFsBtn.classList.toggle('active', isOpen);
+        if (isOpen) {
+            zoomFsModal.classList.remove('open');
+            zoomFsBtn.classList.remove('active');
+        }
+    });
+
+    zoomFsBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        const isOpen = zoomFsModal.classList.toggle('open');
+        zoomFsBtn.classList.toggle('active', isOpen);
+        if (isOpen) {
+            soundModuleContainer.classList.remove('fs-open');
+            soundFsBtn.classList.remove('active');
+        }
+    });
+
+    // Handle exiting fullscreen — ensure everything is cleaned up
+    document.getElementById('btn-exit-fs').addEventListener('click', () => {
+        soundModuleContainer.classList.remove('fs-open');
+        soundFsBtn.classList.remove('active');
+        if (zoomFsModal) {
+            zoomFsModal.classList.remove('open');
+            zoomFsBtn.classList.remove('active');
+        }
+        toggleFullscreen();
+    });
+
     let isMuted = true;
     let hasGridInteracted = false;
+    
+    const SPEAKER_ON = '<path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>';
+    const SPEAKER_OFF = '<path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line>';
+
+    function updateSoundIcons(muted) {
+        const svgContent = muted ? SPEAKER_OFF : SPEAKER_ON;
+        document.querySelectorAll('.ico-speaker').forEach(svg => {
+            svg.innerHTML = svgContent;
+        });
+    }
+
     document.getElementById('sound-toggle-btn').addEventListener('click', e => {
         isMuted = !isMuted;
         if (api._masterGain) {
             api._masterGain.gain.value = isMuted ? 0 : api.volume;
         }
-        e.target.textContent = isMuted ? '🔇' : '🔊';
+        updateSoundIcons(isMuted);
         hasGridInteracted = true;
     });
 
@@ -3368,39 +3622,61 @@
       const isFS = document.body.classList.contains('fullscreen-mode');
       const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-      const winW = window.innerWidth * (isFS ? 0.98 : 0.96);
+      const winW = window.innerWidth * (isFS ? 1.0 : 0.98);
+      const aspect = window.innerWidth / window.innerHeight;
 
       const dualActive = _showGhostGrid && _ghostPadEls.length > 0;
       const vc = vCOLS(), vr = vROWS();
       // Side-by-side layout: dual view active and grid is narrow (≤8 cols)
       const isSideBySide = dualActive && vc <= 8;
 
-      // Vertical deadspace: side-by-side needs no extra (only one grid tall)
-      const deadH = isFS ? 20 : (isMobile ? 100 : (dualActive && !isSideBySide ? 220 : 160));
-      const winH = (window.innerHeight - deadH) * (isFS ? 0.98 : 0.96);
+      // Vertical deadspace: account for top/bottom margins
+      // top:20px + icon:40px + gap:20px = approx 80px if modals are open or cluster is there.
+      // In landscape (aspect > 1.2), controls move to the side, so we minimize vertical deadspace.
+      let deadH = isFS ? (aspect > 1.2 ? 10 : 95) : (isMobile ? 85 : (dualActive && !isSideBySide ? 200 : 150));
+      
+      const winH = (window.innerHeight - deadH) * (isFS ? 1.0 : 0.98);
 
-      const availW = isFS ? winW : Math.min(pane.clientWidth - 10, winW);
+      // Width deadspace: account for side margins (including controls)
+      // In landscape, we reserve room on the right for the vertical controls strip (~90px + margin)
+      const deadW = isFS ? (aspect > 1.2 ? 110 : 45) : 0;
+      const availW = isFS ? (winW - deadW) : Math.min(pane.clientWidth - 4, winW);
+      const availH = (isFS ? winH : Math.min(pane.clientHeight - 4, winH));
 
-      // Minimap strip height (only relevant for stacked dual view)
-      const minimapH = 52;
-      const fixedH = (dualActive && !isSideBySide) ? minimapH : 0;
-      const availH = (isFS ? winH : Math.min(pane.clientHeight - 10, winH)) - fixedH;
+      // Geometric factors: gap is 0.4 * padSize
+      // contentSize = N * padSize + (N-1) * 0.4 * padSize = padSize * (1.4*N - 0.4)
+      const gridUnitsW = 1.4 * vc - 0.4;
+      const gridUnitsH = 1.4 * vr - 0.4;
 
-      // Each pad occupies 1P + 0.4P gap; panel padding adds ~1.6P per grid
-      const singleRowFactor = vr * 1.4 + 1.6;
-      const dualRowFactor   = singleRowFactor * 2 + 6.4;
+      // Padding on mobile is 12px fixed per side (total 24px + 2px border = 26px)
+      // On fullscreen we can be tighter to maximize the grid (e.g. 4px per side = 10px total)
+      const isMobileSize = window.innerWidth <= 600 || (isMobile && aspect > 1.2);
+      const padSpaceFixed = isMobileSize ? (isFS ? 8 : 26) : 2;
+      const padUnitsFactor = (isFS && isMobileSize) ? 0 : (isMobileSize ? 0 : 2.0);
 
       let scaleW, scaleH;
-      if (isSideBySide) {
-        // Two grids sit side by side — constrained by total horizontal width
-        scaleW = availW / (vc * 2.8 + 3.7);
-        scaleH = availH / singleRowFactor;
+
+      if (isFS) {
+        // Fullscreen always fits as a single grid (ghost grid and minimap are hidden)
+        scaleW = (availW - padSpaceFixed) / (gridUnitsW + padUnitsFactor);
+        scaleH = (availH - padSpaceFixed) / (gridUnitsH + padUnitsFactor);
+      } else if (isSideBySide) {
+        // Two grids side-by-side: total width = 2 * panelW + gap(20px)
+        // availW = 2 * (padSize * (gridUnitsW + padUnitsFactor) + padSpaceFixed) + 20
+        scaleW = (availW - 20 - 2 * padSpaceFixed) / (2 * (gridUnitsW + padUnitsFactor));
+        scaleH = (availH - padSpaceFixed) / (gridUnitsH + padUnitsFactor);
+      } else if (dualActive) {
+        // Two grids stacked: total height = 2 * panelH + gap(14px) + minimap(52px)
+        const stackFixedH = 14 + 52 + 2 * padSpaceFixed;
+        scaleW = (availW - padSpaceFixed) / (gridUnitsW + padUnitsFactor);
+        scaleH = (availH - stackFixedH) / (2 * (gridUnitsH + padUnitsFactor));
       } else {
-        scaleW = availW / (vc * 1.4 + (dualActive ? 2.6 : 1.6));
-        scaleH = availH / (dualActive ? dualRowFactor : singleRowFactor);
+        // Single grid
+        scaleW = (availW - padSpaceFixed) / (gridUnitsW + padUnitsFactor);
+        scaleH = (availH - padSpaceFixed) / (gridUnitsH + padUnitsFactor);
       }
 
-      return Math.min(scaleH, scaleW);
+      return Math.max(6, Math.min(scaleH, scaleW));
     }
 
     function updateSliderLimits() {
@@ -3418,8 +3694,13 @@
     function fitToWindow() {
       const maxFit = getMaxFitSize();
       const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      const reasonableMax = isMobile ? 120 : 64;
-      const targetSize = Math.max(6, Math.floor(Math.min(maxFit, reasonableMax)));
+      const isFS = document.body.classList.contains('fullscreen-mode');
+      
+      // Fullscreen mode or Mobile should use the absolute maximum.
+      // Standard desktop view uses a cap to avoid massive pads on ultra-wide screens.
+      const cap = (isFS || isMobile) ? 120 : 64;
+      
+      const targetSize = Math.max(6, Math.floor(Math.min(maxFit, cap)));
       updateGridScale(targetSize);
       syncSliders(targetSize);
       isManualZoom = false;
@@ -3572,45 +3853,83 @@
 
     let _mapModeBeforeFs = false; // remember Live Manual state across fullscreen
 
-    function toggleFullscreen() {
-      const mapToggle = document.getElementById('map-toggle');
-      const isFullscreen = document.body.classList.toggle('fullscreen-mode');
+    btnFullscreen.addEventListener('click', () => toggleFullscreen());
+    btnExitFs.addEventListener('click', () => {
+      // Specifically ensure we are leaving
+      if (document.body.classList.contains('fullscreen-mode')) {
+        toggleFullscreen(false);
+      }
+    });
 
-      if (isFullscreen) {
-        // Disable Live Manual before entering fullscreen to prevent misplaced overlay
+    // Sync state with native browser fullscreen events (handles Esc key, etc.)
+    const onFsChange = () => {
+      const isNativeFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+      const hasFsClass = document.body.classList.contains('fullscreen-mode');
+      
+      if (!isNativeFs && hasFsClass) {
+        // Native exit happened (e.g. Esc key), sync the emulator state
+        document.body.classList.remove('fullscreen-mode');
+        
+        // Restore Live Manual state if it was active before
+        if (_mapModeBeforeFs) {
+          _mapMode = true;
+          const mapToggle = document.getElementById('map-toggle');
+          if (mapToggle) mapToggle.checked = true;
+          document.body.classList.add('map-mode');
+        }
+        
+        fitToWindow();
+      }
+    };
+
+    document.addEventListener('fullscreenchange', onFsChange);
+    document.addEventListener('webkitfullscreenchange', onFsChange);
+    document.addEventListener('mozfullscreenchange', onFsChange);
+    document.addEventListener('MSFullscreenChange', onFsChange);
+
+    function toggleFullscreen(forceState) {
+      const mapToggle = document.getElementById('map-toggle');
+      const currentState = document.body.classList.contains('fullscreen-mode');
+      const newState = (forceState !== undefined) ? forceState : !currentState;
+      
+      if (newState === currentState) {
+        fitToWindow(); // Just in case, ensure fitting is updated
+        return; 
+      }
+
+      document.body.classList.toggle('fullscreen-mode', newState);
+
+      if (newState) {
+        // ENTERING
         _mapModeBeforeFs = _mapMode;
         if (_mapMode) {
-          mapToggle.checked = false;
-          mapToggle.dispatchEvent(new Event('change'));
+          if (mapToggle) {
+            mapToggle.checked = false;
+            mapToggle.dispatchEvent(new Event('change'));
+          }
         }
         if (document.documentElement.requestFullscreen) {
           document.documentElement.requestFullscreen().catch(() => { });
         }
       } else {
+        // EXITING
         if (document.exitFullscreen && document.fullscreenElement) {
           document.exitFullscreen().catch(() => { });
         }
-        // Restore Live Manual state directly — do NOT dispatch the change event here
-        // because the browser fires a resize on fullscreen exit, which triggers _buildMap
-        // via the resize listener. Dispatching change would schedule a second build and
-        // every element would be doubled.
         if (_mapModeBeforeFs) {
           _mapMode = true;
-          mapToggle.checked = true;
+          if (mapToggle) mapToggle.checked = true;
           document.body.classList.add('map-mode');
           const mapBody = document.getElementById('map-readme-body');
           if (mapBody && mapBody.innerHTML.trim()) {
             mapBody.classList.add('open');
-            document.getElementById('map-readme-toggle').classList.add('open');
+            const readmeToggle = document.getElementById('map-readme-toggle');
+            if (readmeToggle) readmeToggle.classList.add('open');
           }
-          // _buildMap will be triggered by the imminent resize event
         }
       }
-      fitToWindow(); // Refit and update slider limits when entering/exiting
+      fitToWindow();
     }
-
-    btnFullscreen.addEventListener('click', toggleFullscreen);
-    btnExitFs.addEventListener('click', toggleFullscreen);
 
     // ... (rest of keyboard/orientation code)
 
@@ -4332,6 +4651,22 @@
     // ─── GRID PRESET DROPDOWN ──────────────────────────────────────────────────
     const btnGridPreset = document.getElementById('btn-grid-preset');
     const gridPresetMenu = document.getElementById('grid-preset-menu');
+    const menuToggle = document.getElementById('menu-toggle');
+    const topbarLinks = document.getElementById('topbar-links');
+
+    if (menuToggle && topbarLinks) {
+      menuToggle.addEventListener('click', e => {
+        e.stopPropagation();
+        topbarLinks.classList.toggle('open');
+      });
+
+      // Close menu when clicking a link
+      topbarLinks.addEventListener('click', e => {
+        if (e.target.classList.contains('nav-link')) {
+          topbarLinks.classList.remove('open');
+        }
+      });
+    }
 
     btnGridPreset.addEventListener('click', e => {
       e.stopPropagation();
@@ -4349,6 +4684,7 @@
 
     document.addEventListener('click', e => {
       if (!e.target.closest('#grid-preset-wrap')) gridPresetMenu.classList.remove('open');
+      if (topbarLinks && !e.target.closest('.topbar-brand')) topbarLinks.classList.remove('open');
     });
 
     document.getElementById('btn-rotate').addEventListener('click', rotateGrid);
