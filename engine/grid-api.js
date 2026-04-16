@@ -77,7 +77,7 @@ export class MonomeAPI {
 
     // Filter controlled by MIDI CC/UI
     this.filter = {
-      enabled: false,
+      enabled: true,
       cc: 74,
       cutoff: 1.0,
     };

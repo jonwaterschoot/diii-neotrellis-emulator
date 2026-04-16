@@ -16,7 +16,7 @@
 
 - [ ] A better structure in the scripts list sorted with divisions and sub-divisions. and maybe a search / filter bar. 
 - [x] Allow other pixel dimensions than 16x8 (common sizes: 8*8, 16*16, but also custom sizes like 32*32, etc.)
-
+- [x] fixing layout on mobile sizes, beautifying the top bar and full screen look
 
 ### Documentation & Script UI Integration
 
@@ -26,10 +26,10 @@
 
 - when loading external script aftyer import show it's repo link in the docs section and above the readme, explaining that it was live pulled from that repo
 
-- [/] Allow other sources like Codeberg (prelink scripts from tehn at `https://codeberg.org/tehn/iii-scripts/src/branch/main/grid`).
+- [x] Allow other sources like Codeberg (prelink scripts from tehn at `https://codeberg.org/tehn/iii-scripts/src/branch/main/grid`).
   - [x] *Note: These do not adhere to our structure standard and license is unsure, so just link them and give due credit (e.g., subcategory "external scripts -tehn-").*
     - currently integrated by loading links in the preset list, but this is not ideal. Links are visble in the console, but thats not loading by default
-- maybe some one makes a script and they'd like to add it (imagine :-P) - what should they do?
+- maybe someone makes a script and they'd like to add it (imagine :-P) - what should they do?
 
 ## Documentation & Project Structure
 
