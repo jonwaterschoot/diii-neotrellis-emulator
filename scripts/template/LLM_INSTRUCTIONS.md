@@ -73,9 +73,8 @@ Place these in the header block or grouped under `-- @section` tags anywhere in 
 -- @group Group Name        ← fan of bezier lines in overlay
 -- @detail Extended description for this group (one or more lines, accumulates).
 -- @detail Each @detail line appends to the previous with a newline.
--- x=N, y=M: Description   ← single cell
--- x=N..M, y=R: Desc       ← column range
--- Row N: Desc              ← full row
+-- @group
+-- x=N..M, y=R: PREFIX — LABEL1 LABEL2   ← use prefix for sidebar clarity
 -- @group                   ← empty @group = close group, next controls are singletons
 ```
 
@@ -83,7 +82,9 @@ Place these in the header block or grouped under `-- @section` tags anywhere in 
 - Descriptions must end after the `:` delimiter
 - Full-grid controls (`x=1..16, y=1..8`) are excluded from the overlay automatically
 - Always declare `@screen live` for main-grid content
-- `@detail` lines must come **after** the `@group` line and **before** any control-map lines for that group
+- **The Capture Rule**: Place coordinate mappings at the **bottom** of a group (after all `@detail` tags) to ensure information is captured in the sidebar.
+- **The Prefix Rule**: Use descriptive headers for ranges: `-- x=1..4: SEAS — SPR SUM AUT WIN`. The renderer ignores prefixes followed by `—` or `:` when matching labels to pads.
+- **Handling Gaps**: Use split ranges (e.g., `x=2..3` and `x=5..7`) for non-contiguous pads like piano keys.
 - The `@detail` annotation resets on the next `@group` or `@section` tag
 
 ---

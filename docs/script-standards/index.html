@@ -724,6 +724,56 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#best-practices-for-layout-and-ordering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices for Layout and Ordering
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices for Layout and Ordering">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-range-prefixing-and-labels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Range Prefixing and Labels
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-the-capture-rule-for-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. The Capture Rule for @detail
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-handling-gaps-piano-layouts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Handling Gaps (Piano Layouts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#multi-screen-rendering-required-pattern-for-dual-view-and-minimap" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1137,7 +1187,7 @@ These are extracted by <code>doc-extractor.js</code> and rendered as the map ove
 <div class="codehilite"><pre><span></span><code><span class="c1">-- x=1, y=8: ALT toggle — momentary press opens Settings, double-tap = sticky</span>
 <span class="c1">-- x=1..8, y=1: Spawn quantity slider (2 fruits per step, max 16)</span>
 <span class="c1">-- Row 3, x=1: Autopilot mode cycles NON → SEM → AUT</span>
-<span class="c1">-- Row 6: Black keys (C# D# F# G# A#) — root note selection when CUS active</span>
+<span class="c1">-- Row 6, col 2..7: Black keys — C# D# F# G# A# (skips the gap)</span>
 </code></pre></div>
 
 <p>Supported location formats (all case-insensitive):
@@ -1178,6 +1228,24 @@ below the group's control list.</p>
 <span class="c1">-- Row 5: TR1 — Water surface, base octave</span>
 <span class="c1">-- Row 6: TR2 — Underwater mid, one octave down</span>
 <span class="c1">-- Row 7: TR3 — Underwater deep, two octaves down</span>
+</code></pre></div>
+
+<h3 id="best-practices-for-layout-and-ordering">Best Practices for Layout and Ordering<a class="headerlink" href="#best-practices-for-layout-and-ordering" title="Permanent link">&para;</a></h3>
+<h4 id="1-range-prefixing-and-labels">1. Range Prefixing and Labels<a class="headerlink" href="#1-range-prefixing-and-labels" title="Permanent link">&para;</a></h4>
+<p>When documenting a range of pads (e.g., <code>x=1..4</code>), you can include a descriptive "prefix" followed by a separator like an em-dash (<code>—</code>) or colon (<code>:</code>). The renderer ignores this prefix when calculating how many words match the pad count.
+- <strong>Good:</strong> <code>-- x=1..4, y=7: SEAS — SPR SUM AUT WIN</code> (4 labels for 4 pads; prefix ignored)
+- <strong>Bad:</strong> <code>-- x=1..4, y=7: SEAS SPR SUM AUT WIN</code> (5 words for 4 pads; labels may break)</p>
+<h4 id="2-the-capture-rule-for-detail">2. The Capture Rule for @detail<a class="headerlink" href="#2-the-capture-rule-for-detail" title="Permanent link">&para;</a></h4>
+<p>To ensure that the sidebar "live manual" captures the full description, always place the coordinate mapping line at the <strong>bottom</strong> of the group block.
+- <strong>Correct Ordering:</strong>
+  <code>lua
+  -- @group Themes
+  -- @detail Each season changes the color and character of the notes.
+  -- x=1..4, y=7: SEAS — SPR SUM AUT WIN</code></p>
+<h4 id="3-handling-gaps-piano-layouts">3. Handling Gaps (Piano Layouts)<a class="headerlink" href="#3-handling-gaps-piano-layouts" title="Permanent link">&para;</a></h4>
+<p>For non-contiguous controls (like piano black keys), use <strong>split ranges</strong> instead of placeholders to ensure perfect physical alignment:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">-- x=2..3, y=3: BLACK — C# D#</span>
+<span class="c1">-- x=5..7, y=3: BLACK — F# G# A#</span>
 </code></pre></div>
 
 <p><strong><code>@section</code></strong> defines a major logical grouping (e.g. "Grid Layout", "Settings View").

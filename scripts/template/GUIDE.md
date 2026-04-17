@@ -128,8 +128,11 @@ the live manual panel.
 ```
 
 > The `@detail` annotation is cleared whenever a new `@group` or `@section` tag is
-> encountered, so each group gets its own description. A `@detail` placed before any
-> `@group` is attached to the first control that follows it.
+> encountered, so each group gets its own description. 
+>
+> **Best Practice for Ordering**: Always place your coordinate lines (e.g. `x=1..4: ...`) at the **bottom** of the group block. This ensures the sidebar "live manual" captures all the detail text that came before it.
+>
+> **Best Practice for Labels**: Use a prefix header for ranges (e.g. `SEAS — SPR SUM AUT WIN`). The emulator ignores words before the dash when mapping labels to pads, allowing for better sidebar clarity.
 
 ---
 

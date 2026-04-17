@@ -43,6 +43,9 @@
       --pad-gap: 6px;
       --grid-cols: 16;
       --grid-rows: 8;
+
+      /* Sidebar tokens */
+      --sidebar-width: 320px;
     }
 
     *,
@@ -352,12 +355,29 @@
     /* ── MAIN LAYOUT ─────────────────────────────────────────────────── */
     .main {
       display: grid;
-      grid-template-columns: 1fr 320px;
+      grid-template-columns: 1fr auto var(--sidebar-width);
       gap: 0;
       overflow: hidden;
       min-height: 0;
       position: relative;
     }
+
+    /* ── RESIZE HANDLE ───────────────────────────────────────────────── */
+    .resize-handle {
+      width: 4px;
+      cursor: col-resize;
+      background: var(--border);
+      transition: background 0.15s, width 0.15s;
+      z-index: 100;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .resize-handle:hover, .resize-handle.active {
+      background: var(--accent);
+      width: 6px;
+    }
+    body.map-mode #sidebar-handle { display: none; }
+    body.fullscreen-mode #sidebar-handle { display: none !important; }
 
     /* ── MAP OVERLAY ──────────────────────────────────────────────────── */
     #map-col-left, #map-col-right {
@@ -1637,6 +1657,7 @@
       .main {
         grid-template-columns: 1fr;
       }
+      #sidebar-handle { display: none; }
 
       .side-pane {
         border-left: none;
@@ -2147,6 +2168,8 @@
       </div>
 
     </div><!-- /emulator-pane -->
+
+    <div id="sidebar-handle" class="resize-handle"></div>
 
     <!-- Side panel -->
     <aside class="side-pane">
@@ -4217,18 +4240,24 @@
      * Returns '' when no useful label can be determined.
      */
     function _padLabel(description, groupTitle, px, py, loc) {
-      const desc   = (description || '').trim();
+      let desc = (description || '').trim();
+      // Skip prefix headers like "SEAS — " or "BLACK:" to only count the actual labels
+      const sepMatch = desc.match(/(.*?)\s*[—–:|-]\s+(.*)/);
+      if (sepMatch) desc = sepMatch[2].trim();
       const rangeW = loc.xMax - loc.xMin + 1;
-      const posIdx = px - loc.xMin; // 0-based column index within range
+      const rangeH = loc.yMax - loc.yMin + 1;
+      const isVert = rangeH > rangeW;
+      const posIdx = isVert ? (py - loc.yMin) : (px - loc.xMin);
+      const span   = isVert ? rangeH : rangeW;
 
-      // 1. Keyboard: extract sequence of note names and map by column position
+      // 1. Keyboard: extract sequence of note names and map by position
       //    Matches "C D E F G A B" or "C# D# F# G# A#" etc.
       const noteList = [...desc.matchAll(/(?<![A-Za-z])([A-G]#?)(?![A-Za-z])/g)].map(m => m[1]);
-      if (noteList.length >= 2) return noteList[posIdx] ?? '';
+      if (noteList.length >= 2 && noteList.length === span) return noteList[posIdx] ?? '';
 
       // 2. D-PAD arrow keywords — only when the description IS the direction word (possibly
       //    followed by whitespace/punctuation), not just contains it inside a list
-      if (rangeW === 1 && /^(UP|DOWN|LEFT|RIGHT)\s*$/i.test(desc.replace(/[—–].*/, '').trim())) {
+      if (span === 1 && /^(UP|DOWN|LEFT|RIGHT)\s*$/i.test(desc.replace(/[—–].*/, '').trim())) {
         if (/^UP/i.test(desc))    return '↑';
         if (/^DOWN/i.test(desc))  return '↓';
         if (/^LEFT/i.test(desc))  return '←';
@@ -4239,19 +4268,22 @@
       const deltaMatch = desc.match(/([+\-−][0-9]+)\s*BPM/i);
       if (deltaMatch) return deltaMatch[1].replace('−', '-');
 
-      // 4. Multiple ALL-CAPS words (2–5 chars) matching the range width exactly
-      //    → per-cell labels (e.g. "MAJ / MIN / PMA / PMI / DOR / LYD / CUS" for 7 cells)
-      const capsWords = [...desc.matchAll(/\b([A-Z]{2,5})\b/g)].map(m => m[1]);
-      if (capsWords.length > 1 && capsWords.length === rangeW) return capsWords[posIdx] ?? '';
+      // 4. Multiple sub-labels: split by " / " or spaces and map by position.
+      //    Matches "MAJ / MIN / PMA ..." or "-10 -1 +1 +10" or "OC2 OC3 OC4 OC5" etc.
+      //    Only applies if the resulting count matches the span exactly.
+      const cleanDesc = desc.replace(/\s*\(.*?\)\s*/g, '').trim();
+      const splitLabels = cleanDesc.includes(' / ') ? cleanDesc.split(/\s+\/\s+/) : cleanDesc.split(/\s+/);
+      if (splitLabels.length > 1 && splitLabels.length === span) return splitLabels[posIdx] ?? '';
 
       // 5. Single ALL-CAPS word → show only on the first (or only) cell
       //    Skip trailing unit/context words that don't describe the control itself
+      const capsWords = [...desc.matchAll(/\b([A-Z]{2,5})\b/g)].map(m => m[1]);
       const unitWords = new Set(['LED', 'BPM', 'RGB', 'OFF', 'ON', 'MIDI']);
       if (capsWords.length === 1 && posIdx === 0 && !unitWords.has(capsWords[0])) return capsWords[0];
 
       // 6. Single-cell fallback: first meaningful word of description, max 4 chars
       //    Give preference to "play" → "PLAY" over later words like "stop"
-      if (rangeW === 1) {
+      if (span === 1) {
         if (/\bplay\b/i.test(desc)) return 'PLAY';
         const firstWord = desc.replace(/[—–\/\-\(].*/, '').trim().split(/\s+/)[0] || '';
         return firstWord.slice(0, 3).toUpperCase();
@@ -4734,6 +4766,43 @@
         _buildMapResizeTimer = setTimeout(() => requestAnimationFrame(_buildMap), 80);
       }
     });
+
+    // ─── RESIZABLE SIDEBAR ─────────────────────────────────────────────────────
+    (function setupResizableSidebar() {
+      const handle = document.getElementById('sidebar-handle');
+      const root = document.documentElement;
+      let isResizing = false;
+
+      // Load saved width
+      const savedWidth = localStorage.getItem('sidebar-width');
+      if (savedWidth) {
+        root.style.setProperty('--sidebar-width', savedWidth + 'px');
+      }
+
+      handle.addEventListener('mousedown', e => {
+        isResizing = true;
+        document.body.style.cursor = 'col-resize';
+        handle.classList.add('active');
+        document.body.style.userSelect = 'none';
+      });
+
+      document.addEventListener('mousemove', e => {
+        if (!isResizing) return;
+        const newWidth = window.innerWidth - e.clientX;
+        if (newWidth > 180 && newWidth < window.innerWidth * 0.7) {
+          root.style.setProperty('--sidebar-width', newWidth + 'px');
+          localStorage.setItem('sidebar-width', newWidth);
+        }
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (!isResizing) return;
+        isResizing = false;
+        document.body.style.cursor = '';
+        handle.classList.remove('active');
+        document.body.style.userSelect = '';
+      });
+    })();
 
   </script>
 

@@ -3,7 +3,7 @@
 A short description of what this script does. One or two sentences is ideal.
 
 - **Author:** Your Name (your-handle)
-- **Version:** v0.1.0
+- **Version:** v1.0.0
 - **Forum:** _(link pending)_
 
 ---
@@ -47,4 +47,4 @@ Open by holding or double-tapping **ALT** (x=1, y=8).
 
 ## Changelog
 
-- **v0.1.0** — Initial release
+- **v1.0.0** — Initial boilerplate with standardized documentation overlay support (prefixes, coordinate alignment).

@@ -87,3 +87,6 @@ clock sync clock-only. Play/stop stays manual on the device
 
 ## v1-30 — 2026-04-04
 clock was failing so stripped back, no sync for now, clock_test.lua can serve as a testing ground later
+
+## v1-31 — 2024-04-17
+Standardized Documentation Overlay: applied full-word prefixes and consolidated fruit toggle mappings for cleaner grid labels; fixed settings screen documentation mapping issue.

@@ -80,6 +80,10 @@ Place these in the header block or grouped under `-- @section` tags anywhere in 
 - Descriptions must end after the `:` delimiter
 - Full-grid controls (`x=1..16, y=1..8`) are excluded from the overlay automatically
 - Always declare `@screen live` for main-grid content
+- **The Capture Rule**: Place coordinate mappings (e.g., `x=1..4: SEAS — SPR SUM AUT WIN`) at the **bottom** of a group block, after all `@detail` tags. This ensures the sidebar captures the full multi-line description.
+- **The Prefix Rule**: Use descriptive prefixes for ranges followed by `—` or `:`. The engine ignores these when matching labels to pads.
+- **Handling Gaps**: Use split ranges (e.g., `x=2..3` and `x=5..7`) for non-contiguous pads like piano keys.
+- The `@detail` annotation resets on the next `@group` or `@section` tag
 
 ---
 

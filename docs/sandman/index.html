@@ -916,7 +916,7 @@
 <p>Mount your NeoTrellis rotated <strong>90° counterclockwise</strong> (power cable at top). The grid becomes 8 columns × 16 rows in portrait. Grains accumulate at the bottom and become a step sequencer.</p>
 <ul>
 <li><strong>Author:</strong> jonwaterschoot</li>
-<li><strong>Version:</strong> v0.1.0</li>
+<li><strong>Version:</strong> v0.1.2</li>
 <li><strong>Forum:</strong> <em>(link pending)</em></li>
 </ul>
 <hr />
@@ -946,26 +946,38 @@
 <tr>
 <td>Col 1, Row 3</td>
 <td>x=14, y=1</td>
-<td><strong>ALT</strong></td>
-<td>Tap → Cycle screens (Live/Seq/Scale)</td>
+<td><strong>CYC</strong></td>
+<td>ALT — Cycle screens (Live/Seq/Scale)</td>
 </tr>
 <tr>
 <td>Col 1, Row 4</td>
 <td>x=13, y=1</td>
-<td><strong>Start/Stop</strong></td>
-<td>Green = running, Red = stopped</td>
+<td><strong>TOG</strong></td>
+<td>Play/Stop — Blue = running, Red = stopped</td>
 </tr>
 <tr>
 <td>Col 1, Row 5</td>
 <td>x=12, y=1</td>
-<td><strong>Lock</strong></td>
-<td>Cycle dissolve rate (Off/Half/Normal)</td>
+<td><strong>LOCK</strong></td>
+<td>Dissolve State — Cycle rate (Off/Slow/Fast)</td>
 </tr>
 <tr>
 <td>Col 8, Row 3</td>
 <td>x=14, y=8</td>
-<td><strong>Reset</strong></td>
-<td>Soft White/Grey. Resets the portrait.</td>
+<td><strong>RESET</strong></td>
+<td>Restore Portrait — Resets the simulation area.</td>
+</tr>
+<tr>
+<td>Col 8, Row 4</td>
+<td>x=13, y=8</td>
+<td><strong>AUTO</strong></td>
+<td>Auto-Dropper — Toggle randomized grain release.</td>
+</tr>
+<tr>
+<td>Col 8, Row 5</td>
+<td>x=12, y=8</td>
+<td><strong>CLEAR</strong></td>
+<td>Clear Color — Hold + tap a grain to delete its color.</td>
 </tr>
 <tr>
 <td>Row 1 (all)</td>
@@ -1118,8 +1130,9 @@
 <hr />
 <h2 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>v0.1.0</strong> — Initial release: physics simulation, 3 grain types, portrait orientation, 3-screen UI, step sequencer with mining</li>
-<li><strong>v0.1.1</strong> (Dev) — Added Reset function; optimized RAM; fixed eye-blinking presence check.</li>
+<li><strong>v0.1.2</strong> — Standardized Documentation &amp; UI Fixes: Implemented vertical range labeling, robust note extraction, side-sidebar control mappings, and purged stray internal documentation comments.</li>
+<li><strong>v0.1.1</strong> — Optimized RAM; fixed eye-blinking presence check; initial internal support for Reset function.</li>
+<li><strong>v0.1.0</strong> — Initial release: physics simulation, 3 grain types, portrait orientation, 3-screen UI, step sequencer with mining.</li>
 </ul>
 <hr />
 <h2 id="future-ideas-todo">Future Ideas (TODO)<a class="headerlink" href="#future-ideas-todo" title="Permanent link">&para;</a></h2>

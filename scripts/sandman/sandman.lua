@@ -1,5 +1,5 @@
 -- scriptname: Sandman
--- v0.1.0
+-- v0.1.2
 -- @author: jonwaterschoot
 -- https://llllllll.co/t/sandman
 --
@@ -13,37 +13,47 @@
 -- @section Global Controls
 -- These controls are persistent across all three screens (x and y refer to landscape hardware coordinates).
 -- @group Persistent Controls
--- x=14, y=1: ALT — cycle through Live, Sequence, and Scale screens.
--- x=13, y=1: Play/Stop — Toggle sequencer running state.
--- x=12, y=1: Lock (Dissolve State) — Toggle particle dissolve rate (Off/Half/Normal).
+-- @detail System-level controls available on all screens.
+-- x=14, y=1: CYC — ALT — cycle through Live, Sequence, and Scale screens.
+-- x=13, y=1: TOG — Play/Stop — Toggle sequencer running state.
+-- x=12, y=1: LOCK — Dissolve State — Toggle particle dissolve rate (Off/Half/Normal).
+-- x=14, y=8: RESET — Restore Portrait — Soft reset of the simulation area.
+-- x=13, y=8: AUTO — Auto-Dropper — Toggle randomized grain release.
+-- x=12, y=8: CLEAR — Clear Color — Hold to clear all pixels of a specific color.
 -- ---------------------------------------------------------------------------
 -- @section Portrait Live Grid
 -- @screen live
 -- @group Reservoir
--- x=16, y=1..8: Reservoir row — pending grains.
+-- @detail Incoming grains shift left/right and are loaded into the drop zone.
+-- x=16, y=1..8: RES — PENDING GRAINS
 -- @group Drop Zone
--- x=15, y=3..6: Drop slots — tap to release one grain; hold to stream.
+-- @detail Tap a slot to release one grain; hold to stream.
+-- x=15, y=3..6: ZONE — DROP SLOTS
 -- @group Play Grid
 -- x=1..14, y=1..8: Falling sand, leaves, and water interacting physically.
 -- ---------------------------------------------------------------------------
 -- @section Sequence Settings
 -- @screen seq
 -- @group Sequence Toggles
--- x=10, y=1..5: Select Sequence Option: Length, Division, Mute Notes, Track On/Off, and MIDI Channel.
+-- @detail Select which parameter to edit on the step grids below.
+-- x=10, y=1..5: OPTS — LEN DIV MUTE RUN CHAN
 -- @group Sequence Views
 -- x=1..8, y=1..8: 4 Sequences, each 2x8 (16 steps). Tapping modifies based on chosen toggle above.
 -- ---------------------------------------------------------------------------
 -- @section Scale Settings
 -- @screen scale
 -- @group Scale
--- x=11, y=1..6: Scale mode MAJ/MIN/PMA/PMI/DOR/LYD
--- x=9, y=1..7: Black keys root note
--- x=8, y=1..7: White keys root note
+-- @detail Use the mode buttons to select a scale, then pick a root note below.
+-- x=11, y=1..6: MODE — MAJ MIN PMA PMI DOR LYD
+-- x=9, y=1..2: BLACK — C# D#
+-- x=9, y=4..6: BLACK — F# G# A#
+-- x=8, y=1..7: WHITE — C D E F G A B
 -- @group Playback
--- x=6, y=1..4: BPM adjust (-10, -1, +1, +10)
--- x=5, y=1..4: Octave base (oct2..oct5)
--- x=4, y=1..3: Humanizer off/on/extreme (randomizes timing and velocity)
--- x=2, y=1..3: Brightness (full/medium/dim)
+-- @detail Adjust global timing, octave, humanization, and brightness.
+-- x=6, y=1..4: TEMPO SETTINGS — -10 -1 +1 +10
+-- x=5, y=1..4: OCTAVE RANGE — OC2 OC3 OC4 OC5
+-- x=4, y=1..3: HUMANIZE JITTER — OFF ON EXTREME (timing/velocity jitter)
+-- x=2, y=1..3: BRIGHTNESS LEVEL — FULL MED DIM
 -- ---------------------------------------------------------------------------
 
 -- ===========================================================================
@@ -801,12 +811,12 @@ local function draw_scale()
   dirty_ctrl_cache()  -- force ctrl buttons to re-paint into this screen's buffer
   draw_ctrl_buttons()
 
-  -- Row 6: Scale mode (cols 1-6: MAJ MIN PMA PMI DOR LYD)
+  -- Scale mode
   for x=1,6 do
     if x==scale_mode then spx(x,6, 200,200,50)
     else spx(x,6, 40,40,10) end
   end
-  -- Row 8: Black keys root (C# D# gap F# G# A# gap)
+  -- Black keys
   for x=1,7 do
     local semi=KB_BLACK[x]
     if semi>=0 then
@@ -818,7 +828,7 @@ local function draw_scale()
       else spx(x,8, 18,18,18) end
     end
   end
-  -- Row 9: White keys root (C D E F G A B)
+  -- White keys
   for x=1,7 do
     local semi=KB_WHITE[x]
     local is_r=(semi==root_note)
@@ -828,20 +838,20 @@ local function draw_scale()
     elseif in_s then spx(x,9, 160,160,160)
     else spx(x,9, 20,20,20) end
   end
-  -- Row 11: BPM adjust (cols 1-4: -10 -1 +1 +10)
+  -- BPM adjust
   spx(1,11, 200,60,20); spx(2,11, 200,120,20)
   spx(3,11, 20,180,80); spx(4,11, 20,220,60)
-  -- Row 12: Octave base (cols 1-4: oct2 oct3 oct4 oct5)
+  -- Octave base
   for x=1,4 do
     if x==oct_base-1 then spx(x,12, 80,80,240) else spx(x,12, 10,10,40) end
   end
-  -- Row 13: Humanizer state (cols 1-3: off/on/extreme)
+  -- Humanizer state
   for x=1,3 do
     local c=hum_labels[x]
     if (x-1)==humanize_level then spx(x,13, c.r,c.g,c.b)
     else spx(x,13, math.floor(c.r*0.1),math.floor(c.g*0.1),math.floor(c.b*0.1)) end
   end
-  -- Row 15: Brightness (cols 1-3: full/medium/dim) — drawn raw, bypassing dim_f
+  -- Brightness
   local bv = {255, 140, 60}
   for x=1,3 do
     local v = (x-1)==dim_lvl and bv[x] or math.floor(bv[x]*0.2)
