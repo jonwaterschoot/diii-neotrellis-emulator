@@ -5,7 +5,7 @@ The snake eats fruit to collect notes into an arpeggiator pool.
 Each fruit type triggers a different musical event on collection.
 
 - **Author:** jonwaterschoot (jonwtr)
-- **Version:** v1.3.0-dev
+- **Version:** v1.3.1
 - **Forum:** _(link pending)_
 
 ---

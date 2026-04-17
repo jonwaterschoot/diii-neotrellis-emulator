@@ -1,5 +1,5 @@
 -- scriptname: My Script Name
--- v0.1.0
+-- v1.0.0
 -- @author: Your Name
 -- https://llllllll.co/t/your-thread  (replace or remove)
 --
@@ -12,11 +12,12 @@
 -- ---------------------------------------------------------------------------
 -- @section Grid Layout
 -- @screen live
--- Describe your main screen controls here using the control-map format:
--- x=1, y=8: Example button — what it does
--- x=2..8, y=8: Example slider — range and meaning
+-- @group Example Group
+-- @detail Describe your main screen controls here using the control-map format.
+-- @detail Multiple @detail lines are captured by the coordinate line below.
+-- x=1, y=8: BUTTON — What it does
+-- x=2..8, y=8: SLIDER — R1 R2 R3 R4 R5 R6 R7 (Prefix ignored for pad labels)
 --
--- Uncomment and add a @section block for each alternate screen you use:
 -- @section Settings
 -- @screen settings
 -- x=1, y=1: Example settings control — what it does

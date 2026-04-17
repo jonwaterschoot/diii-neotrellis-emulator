@@ -3,16 +3,7 @@
 Ambient leaf physics sequencer for Neotrellis grids: leaves drift through the air, float on the water surface, and sink slowly to the mud. Three independent generative water tracks play notes as leaves pass over the playheads. Triops leap into the water to eat the sinking leaves, causing a bouncing bass echo delay.
 
 - **Author:** jonwaterschoot
-- **Version:** v0.3.0
-
----
-
-# LeaveSeqr
-
-Ambient leaf physics sequencer for Neotrellis grids: leaves drift through the air, float on the water surface, and sink slowly to the mud. Three independent generative water tracks play notes as leaves pass over the playheads. Triops leap into the water to eat the sinking leaves, causing a bouncing bass echo delay.
-
-- **Author:** jonwaterschoot
-- **Version:** v0.3.0
+- **Version:** v0.3.1
 
 ---
 
@@ -78,10 +69,11 @@ Tune the harmony, environment, and physical appearance.
 
 | Component      | Location               | Controls Description                                         |
 |----------------|------------------------|--------------------------------------------------------------|
-| **Scale**      | `x=1..7, y=1`          | Select scale: MAJ, MIN, PMA, PMI, DOR, LYD, CUS (Custom)     |
-| **Root Note/Custom** | `x=1..7, y=3..4` | y=3: Black keys (with gaps). y=4: White keys. Custom toggles.|
-| **Octave Base**| `x=1..4, y=6`          | Octave base: 2, 3, 4, 5                                      |
-| **Season**     | `x=1..4, y=7`          | SP Spring, SU Summer, AU Autumn, WI Winter (see below)       |
+| **Scale Modes** | `x=1..7, y=1`          | Labeled: MAJ, MIN, PMA, PMI, DOR, LYD, CUS                   |
+| **Black Keys** | `x=1,2,4,5,6, y=3`     | Labeled: C#, D#, F#, G#, A# (aligned to grid)                |
+| **White Keys** | `x=1..7, y=4`          | Labeled: C, D, E, F, G, A, B                                 |
+| **Octave Base**| `x=1..4, y=6`          | Labeled: OC2, OC3, OC4, OC5                                  |
+| **Season**     | `x=1..4, y=7`          | Labeled: SPR, SUM, AUT, WIN                                  |
 | **Monochrome** | `x=6, y=7`             | Toggle monochrome mode on/off                                |
 
 ### Seasons
@@ -97,3 +89,11 @@ Seasons change leaf colors, note character, and MIDI CC filter automation simult
 
 Spring and Summer leave the MIDI CC filter at 100 (fully open, no movement). Autumn and Winter drive a slow-moving CC ramp on CC 74 — Autumn sweeps broadly and slowly, Winter drifts fast and erratically. If your synth or DAW responds to CC 74 (filter cutoff), these seasons will animate the filter automatically.
 | **Grid Dimming** | `x=3..5, y=8`        | Grid brightness levels: lo, mid, max                         |
+| **ALT**          | `x=1, y=8`           | Momentary: exit settings; Double-tap: sticky mode            |
+
+---
+
+## Changelog
+
+- **v0.3.1** — Standardized Documentation Overlay: implemented full-word prefixes, coordinate alignment rules, and improved LDoc parser support.
+- **v0.3.0** — Initial stable release: ambient leaf physics, 3-screen UI, and generative sequencer.

@@ -1,5 +1,5 @@
 -- scriptname: Serpentine Sequencer
--- v1.3.0-dev
+-- v1.3.1
 -- @author: jonwaterschoot aka jonwtr
 -- no link yet
 --
@@ -26,19 +26,19 @@
 -- x=15, y=8: DOWN
 -- x=16, y=8: RIGHT
 
--- @section Settings View (hold ALT)
+-- @section Settings
 -- @screen settings
--- x=1..8, y=1: Spawn Quantity — slider, each step = 2 fruits, max 16 on grid
+
+-- @group Fruit Spawning
+-- @detail Set how many fruits the snake can eat before they are cleared.
+-- x=1..8, y=1: SPAWN QUANTITY — 2 4 6 8 10 12 14 16
 -- @group Fruit Type Toggles
--- x=11, y=1: Red — tail shrink, note to pool; demo: high sharp
--- x=12, y=1: Blue — tail grow, note to pool; demo: fifth
--- x=13, y=1: Yellow — halves tempo 16 ticks; demo: accent burst
--- x=14, y=1: Cyan — diatonic triad (3 stages); demo: triad
--- x=15, y=1: Orange — 33% trigger probability; demo: soft
--- x=16, y=1: Purple — echo bounces; demo: echo
+-- @detail SHR=Shrink, GRO=Grow, SLO=Slow, TRI=Triad, 33%=Prob, ECH=Echo.
+-- x=11..16, y=1: FRUITS — SHR GRO SLO TRI 33% ECH
 -- @group Timing & Pool
--- x=1..8, y=2: Accent Interval — slider, 1–8 steps; lit LEDs show active beats
--- x=9..16, y=2: Arp Pool Max Capacity — 1–8 notes
+-- @detail Set the accent beat interval and the maximum number of notes in the arp pool.
+-- x=1..8, y=2: ACCENT INTERVAL — 1 2 3 4 5 6 7 8
+-- x=9..16, y=2: POOL CAPACITY — 1 2 3 4 5 6 7 8
 -- @group Playback
 -- x=1, y=3: Autopilot — dim=manual, bright green=auto (BFS to nearest fruit)
 -- x=3, y=3: Arp Playback Order — ORD / RND / UP / DWN
@@ -53,14 +53,18 @@
 -- x=12, y=3: +1 BPM
 -- x=13, y=3: +10 BPM
 -- @group Display
--- x=15, y=3: Brightness — steps 4 → 8 → 12 LED limit
--- x=16, y=3: Monochrome Tint — 5 cinematic tints + off
--- x=8..16, y=4: LED Readout — 3×5 block font: BPM / scale / arp mode
+-- @detail Adjust brightness and tint, or view the current BPM/Scale on the LED readout.
+-- x=15, y=3: LED BRIGHTNESS — 4 8 12
+-- x=16, y=3: SCREEN TINT — CINEMA MONO OFF
+-- x=8..16, y=4: READOUT — BPM / SCALE / ARP
 -- @group Scale System
--- x=1..7, y=4: Scale — MAJ / MIN / PMA / PMI / DOR / LYD / CUS
+-- @detail Choose a musical scale for the collected notes.
+-- x=1..7, y=4: SCALE SYSTEM — MAJ MIN PMA PMI DOR LYD CUS
 -- @group Root Note Keyboard
--- x=1..7, y=6: Black keys (C# D# F# G# A#)
--- x=1..7, y=7: White keys (C D E F G A B)
+-- @detail Picking a root note transposes the scale accordingly.
+-- x=2..3, y=6: BLACK — C# D#
+-- x=5..7, y=6: BLACK — F# G# A#
+-- x=1..7, y=7: WHITE — C D E F G A B
 -- @group Persistent Controls
 -- x=1, y=8: ALT — exits settings when released (momentary) or stays sticky (double-tap)
 -- x=2, y=8: Play/Stop — toggle sequencer; stop sends MIDI panic

@@ -1,5 +1,5 @@
 -- scriptname: LeaveSeqr
--- v0.3.0
+-- v0.3.1
 -- @author: jonwaterschoot
 --
 -- Ambient leaf physics sequencer: leaves drift through air, float on water, sink to mud.
@@ -73,19 +73,20 @@
 -- @section Scale / Display Settings
 -- @screen scale
 -- @group Key Scale
--- x=1..7, y=1: SCALE — MAJ, MIN, PMA, PMI, DOR, LYD, CUS
+-- x=1..7, y=1: MODES — MAJ MIN PMA PMI DOR LYD CUS
 -- @group Custom Overrides
--- x=1..7, y=3: BLACK keys (gaps at 1 and 4)
--- x=1..7, y=4: WHITE keys — C D E F G A B
+-- x=2..3, y=3: BLACK — C# D#
+-- x=5..7, y=3: BLACK — F# G# A#
+-- x=1..7, y=4: WHITE — C D E F G A B
 -- @group Octave Center
--- x=1..4, y=6: OCT base (2, 3, 4, 5)
+-- x=1..4, y=6: OCTS — OC2 OC3 OC4 OC5
 -- @group Themes
 -- @detail Seasons shape leaf colors, note character, and MIDI CC filter automation.
 -- @detail SP Spring · bright greens · short energetic notes · high velocity · CC stays neutral
 -- @detail SU Summer · warm yellow-greens · long sustained notes · high velocity · CC stays neutral
 -- @detail AU Autumn · warm oranges/reds · short-medium notes · 25% chord chance (thirds/fifths) · slow wide CC filter sweeps
 -- @detail WI Winter · cool blues/greys · long and short mixed · lower velocity · 15% echo chance · fast jittery CC filter drift
--- x=1..4, y=7: SEAS — Season (SP, SU, AU, WI)
+-- x=1..4, y=7: SEAS — SPR SUM AUT WIN
 -- @group Monochrome
 -- x=6, y=7: MONO mode toggle
 -- @group Grid Display
@@ -745,7 +746,7 @@ local function draw_seq()
   if supports_multi_screen then grid_set_screen("seq") end
   for y = 1, H do for x = 1, W do spx(x, y, 0, 0, 0) end end
 
-  -- Row 1: Track Selectors (LEN, DIV, CH, OCT) at x=1..4
+  -- [Row 1] Track Selectors (LEN, DIV, CH, OCT) at x=1..4
   for x = 1, 4 do
     local on = (x == seq_opt)
     local v  = on and 1.0 or 0.12
@@ -753,13 +754,13 @@ local function draw_seq()
     spx(x, 1, math.floor(oc[1]*v), math.floor(oc[2]*v), math.floor(oc[3]*v))
   end
 
-  -- Row 2: BPM (x=1..4)
+  -- [Row 2] BPM (x=1..4)
   for x = 1, 4 do
     local c = (x == 1 or x == 4) and BPM_COL_HI or BPM_COL_MID
     spx(x, 2, c[1], c[2], c[3])
   end
 
-  -- Row 3: Wind Str (x=1..3) and Density (x=5..8)
+  -- [Row 3] Wind Str (x=1..3) and Density (x=5..8)
   for x = 1, 3 do
     local on = (x == WIND_STR)
     local v = on and 1.0 or 0.12
@@ -775,7 +776,7 @@ local function draw_seq()
     end
   end
 
-  -- Row 4: Humanize (x=1..3) and Triops (x=5)
+  -- [Row 4] Humanize (x=1..3) and Triops (x=5)
   for x = 1, 3 do
     local on = (x-1 == humanize_level)
     local v = on and 1.0 or 0.12
@@ -803,13 +804,13 @@ local function draw_scale()
   if supports_multi_screen then grid_set_screen("scale") end
   for y = 1, H do for x = 1, W do spx(x, y, 0, 0, 0) end end
 
-  -- y=1: Scales Row 1 (MAJ, MIN, PMA, PMI, DOR, LYD, CUS) x=1..7
+  -- [y=1] Scales Row 1 (MAJ, MIN, PMA, PMI, DOR, LYD, CUS) x=1..7
   for x = 1, 7 do
     local on = (x == scale_mode)
     spx(x, 1, on and 212 or 36, on and 192 or 32, on and 42 or 8)
   end
 
-  -- y=3: Black keys Row 3 (0 X X 0 X X X) x=1..7
+  -- [y=3] Black keys Row 3 (0 X X 0 X X X) x=1..7
   for x = 1, 7 do
     local s = SCALE_BLK_KEYS[x]
     if s >= 0 then
@@ -825,7 +826,7 @@ local function draw_scale()
     end
   end
 
-  -- y=4: White keys Row 4 x=1..7
+  -- [y=4] White keys Row 4 x=1..7
   for x = 1, 7 do
     local s = KB_WHITE[x]
     local is_root, is_active = false, false
@@ -839,13 +840,13 @@ local function draw_scale()
     else spx(x, 4, 52, 52, 72) end
   end
 
-  -- Row 6: Octaves x=1..4
+  -- [Row 6] Octaves x=1..4
   for x = 1, 4 do
     local on = (x+1 == oct_base)
     spx(x, 6, on and 72 or 10, on and 72 or 10, on and 232 or 36)
   end
 
-  -- Row 7: Seasons x=1..4; Mono toggle x=6
+  -- [Row 7] Seasons x=1..4; Mono toggle x=6
   for x = 1, 4 do
     local on = (x == season)
     local c  = SCALE_SEA_DRAW[x]
@@ -855,7 +856,7 @@ local function draw_scale()
   -- Mono toggle
   spx(6, 7, mono_ui and 255 or 40, mono_ui and 255 or 40, mono_ui and 255 or 40)
 
-  -- Row 8: Alt x=1; Dim x=3..5
+  -- [Row 8] Alt x=1; Dim x=3..5
   spx(1, 8, alt_on and 255 or 60, alt_on and 100 or 20, alt_on and 20 or 20)
   for x = 1, 3 do
     local on = (x-1 == dim_lvl)
@@ -1349,7 +1350,7 @@ function event_grid(x, y, z)
 
   -- ── SEQ SCREEN ───────────────────────────────────────────────────────────
   if active_screen == "seq" then
-    -- Row 1: Selectors (1-4)
+    -- [Row 1] Selectors (1-4)
     if y == 1 then
       if x >= 1 and x <= 4 then
         seq_opt = x
@@ -1357,7 +1358,7 @@ function event_grid(x, y, z)
         local lbls = {"LEN", "DIV", "CH", "OCT"}
         show_hud(lbls[x], "", 160, 160, 160)
       end
-    -- Row 2: BPM (1-4)
+    -- [Row 2] BPM (1-4)
     elseif y == 2 then
       if x >= 1 and x <= 4 then
         if     x==1 then bpm=math.max(20,bpm-10)
@@ -1368,7 +1369,7 @@ function event_grid(x, y, z)
         if m_seq then m_seq:stop(); m_seq:start(get_interval()) end
         show_hud("", bpm, 192, 112, 16)
       end
-    -- Row 3: Wind (1-3) and Density (5-8)
+    -- [Row 3] Wind (1-3) and Density (5-8)
     elseif y == 3 then
       if x >= 1 and x <= 3 then
         WIND_STR = x
@@ -1379,7 +1380,7 @@ function event_grid(x, y, z)
         local lbl = grow_density == 0 and "DE0" or ("DE" .. grow_density)
         show_hud(lbl, "", grow_density == 0 and 60 or 32, grow_density == 0 and 60 or 185, grow_density == 0 and 60 or 100)
       end
-    -- Row 4: Humanize (1-3) and Triops (5)
+    -- [Row 4] Humanize (1-3) and Triops (5)
     elseif y == 4 then
       if x >= 1 and x <= 3 then
         humanize_level = x - 1 -- 0, 1, 2
@@ -1390,7 +1391,7 @@ function event_grid(x, y, z)
         else triop_strength = 0; triop_auto_spawn = false end
         show_hud("TS" .. triop_strength, "", 220, 140, 20)
       end
-    -- Tracks y=5,6,7
+    -- [Rows 5,6,7] Tracks y=5,6,7
     elseif y == Y_SURF then seq_track_tap(t1, x)
     elseif y == Y_MID  then seq_track_tap(t2, x)
     elseif y == Y_DEEP then seq_track_tap(t3, x)
@@ -1400,7 +1401,7 @@ function event_grid(x, y, z)
 
   -- ── SCALE SCREEN ─────────────────────────────────────────────────────────
   if active_screen == "scale" then
-    -- Row 1: Scale selector
+    -- [Row 1] Scale selector
     if y == 1 then
       if x >= 1 and x <= 7 then 
         scale_mode = x
@@ -1408,7 +1409,7 @@ function event_grid(x, y, z)
         show_hud(names[scale_mode], "", 212, 192, 42)
         gen_scale() 
       end
-    -- Row 3: Black Keys
+    -- [Row 3] Black Keys
     elseif y == 3 then
       if x >= 1 and x <= 7 then
         local s = SCALE_BLK_KEYS[x]
@@ -1418,7 +1419,7 @@ function event_grid(x, y, z)
           gen_scale()
         end
       end
-    -- Row 4: White Keys
+    -- [Row 4] White Keys
     elseif y == 4 then
       if x >= 1 and x <= 7 then
         local s = KB_WHITE[x]
@@ -1426,13 +1427,13 @@ function event_grid(x, y, z)
         else root_note = s end
         gen_scale()
       end
-    -- Row 6: Octaves
+    -- [Row 6] Octaves
     elseif y == 6 then
       if x >= 1 and x <= 4 then
         oct_base = x + 1
         show_hud("OC" .. x, "", 72, 72, 232)
       end
-    -- Row 7: Seasons and Mono
+    -- [Row 7] Seasons and Mono
     elseif y == 7 then
       if x >= 1 and x <= 4 then
         season = x
@@ -1442,7 +1443,7 @@ function event_grid(x, y, z)
         mono_ui = not mono_ui
         show_hud(mono_ui and "MON" or "COL", "", 240, 240, 240)
       end
-    -- Row 8: Alt and Dim
+    -- [Row 8] Alt and Dim
     elseif y == 8 then
       if x == 1 then
         alt_on = not alt_on

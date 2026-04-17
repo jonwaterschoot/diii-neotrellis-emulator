@@ -5,7 +5,7 @@ A living portrait of falling sand, leaves and water that turn into music.
 Mount your NeoTrellis rotated **90° counterclockwise** (power cable at top). The grid becomes 8 columns × 16 rows in portrait. Grains accumulate at the bottom and become a step sequencer.
 
 - **Author:** jonwaterschoot
-- **Version:** v0.1.0
+- **Version:** v0.1.2
 - **Forum:** _(link pending)_
 
 ---
@@ -28,10 +28,12 @@ Mount your NeoTrellis rotated **90° counterclockwise** (power cable at top). Th
 
 | Portrait position | Hardware position | Label | Description |
 |---|---|---|---|
-| Col 1, Row 3 | x=14, y=1 | **ALT** | Tap → Cycle screens (Live/Seq/Scale) |
-| Col 1, Row 4 | x=13, y=1 | **Start/Stop** | Green = running, Red = stopped |
-| Col 1, Row 5 | x=12, y=1 | **Lock** | Cycle dissolve rate (Off/Half/Normal) |
-| Col 8, Row 3 | x=14, y=8 | **Reset** | Soft White/Grey. Resets the portrait. |
+| Col 1, Row 3 | x=14, y=1 | **CYC** | ALT — Cycle screens (Live/Seq/Scale) |
+| Col 1, Row 4 | x=13, y=1 | **TOG** | Play/Stop — Blue = running, Red = stopped |
+| Col 1, Row 5 | x=12, y=1 | **LOCK** | Dissolve State — Cycle rate (Off/Slow/Fast) |
+| Col 8, Row 3 | x=14, y=8 | **RESET** | Restore Portrait — Resets the simulation area. |
+| Col 8, Row 4 | x=13, y=8 | **AUTO** | Auto-Dropper — Toggle randomized grain release. |
+| Col 8, Row 5 | x=12, y=8 | **CLEAR** | Clear Color — Hold + tap a grain to delete its color. |
 | Row 1 (all) | x=16, y=1-8 | **Reservoir** | Tap left half (y=1-4) to shift left; right half (y=5-8) to shift right |
 | Row 2, Col 3-6 | x=15, y=3-6 | **Drop Zone** | Tap = release 1 grain; hold 0.5s = stream up to 16 |
 | Rows 3-16 | — | **Physics area** | Dynamic interaction zone. Grains land here. |
@@ -94,8 +96,9 @@ All grains decay slowly over time (unless Lock is on). Dim speed varies per type
 
 ## Changelog
 
-- **v0.1.0** — Initial release: physics simulation, 3 grain types, portrait orientation, 3-screen UI, step sequencer with mining
-- **v0.1.1** (Dev) — Added Reset function; optimized RAM; fixed eye-blinking presence check.
+- **v0.1.2** — Standardized Documentation & UI Fixes: Implemented vertical range labeling, robust note extraction, side-sidebar control mappings, and purged stray internal documentation comments.
+- **v0.1.1** — Optimized RAM; fixed eye-blinking presence check; initial internal support for Reset function.
+- **v0.1.0** — Initial release: physics simulation, 3 grain types, portrait orientation, 3-screen UI, step sequencer with mining.
 
 ---
 

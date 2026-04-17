@@ -54,7 +54,7 @@ These are extracted by `doc-extractor.js` and rendered as the map overlay.
 -- x=1, y=8: ALT toggle — momentary press opens Settings, double-tap = sticky
 -- x=1..8, y=1: Spawn quantity slider (2 fruits per step, max 16)
 -- Row 3, x=1: Autopilot mode cycles NON → SEM → AUT
--- Row 6: Black keys (C# D# F# G# A#) — root note selection when CUS active
+-- Row 6, col 2..7: Black keys — C# D# F# G# A# (skips the gap)
 ```
 
 Supported location formats (all case-insensitive):
@@ -102,6 +102,29 @@ below the group's control list.
 -- Row 5: TR1 — Water surface, base octave
 -- Row 6: TR2 — Underwater mid, one octave down
 -- Row 7: TR3 — Underwater deep, two octaves down
+```
+
+### Best Practices for Layout and Ordering
+
+#### 1. Range Prefixing and Labels
+When documenting a range of pads (e.g., `x=1..4`), you can include a descriptive "prefix" followed by a separator like an em-dash (` — `) or colon (`:`). The renderer ignores this prefix when calculating how many words match the pad count.
+- **Good:** `-- x=1..4, y=7: SEAS — SPR SUM AUT WIN` (4 labels for 4 pads; prefix ignored)
+- **Bad:** `-- x=1..4, y=7: SEAS SPR SUM AUT WIN` (5 words for 4 pads; labels may break)
+
+#### 2. The Capture Rule for @detail
+To ensure that the sidebar "live manual" captures the full description, always place the coordinate mapping line at the **bottom** of the group block.
+- **Correct Ordering:**
+  ```lua
+  -- @group Themes
+  -- @detail Each season changes the color and character of the notes.
+  -- x=1..4, y=7: SEAS — SPR SUM AUT WIN
+  ```
+
+#### 3. Handling Gaps (Piano Layouts)
+For non-contiguous controls (like piano black keys), use **split ranges** instead of placeholders to ensure perfect physical alignment:
+```lua
+-- x=2..3, y=3: BLACK — C# D#
+-- x=5..7, y=3: BLACK — F# G# A#
 ```
 
 **`@section`** defines a major logical grouping (e.g. "Grid Layout", "Settings View").
