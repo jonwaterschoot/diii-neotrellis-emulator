@@ -106,7 +106,9 @@ end
 - `color-workaround-demo.lua`: Demonstrates workarounds for NeoTrellis color accuracy issues at low brightness.
 
 As okyeron started sharing news of the diii build for pico, i started trying to make a script that uses color.  
-I forked his repo and started implementing this into this fork branch [feature/colors](https://github.com/jonwaterschoot/neotrellis-monome/tree/feature/colors/neotrellis_monome_picosdk_iii)
+I forked his repo and implemented this in my fork: [jonwaterschoot/neotrellis-monome](https://github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii) (`main` branch; the older `feature/colors` branch is superseded).
+
+The fork also uses my fork of iii, [codeberg.org/jonwaterschoot/iii](https://codeberg.org/jonwaterschoot/iii/src/branch/fix/streaming-upload) (branch `fix/streaming-upload`). It fixes uploads of scripts larger than ~32 KB, such as leaveseqr, which stock iii can't upload. The details are in the [upload failure investigation](https://github.com/jonwaterschoot/neotrellis-monome/blob/main/neotrellis_monome_picosdk_iii/doc/changestracker/leaveseqr-upload-failure-investigation.md).
 
 > Neotrellis repo by okyeron: https://github.com/okyeron/neotrellis-monome :
 > 

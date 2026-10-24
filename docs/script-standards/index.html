@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1275,12 +1275,12 @@ draws to <code>live</code> will have empty thumbnails and an empty ghost grid.</
 ghost grid, and main grid all update in one pass.</p>
 <div class="codehilite"><pre><span></span><code><span class="kr">function</span><span class="w"> </span><span class="nf">redraw</span><span class="p">()</span>
 <span class="w">    </span><span class="c1">-- Primary screen</span>
-<span class="w">    </span><span class="nf">grid_set_screen</span><span class="p">(</span><span class="s1">&#39;live&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="nf">grid_set_screen</span><span class="p">(</span><span class="s1">'live'</span><span class="p">)</span>
 <span class="w">    </span><span class="nf">grid_led_all</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="w">    </span><span class="c1">-- ... draw live content ...</span>
 
 <span class="w">    </span><span class="c1">-- Each secondary screen gets its own buffer</span>
-<span class="w">    </span><span class="nf">grid_set_screen</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="nf">grid_set_screen</span><span class="p">(</span><span class="s1">'settings'</span><span class="p">)</span>
 <span class="w">    </span><span class="nf">grid_led_all</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="w">    </span><span class="c1">-- ... draw settings content ...</span>
 
@@ -1296,10 +1296,10 @@ controls the minimap highlight and switches the ghost grid in dual-view. Call it
 the user navigates between screens. Guard with <code>if display_screen then</code> for hardware
 compatibility (the function does not exist on real NeoTrellis hardware):</p>
 <div class="codehilite"><pre><span></span><code><span class="c1">-- When navigating to a secondary screen:</span>
-<span class="kr">if</span><span class="w"> </span><span class="nv">display_screen</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="nf">display_screen</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">)</span><span class="w"> </span><span class="kr">end</span>
+<span class="kr">if</span><span class="w"> </span><span class="nv">display_screen</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="nf">display_screen</span><span class="p">(</span><span class="s1">'settings'</span><span class="p">)</span><span class="w"> </span><span class="kr">end</span>
 
 <span class="c1">-- When returning to main:</span>
-<span class="kr">if</span><span class="w"> </span><span class="nv">display_screen</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="nf">display_screen</span><span class="p">(</span><span class="s1">&#39;live&#39;</span><span class="p">)</span><span class="w"> </span><span class="kr">end</span>
+<span class="kr">if</span><span class="w"> </span><span class="nv">display_screen</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="nf">display_screen</span><span class="p">(</span><span class="s1">'live'</span><span class="p">)</span><span class="w"> </span><span class="kr">end</span>
 </code></pre></div>
 
 <p><strong>Backwards compatibility note:</strong> with serial testing with the viii app
@@ -1311,9 +1311,9 @@ draw only the active screen. For example:</p>
 
 <span class="kr">function</span><span class="w"> </span><span class="nf">redraw</span><span class="p">()</span>
 <span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="nv">supports_multi_screen</span><span class="w"> </span><span class="kr">then</span>
-<span class="w">    </span><span class="nf">grid_set_screen</span><span class="p">(</span><span class="s1">&#39;live&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="nf">grid_set_screen</span><span class="p">(</span><span class="s1">'live'</span><span class="p">)</span>
 <span class="w">    </span><span class="c1">-- draw live and alternate screen buffers...</span>
-<span class="w">    </span><span class="nf">grid_set_screen</span><span class="p">(</span><span class="s1">&#39;settings&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="nf">grid_set_screen</span><span class="p">(</span><span class="s1">'settings'</span><span class="p">)</span>
 <span class="w">    </span><span class="c1">-- draw settings screen...</span>
 <span class="w">  </span><span class="kr">else</span>
 <span class="w">    </span><span class="c1">-- draw only the currently active screen</span>
@@ -1374,14 +1374,14 @@ it should be renamed to <code>README.md</code> when the script is packaged for e
 <p>A <code>manifest.json</code> in the script folder enables the emulator to display rich metadata
 and supports future catalog-based browsing. The shape mirrors the norns community catalog:</p>
 <div class="codehilite"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;project_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;serpentine&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;project_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://github.com/user/repo&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your-name&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Snake sequencer with arpeggiator for NeoTrellis 16x8&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;discussion_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://llllllll.co/t/your-thread/12345&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;documentation_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://raw.githubusercontent.com/user/repo/main/README.md&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;tags&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sequencer&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;generative&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;neotrellis&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rgb&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;lua_file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;myscript.lua&quot;</span>
+<span class="w">  </span><span class="nt">"project_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"serpentine"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"project_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://github.com/user/repo"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"author"</span><span class="p">:</span><span class="w"> </span><span class="s2">"your-name"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Snake sequencer with arpeggiator for NeoTrellis 16x8"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"discussion_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://llllllll.co/t/your-thread/12345"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"documentation_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://raw.githubusercontent.com/user/repo/main/README.md"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"sequencer"</span><span class="p">,</span><span class="w"> </span><span class="s2">"generative"</span><span class="p">,</span><span class="w"> </span><span class="s2">"neotrellis"</span><span class="p">,</span><span class="w"> </span><span class="s2">"rgb"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"lua_file"</span><span class="p">:</span><span class="w"> </span><span class="s2">"myscript.lua"</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -1574,7 +1574,7 @@ The <code>R</code> key (Reload) is always shown as an app-level entry at the end
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

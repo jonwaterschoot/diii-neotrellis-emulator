@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1244,7 +1244,7 @@ final brightness of rendered output.</p>
 <span class="w">        </span><span class="err">│</span>
 <span class="w">    </span><span class="n">fs</span><span class="o">.</span><span class="n">watch</span><span class="p">()</span><span class="w">                 </span><span class="err">←</span><span class="w"> </span><span class="n">serve</span><span class="o">.</span><span class="n">js</span><span class="w"> </span><span class="n">watches</span><span class="w"> </span><span class="n">scripts</span><span class="o">/</span>
 <span class="w">        </span><span class="err">│</span>
-<span class="w">    </span><span class="n">WebSocket</span><span class="w"> </span><span class="n">broadcast</span><span class="w">        </span><span class="err">←</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;file_changed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="n">WebSocket</span><span class="w"> </span><span class="n">broadcast</span><span class="w">        </span><span class="err">←</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="s2">"file_changed"</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="w"> </span><span class="p">}</span>
 <span class="w">        </span><span class="err">│</span>
 <span class="w">    </span><span class="n">browser</span><span class="w"> </span><span class="n">receives</span><span class="w"> </span><span class="n">message</span><span class="w">   </span><span class="err">←</span><span class="w"> </span><span class="n">lua</span><span class="o">-</span><span class="n">loader</span><span class="o">.</span><span class="n">js</span>
 <span class="w">        </span><span class="err">│</span>
@@ -1329,10 +1329,10 @@ final brightness of rendered output.</p>
 <li>Add an entry to <code>emulator/scripts/manifest.json</code>:</li>
 </ol>
 <div class="codehilite"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My Script&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_script.lua&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;What it does&quot;</span>
+<span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"My Script"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"file"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my_script.lua"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0.0"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"What it does"</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -1373,7 +1373,7 @@ using a triangle-wave oscillator with configurable volume, attack, and release
 to add the JS-side implementation, then register it in <code>engine/lua-loader.js</code>
 using <code>setGlobal</code>:</p>
 <div class="codehilite"><pre><span></span><code><span class="c1">// In lua-loader.js _execute(), after other setGlobal calls:</span>
-<span class="nx">setGlobal</span><span class="p">(</span><span class="s1">&#39;my_new_fn&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="nx">L2</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="nx">setGlobal</span><span class="p">(</span><span class="s1">'my_new_fn'</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="nx">L2</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">getInt</span><span class="p">(</span><span class="nx">L2</span><span class="p">,</span><span class="w"> </span><span class="mf">1</span><span class="p">);</span><span class="w">   </span><span class="c1">// first Lua argument</span>
 <span class="w">  </span><span class="nx">api</span><span class="p">.</span><span class="nx">my_new_fn</span><span class="p">(</span><span class="nx">val</span><span class="p">);</span>
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span><span class="w">                    </span><span class="c1">// number of return values pushed</span>
@@ -1437,7 +1437,7 @@ using <code>setGlobal</code>:</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

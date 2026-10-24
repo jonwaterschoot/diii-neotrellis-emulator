@@ -1,4 +1,4 @@
-This is the readme from the fork i made for neotrellis - at https://github.com/jonwaterschoot/neotrellis-monome/tree/feature/colors/neotrellis_monome_picosdk_iii
+This is the readme from the fork i made for neotrellis - at https://github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii
 
 # Neotrellis Grid + iii Code for Raspberry Pi Pico/RP2040 boards  
 
