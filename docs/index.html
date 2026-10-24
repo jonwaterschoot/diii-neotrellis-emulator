@@ -1117,7 +1117,7 @@ Do not leave a heavy script (like Serpentine) running while uploading files to t
 <h3 id="monome-vs-neotrellis-color-setup">Monome vs NeoTrellis (Color Setup)<a class="headerlink" href="#monome-vs-neotrellis-color-setup" title="Permanent link">&para;</a></h3>
 <p>This emulator supports both the original <strong>Monome Grid</strong> (monochrome) and <strong>Adafruit NeoTrellis</strong> (RGB). Scripts can be written once and run on both targets gracefully via hardware detection (<code>grid_led_rgb</code> versus standard <code>grid_led</code>). Considerable time has gone into building robust grayscale fallback compatibility.</p>
 <h3 id="testing-hardware-setup">Testing &amp; Hardware Setup<a class="headerlink" href="#testing-hardware-setup" title="Permanent link">&para;</a></h3>
-<p>This has been extensively tested using my custom fork of <a href="https://github.com/jonwaterschoot/neotrellis-monome/tree/feature/colors">okyeron's NeoTrellis setup</a> running on a Pico 2040. (Specifically, the modifications enabling color sit in the <a href="https://github.com/jonwaterschoot/neotrellis-monome/tree/feature/colors/neotrellis_monome_picosdk_iii"><code>neotrellis_monome_picosdk_iii</code></a> directory). Backwards compatibility with standard Monome features has only been verified via the <a href="https://dessertplanet.github.io/viii/">monome viii app</a>, which serves as the official web-enabled monome grid emulator.</p>
+<p>This has been extensively tested using my custom fork of <a href="https://github.com/jonwaterschoot/neotrellis-monome">okyeron's NeoTrellis setup</a> running on a Pico 2040. (Specifically, the modifications enabling color sit in the <a href="https://github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii"><code>neotrellis_monome_picosdk_iii</code></a> directory). Backwards compatibility with standard Monome features has only been verified via the <a href="https://dessertplanet.github.io/viii/">monome viii app</a>, which serves as the official web-enabled monome grid emulator.</p>
 <h3 id="known-challenges">Known Challenges<a class="headerlink" href="#known-challenges" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>MIDI Timing</strong>: Building stable MIDI handling has been tricky. Managing multiple timers and handling reliable MIDI Clock sync in a browser environment is currently one of the hardest aspects to perfect.</li>
@@ -1126,7 +1126,7 @@ Do not leave a heavy script (like Serpentine) running while uploading files to t
 <hr />
 <h2 id="important-links">Important Links<a class="headerlink" href="#important-links" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong><a href="https://github.com/jonwaterschoot/neotrellis-monome/tree/feature/colors">jonwaterschoot / neotrellis-monome (feature/colors)</a></strong>: My custom hardware driver fork enabling color support.</li>
+<li><strong><a href="https://github.com/jonwaterschoot/neotrellis-monome">jonwaterschoot / neotrellis-monome</a></strong>: My custom hardware driver fork enabling color support.</li>
 <li><strong><a href="https://github.com/okyeron/neotrellis-monome">okyeron / neotrellis-monome</a></strong>: The original hardware driver repository.</li>
 <li><strong><a href="https://monome.org">monome.org</a></strong>: The creators of the grid hardware.</li>
 <li><strong><a href="https://monome.org/diii/">diii app</a></strong>: Web app to upload scripts to your grid.</li>
