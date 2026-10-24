@@ -55,7 +55,7 @@ This is a universal development tool that runs **real `.lua` scripts natively** 
 This emulator supports both the original **Monome Grid** (monochrome) and **Adafruit NeoTrellis** (RGB). Scripts can be written once and run on both targets gracefully via hardware detection (`grid_led_rgb` versus standard `grid_led`). Considerable time has gone into building robust grayscale fallback compatibility.
 
 ### Testing & Hardware Setup
-This has been extensively tested using my custom fork of [okyeron's NeoTrellis setup](https://github.com/jonwaterschoot/neotrellis-monome/tree/feature/colors) running on a Pico 2040. (Specifically, the modifications enabling color sit in the [`neotrellis_monome_picosdk_iii`](https://github.com/jonwaterschoot/neotrellis-monome/tree/feature/colors/neotrellis_monome_picosdk_iii) directory). Backwards compatibility with standard Monome features has only been verified via the [monome viii app](https://dessertplanet.github.io/viii/), which serves as the official web-enabled monome grid emulator.
+This has been extensively tested using my custom fork of [okyeron's NeoTrellis setup](https://github.com/jonwaterschoot/neotrellis-monome) running on a Pico 2040. (Specifically, the modifications enabling color sit in the [`neotrellis_monome_picosdk_iii`](https://github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii) directory). Backwards compatibility with standard Monome features has only been verified via the [monome viii app](https://dessertplanet.github.io/viii/), which serves as the official web-enabled monome grid emulator.
 
 ### Known Challenges
 - **MIDI Timing**: Building stable MIDI handling has been tricky. Managing multiple timers and handling reliable MIDI Clock sync in a browser environment is currently one of the hardest aspects to perfect.
@@ -64,7 +64,7 @@ This has been extensively tested using my custom fork of [okyeron's NeoTrellis s
 ---
 
 ## Important Links
-- **[jonwaterschoot / neotrellis-monome (feature/colors)](https://github.com/jonwaterschoot/neotrellis-monome/tree/feature/colors)**: My custom hardware driver fork enabling color support.
+- **[jonwaterschoot / neotrellis-monome](https://github.com/jonwaterschoot/neotrellis-monome)**: My custom hardware driver fork enabling color support.
 - **[okyeron / neotrellis-monome](https://github.com/okyeron/neotrellis-monome)**: The original hardware driver repository.
 - **[monome.org](https://monome.org)**: The creators of the grid hardware.
 - **[diii app](https://monome.org/diii/)**: Web app to upload scripts to your grid.
