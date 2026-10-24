@@ -788,6 +788,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#choosing-the-default-color" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choosing the default color
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#loading-a-script" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1019,9 +1030,10 @@
 <h2 id="installing-the-firmware">Installing the firmware<a class="headerlink" href="#installing-the-firmware" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Hold the <strong>boot button</strong> on the Pico while powering it on — it will mount as a drive in your file explorer / Finder.</li>
-<li>Drag <a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/raw/main/uf2s/neotrellis-iii-128-20260419-jonwtr-color-memory.uf2">neotrellis-iii-128-20260419-jonwtr-color-memory.uf2</a> into that drive.</li>
+<li>Drag <a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/raw/main/uf2s/neotrellis-iii-128-20261024-jonwtr-colorpicker.uf2">neotrellis-iii-128-20261024-jonwtr-colorpicker.uf2</a> into that drive. This is for a 16x8 grid.</li>
 <li>The Pico will reboot automatically with the new firmware.</li>
 </ol>
+<p>The previous build, <a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/raw/main/uf2s/neotrellis-iii-128-20260419-jonwtr-color-memory.uf2">neotrellis-iii-128-20260419-jonwtr-color-memory.uf2</a>, is kept as a fallback. The 20261024 build adds a grid coordinate fix and the default color picker below.</p>
 <hr />
 <h2 id="selecting-a-mode-at-startup">Selecting a mode at startup<a class="headerlink" href="#selecting-a-mode-at-startup" title="Permanent link">&para;</a></h2>
 <p>Hold the <strong>top-left (1.1) button</strong> while powering on to cycle between modes:</p>
@@ -1031,8 +1043,18 @@
 </ul>
 <p>Power off and repeat to toggle to the next mode.</p>
 <hr />
+<h2 id="choosing-the-default-color">Choosing the default color<a class="headerlink" href="#choosing-the-default-color" title="Permanent link">&para;</a></h2>
+<p>Hold the <strong>top-right button</strong> while powering on to open the color picker (20261024 build and later):</p>
+<ul>
+<li>column 1 is white, the other columns are hues, and rows fade from full color (top) to pastel</li>
+<li>the bottom row previews brightness levels 1–15 in the chosen color</li>
+<li>press a color to choose it (it blinks), then press the top-right button to save and continue booting</li>
+</ul>
+<p>The color is remembered and tints monochrome output in both modes: norns apps in serial mode, and diii scripts written for standard monochrome grids. Scripts that set their own colors with <code>grid_color()</code> or <code>grid_led_rgb()</code> are not affected. Hold top-left and top-right together to switch mode and pick a color in one go.</p>
+<hr />
 <h2 id="loading-a-script">Loading a script<a class="headerlink" href="#loading-a-script" title="Permanent link">&para;</a></h2>
-<p>Open the <strong>diii web app</strong> and upload a <code>.lua</code> script. You can set a script to auto-run at boot, or use a small launcher script that presents a selector on startup.</p>
+<p>Open the <strong>diii web app</strong> and upload a <code>.lua</code> script. You can set a script to auto-run at boot, or use a launcher script that presents a selector on startup.</p>
+<p>My launcher is <a href="https://github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii/doc/scripts/selector">selector.lua</a>. Every script on the device gets a colored slot. Press a slot once to show the script's name on the grid, then press it again to load it. Make it the boot script with <code>first("selector.lua")</code> in the diii REPL, and reboot to pick another script.</p>
 <blockquote>
 <p>[!NOTE]
 When uploading a script I have found it best to reboot the device and not to perform that action while a script is playing, non heavy scripts probably wont be an issue. 

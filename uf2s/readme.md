@@ -7,8 +7,10 @@ This UF2 was built from a fork of [okyeron's neotrellis repo](https://github.com
 ## Installing the firmware
 
 1. Hold the **boot button** on the Pico while powering it on — it will mount as a drive in your file explorer / Finder.
-2. Drag [neotrellis-iii-128-20260419-jonwtr-color-memory.uf2](https://github.com/jonwaterschoot/diii-neotrellis-emulator/raw/main/uf2s/neotrellis-iii-128-20260419-jonwtr-color-memory.uf2) into that drive.
+2. Drag [neotrellis-iii-128-20261024-jonwtr-colorpicker.uf2](https://github.com/jonwaterschoot/diii-neotrellis-emulator/raw/main/uf2s/neotrellis-iii-128-20261024-jonwtr-colorpicker.uf2) into that drive. This is for a 16x8 grid.
 3. The Pico will reboot automatically with the new firmware.
+
+The previous build, [neotrellis-iii-128-20260419-jonwtr-color-memory.uf2](https://github.com/jonwaterschoot/diii-neotrellis-emulator/raw/main/uf2s/neotrellis-iii-128-20260419-jonwtr-color-memory.uf2), is kept as a fallback. The 20261024 build adds a grid coordinate fix and the default color picker below.
 
 ---
 
@@ -23,9 +25,23 @@ Power off and repeat to toggle to the next mode.
 
 ---
 
+## Choosing the default color
+
+Hold the **top-right button** while powering on to open the color picker (20261024 build and later):
+
+- column 1 is white, the other columns are hues, and rows fade from full color (top) to pastel
+- the bottom row previews brightness levels 1–15 in the chosen color
+- press a color to choose it (it blinks), then press the top-right button to save and continue booting
+
+The color is remembered and tints monochrome output in both modes: norns apps in serial mode, and diii scripts written for standard monochrome grids. Scripts that set their own colors with `grid_color()` or `grid_led_rgb()` are not affected. Hold top-left and top-right together to switch mode and pick a color in one go.
+
+---
+
 ## Loading a script
 
-Open the **diii web app** and upload a `.lua` script. You can set a script to auto-run at boot, or use a small launcher script that presents a selector on startup.
+Open the **diii web app** and upload a `.lua` script. You can set a script to auto-run at boot, or use a launcher script that presents a selector on startup.
+
+My launcher is [selector.lua](https://github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii/doc/scripts/selector). Every script on the device gets a colored slot. Press a slot once to show the script's name on the grid, then press it again to load it. Make it the boot script with `first("selector.lua")` in the diii REPL, and reboot to pick another script.
 
 > [!NOTE]
 > When uploading a script I have found it best to reboot the device and not to perform that action while a script is playing, non heavy scripts probably wont be an issue. 
