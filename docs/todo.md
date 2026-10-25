@@ -28,7 +28,7 @@ A more elaborate list to load scripts that remembers / stores the scripts locall
 https://github.com/nolliegray/stepiii
 
   - loads but doesn't seem to play, or respond beyond initial loading. Is it a clock issue?
-  - fixed (2026-10-25): it calls `midi_tx` for MIDI clock, which the emulator didn't have. Every failing metro tick left its error on the Lua stack, and after ~20 errors every metro and key press failed. The emulator now has `midi_tx`, clears errors and shows each one once. Plays in a node test, still to check by ear in the browser.
+  - fixed (2026-10-25): it calls `midi_tx` for MIDI clock, which the emulator didn't have. Every failing metro tick left its error on the Lua stack, and after ~20 errors every metro and key press failed. The emulator now has `midi_tx`, clears errors and shows each one once. Checked in the dev server: works.
 
 https://github.com/duncangeere/sluiiice
 
