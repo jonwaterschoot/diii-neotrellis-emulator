@@ -12,10 +12,11 @@
  *   grid_color_intensity(val)      – set master brightness multiplier
  *   midi_note_on(note, vel)        – send MIDI note on + Web Audio fallback
  *   midi_note_off(note)            – send MIDI note off
+ *   midi_tx(d1, d2, d3)            – raw MIDI out (clock, transport, any channel message)
  *   get_time()                     – seconds since page load (float)
  *   wrap(v, lo, hi)               – integer range wrapping utility
- *   metro.init(fn, interval)       – create a repeating timer object
- *   metro:start([interval])        – start/restart the metro timer
+ *   metro.init(fn, time, count)    – create a timer; fn(stage), endless when count is omitted
+ *   metro:start([time], [count])   – start the metro (on a running metro: change its period)
  *   metro:stop()                   – stop the metro timer
  *   event_grid(x, y, z)           – called BY the emulator when a pad is clicked
  */
@@ -331,6 +332,29 @@ export class MonomeAPI {
     }
   }
 
+  /**
+   * Raw MIDI out, like iii's midi_tx(d1, d2, d3). Note and CC messages go through
+   * midi_note_on/off and midi_cc so they also reach the internal synth and filter.
+   * Clock and transport (0xF8, 0xFA, 0xFC, ...) are sent as single bytes.
+   */
+  midi_tx(d1, d2 = 0, d3 = 0) {
+    d1 &= 0xFF;
+    const type = d1 & 0xF0;
+    const ch = (d1 & 0x0F) + 1;
+    if (type === 0x90 && d3 > 0) return this.midi_note_on(d2, d3, ch);
+    if (type === 0x90 || type === 0x80) return this.midi_note_off(d2, d3, ch);
+    if (type === 0xB0) return this.midi_cc(d2, d3, ch);
+    let bytes;
+    if (d1 < 0x80 || d1 === 0xF0 || d1 === 0xF7 || d1 === 0xF4 || d1 === 0xF5) return; // data bytes, sysex
+    else if (d1 >= 0xF6) bytes = [d1];
+    else if (type === 0xC0 || type === 0xD0 || d1 === 0xF1 || d1 === 0xF3) bytes = [d1, d2 & 0x7F];
+    else bytes = [d1, d2 & 0x7F, d3 & 0x7F];
+    if (this.midiOut) {
+      try { this.midiOut.send(bytes); } catch (e) { console.warn('[midi_tx]', e); }
+    }
+    if (this.onMidiMonitor) this.onMidiMonitor('out', bytes, performance.now());
+  }
+
   midi_panic() {
     const soundOff = [0xB0, 120, 0];
     const notesOff = [0xB0, 123, 0];
@@ -409,23 +433,54 @@ export class MonomeAPI {
    * @param {number} interval - time between ticks in seconds
    * @returns {Metro} metro object with start() and stop() methods
    */
-  createMetro(fn, interval) {
+  /**
+   * Timer with iii metro semantics. fn(stage) gets 1..count for a counted metro
+   * and -1 for an endless one (count -1). As on the device, start() on a running
+   * metro only changes its period. Ticks are scheduled against a running target
+   * time, so tempo doesn't drift the way chained intervals do.
+   */
+  createMetro(fn, interval, count = -1) {
     const metro = {
       _fn: fn,
       _interval: interval || 1,
+      _count: count,
+      _stages: count,
+      _remaining: count,
+      _next: 0,
       _timerId: null,
       _api: this,
-      start(newInterval) {
+      get running() { return this._timerId !== null; },
+      start(newInterval, newCount) {
         if (newInterval !== undefined) this._interval = newInterval;
-        this.stop();
-        const ms = Math.max(8, Math.floor(this._interval * 1000));
-        this._timerId = setInterval(() => {
-          try { this._fn(); } catch (e) { console.error('[metro tick error]', e); }
-        }, ms);
+        if (newCount !== undefined) this._count = Math.trunc(newCount);
+        if (this._timerId !== null) return;
+        this._stages = this._remaining = this._count;
+        this._next = performance.now();
+        this._schedule();
+      },
+      setTime(t) {
+        if (t > 0) this._interval = t;
+      },
+      _schedule() {
+        const ms = Math.max(1, this._interval * 1000);
+        const now = performance.now();
+        this._next += ms;
+        if (this._next < now - 100) this._next = now + ms; // far behind (background tab): skip, don't burst
+        this._timerId = setTimeout(() => this._tick(), Math.max(0, this._next - now));
+      },
+      _tick() {
+        this._timerId = null;
+        let stage = -1;
+        if (this._remaining >= 0) {
+          if (this._remaining > 0) this._remaining--;
+          stage = this._stages - this._remaining;
+        }
+        if (this._remaining !== 0) this._schedule();
+        try { this._fn(stage); } catch (e) { console.error('[metro tick error]', e); }
       },
       stop() {
         if (this._timerId !== null) {
-          clearInterval(this._timerId);
+          clearTimeout(this._timerId);
           this._timerId = null;
         }
       }

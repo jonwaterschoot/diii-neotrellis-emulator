@@ -1,77 +1,113 @@
 [
   {
     "name": "LeaveSeqr",
+    "group": "Music",
     "file": "leaveseqr/leaveseqr.lua",
     "readme": "leaveseqr/README.md",
-    "description": "Ambient leaf physics sequencer: leaves fall through air, float on water, sink to mud — two generative tracks with triop bass echoes.",
+    "description": "Ambient leaf physics sequencer: leaves fall through air, float on water, sink to mud — three generative tracks with triop bass echoes.",
     "author": "jonwaterschoot",
-    "version": "0.1.0",
+    "version": "0.3.1",
     "gridSize": [16, 8]
   },
   {
     "name": "Sandman",
+    "group": "Music",
     "file": "sandman/sandman.lua",
     "readme": "sandman/README.md",
     "description": "A living portrait: falling sand, leaves and water that become music. Portrait orientation, physics simulation, step sequencer.",
     "author": "jonwaterschoot",
-    "version": "0.1.0",
+    "version": "0.1.2",
     "gridSize": [16, 8],
     "orientation": "portrait"
   },
   {
     "name": "Serpentine Dev",
+    "group": "Music",
     "file": "serpentineSeqr/serpentine_dev.lua",
     "readme": "serpentineSeqr/README.md",
     "description": "Snake sequencer game — development version with all latest features",
     "author": "jonwaterschoot",
-    "version": "1.30-dev",
+    "version": "1.3.1-dev",
     "gridSize": [16, 8]
   },
   {
     "name": "Serpentine minified",
+    "group": "Music",
     "file": "serpentineSeqr/serpentine_dev_min.lua",
-    "description": "Snake sequencer game — development version with all latest features",
+    "description": "Snake sequencer game — minified copy of the development version, for uploading to the device",
     "author": "jonwaterschoot",
-    "version": "1.30-minified",
+    "version": "1.3.1-minified",
     "gridSize": [16, 8]
-  },  
-   {
+  },
+  {
     "name": "Color Fallback Demo",
+    "group": "Color demos",
     "file": "colorfallback/color_fallback_demo.lua",
     "description": "Made to test the color_fallback() function, shows how you can use it to make a monochrome version of your script that still looks good on a monochrome grid, more info in the github folder uf2s",
     "author": "jonwaterschoot",
     "version": "",
     "gridSize": [16, 8]
   },
-{
-  "name": "Grid Color Test",
-  "file": "colorfallback/test-grid-color.lua",
-  "description": "Test script for NeoTrellis / Monome color compatibility.",
-  "author": "jonwaterschoot",
-  "version": "",
-  "gridSize": [16, 8]
-  },
-   {
-    "name": "Power Test",
-    "file": "powertest/power_test.lua",
-    "description": "Tests the Power Limiter and grid_color_intensity() function, was made to test brownout of the leds.",
+  {
+    "name": "Monochrome Fallback",
+    "group": "Color demos",
+    "file": "colorfallback/monochrome_fallback.lua",
+    "description": "Brightness slider demo —  my first monochrome fallback example, color_fallback_demo is a better example of this but I wanted to keep this one around for testing purposes",
     "author": "jonwaterschoot",
     "version": "",
     "gridSize": [16, 8]
   },
   {
+    "name": "Color Workaround Demo",
+    "group": "Color demos",
+    "file": "colorfallback/color-workaround-demo.lua",
+    "description": "Shows how grid_led_rgb() overrides keep cyan accurate at low brightness, where tinted grid_led() turns orange on NeoTrellis.",
+    "author": "jonwaterschoot",
+    "version": "1.0.0",
+    "gridSize": [16, 8]
+  },
+  {
+    "name": "Text Runner",
+    "group": "Color demos",
+    "file": "displayfun/textrunner.lua",
+    "description": "Renders a 3x5 pixel font and scrolls text. Top-row buttons pick slow, medium or fast scrolling, or chunk mode.",
+    "author": "jonwaterschoot",
+    "version": "1.0.0",
+    "gridSize": [16, 8]
+  },
+  {
     "name": "Multi-Screen Test",
+    "group": "Tests",
     "file": "multiplescreen-test/multiplescreen-test.lua",
     "readme": "multiplescreen-test/README.md",
     "description": "Demo for multiple-screen emulation and NeoTrellis color handling across separate screen buffers.",
     "author": "Gemini / jonwtr",
-    "version": "",
+    "version": "1.2.0",
     "gridSize": [16, 8]
   },
   {
-    "name": "Monochrome Fallback",
-    "file": "../uf2s/monochrome_fallback.lua",
-    "description": "Brightness slider demo —  my first monochrome fallback example, color_fallback_demo is a better example of this but I wanted to keep this one around for testing purposes",
+    "name": "Grid Color Test",
+    "group": "Tests",
+    "file": "colorfallback/test-grid-color.lua",
+    "description": "Test script for NeoTrellis / Monome color compatibility.",
+    "author": "jonwaterschoot",
+    "version": "1.0.0",
+    "gridSize": [16, 8]
+  },
+  {
+    "name": "Color Threshold Test",
+    "group": "Tests",
+    "file": "colorfallback/color-threshold-test.lua",
+    "description": "Finds the brightness levels where NeoTrellis LEDs start rendering tinted colors incorrectly, next to grid_led_rgb() references.",
+    "author": "jonwaterschoot",
+    "version": "1.0.0",
+    "gridSize": [16, 8]
+  },
+  {
+    "name": "Power Test",
+    "group": "Tests",
+    "file": "powertest/power_test.lua",
+    "description": "Tests the Power Limiter and grid_color_intensity() function, was made to test brownout of the leds. Needs a color grid.",
     "author": "jonwaterschoot",
     "version": "",
     "gridSize": [16, 8]

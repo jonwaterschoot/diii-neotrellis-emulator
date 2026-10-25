@@ -574,6 +574,89 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#sorting-my-own-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sorting my own scripts:
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sorting my own scripts:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scripts-dedicated-list-modal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scripts dedicated list / modal?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing scripts:
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-compatibility-issues-found-2026-10-25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open compatibility issues (found 2026-10-25)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#synth-sound" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Synth / sound
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uf2-versions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UF2 versions
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -988,6 +1071,111 @@
 <li>[ ] <strong>Restructure the Walkthrough</strong>: Extract the detailed Lua execution logic and LDoc API reference out of <code>walkthrough.md</code> and move it to a dedicated developer-focused <code>script-standards.md</code> or <code>developer-guide.md</code>. Keep <code>walkthrough.md</code> solely for navigating the emulator UI.</li>
 <li>[ ] <strong>Hardware vs. Emulation Differences</strong>: Create a specific page clearly outlining the differences between running scripts natively in the browser emulator versus exporting and running them natively on the hardware.</li>
 <li>[ ] <strong>MIDI Documentation</strong>: Add screenshots and clearer diagrams explaining MIDI connectivity and the challenges with multiple timers/clock syncing logic so script developers understand the physical constraints.</li>
+</ul>
+<p>--</p>
+<h2 id="sorting-my-own-scripts">Sorting my own scripts:<a class="headerlink" href="#sorting-my-own-scripts" title="Permanent link">&para;</a></h2>
+<ul>
+<li>better structure</li>
+<li>done (2026-10-25): this repo is now the only home for the scripts. The firmware repo keeps only selector and the upload threshold tests.</li>
+<li>the dropdown is grouped (Music / Color demos / Tests) via a <code>group</code> field in <code>scripts/manifest.json</code></li>
+<li><code>monochrome_fallback.lua</code> moved from <code>uf2s/</code> to <code>scripts/colorfallback/</code>, <code>powertest/power_test.lua</code> restored, stale <code>_min</code> files regenerated</li>
+<li>clear link to the (llm) example</li>
+</ul>
+<h3 id="scripts-dedicated-list-modal">Scripts dedicated list / modal?<a class="headerlink" href="#scripts-dedicated-list-modal" title="Permanent link">&para;</a></h3>
+<p>In general: perhaps we make a json file that can be used to add other scripts from which we can load into our repo, still linking to the originals not copying. 
+A more elaborate list to load scripts that remembers / stores the scripts locally in browser memory   </p>
+<h2 id="testing-scripts">Testing scripts:<a class="headerlink" href="#testing-scripts" title="Permanent link">&para;</a></h2>
+<p>https://github.com/nolliegray/stepiii</p>
+<ul>
+<li>loads but doesn't seem to play, or respond beyond initial loading. Is it a clock issue?</li>
+<li>fixed (2026-10-25): it calls <code>midi_tx</code> for MIDI clock, which the emulator didn't have. Every failing metro tick left its error on the Lua stack, and after ~20 errors every metro and key press failed. The emulator now has <code>midi_tx</code>, clears errors and shows each one once. Checked in the dev server: works.</li>
+</ul>
+<p>https://github.com/duncangeere/sluiiice</p>
+<ul>
+<li>ok it's a 90° script, but we cannot know this from any settings file, so it's ok</li>
+</ul>
+<p>https://github.com/aktsom/kria_iii</p>
+<ul>
+<li>Fails to load with error: 
+    <code>Connecting to github:aktsom/kria_iii…
+    Trying kria_iii.lua…
+    Fetching README…
+    Lua runtime error: kria_iii.lua:2: lua_gc not implemented
+    Error: kria_iii.lua:2: lua_gc not implemented</code></li>
+<li>fixed (2026-10-25): fengari has no garbage collector API, so <code>collectgarbage()</code> now gets a stand-in that returns 0. Loads; playback not tested yet.</li>
+<li>uses 11 metros. iii has 12, the emulator has no limit (yet).</li>
+</ul>
+<p>https://github.com/nolliegray/arpiii</p>
+<ul>
+<li>loads but doesn't seem to play, or respond beyond initial loading. Is it a clock issue?</li>
+<li>fixed (2026-10-25): same stack problem, caused by <code>collectgarbage("step")</code> every 0.1 s. It also relies on metro counts (one-shot gate-off) and <code>m.time = x</code> (swing); emulator metros now follow iii for both. Plays in a node test.</li>
+<li>MIDI keyboard input still won't work: see "Open compatibility issues" below.</li>
+</ul>
+<p>https://github.com/liamelliot/iiinvert/</p>
+<ul>
+<li>works</li>
+<li>geared towards drums, perhaps the emulator should include a few drum options (e.g. take the models I used in WAV.builder Mangler)</li>
+</ul>
+<p>https://github.com/liamelliot/fell</p>
+<ul>
+<li>works, first one i fiind that uses 16 x 16 grid, and first proven use case!</li>
+<li>
+<p>only lua file, no readme for docs → https://llllllll.co/t/fell/72593</p>
+</li>
+<li>
+<p>This makes a good case for also allowing to view the content of lua files inside the inspector (even allowing to change parameters!)</p>
+</li>
+</ul>
+<p>https://github.com/behindkeyframes/fugace</p>
+<ul>
+<li>works</li>
+</ul>
+<p>https://github.com/boreal-ground/many-roads-grid</p>
+<ul>
+<li>stays empty, but that's logical since it's needing those lua's in place, we could mark it as a script loader</li>
+<li>I made my own version: selector</li>
+</ul>
+<p>C:\Users\jonwa\Documents\GitHub\neotrellis-monome\neotrellis_monome_picosdk_iii\doc\scripts\selector\selector.lua  </p>
+<ul>
+<li>logical error:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="n">Loading selector.lua…</span>
+<span class="n">Lua runtime error: selector.lua:52: attempt to call a nil value (global 'fs_list_files')</span>
+<span class="n">Error: selector.lua:52: attempt to call a nil value (global 'fs_list_files')</span>
+</code></pre></div>
+
+<ul>
+<li>also mark as a selecting script and use the scripts in the the loader</li>
+<li>idea: provide <code>fs_list_files()</code> (and <code>fs_run_file()</code>) from <code>scripts/manifest.json</code>, so selector shows the bundled scripts</li>
+</ul>
+<h2 id="open-compatibility-issues-found-2026-10-25">Open compatibility issues (found 2026-10-25)<a class="headerlink" href="#open-compatibility-issues-found-2026-10-25" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong><code>event_midi</code> is never called.</strong> Incoming MIDI notes are turned into grid presses and nothing reaches the script, so external clock sync (stepiii/arpiii clock source 2) and arpiii's MIDI keyboard don't work. Proposal: when a script defines <code>event_midi</code>, send incoming MIDI there and skip the note→pad mapping.</li>
+<li><strong>sandman note-offs on hardware</strong>: <code>midi_note_off(note, ch)</code> uses the 2-argument form. On iii the second argument is the velocity, so on the device the note-offs go to channel 1. The emulator still accepts the 2-argument form, so this doesn't show here. Fix in sandman: <code>midi_note_off(note, 0, ch)</code>.</li>
+<li><strong>Metro limit</strong>: iii has 12 metros, the emulator has none. Warn when a script makes more than 12?</li>
+<li><strong>Not in the emulator yet</strong>: <code>grid_led_get</code>, <code>fs_*</code> functions, <code>metro.free</code>.</li>
+<li><strong>Emulator-only</strong>: <code>grid_brightness</code>, <code>grid_set_screen</code>, <code>display_screen</code>, <code>get_focused_screen</code> don't exist on the device. Scripts should check <code>if grid_brightness then</code> (leaveseqr does).</li>
+<li>All of this belongs on the "Hardware vs. Emulation Differences" page above.</li>
+</ul>
+<h2 id="synth-sound">Synth / sound<a class="headerlink" href="#synth-sound" title="Permanent link">&para;</a></h2>
+<ul>
+<li>play pause small fade to avoid clicks</li>
+<li>synth (more models?)</li>
+<li>delay:</li>
+<li>smooth delay time changes so it doesn't create glitches or crackles</li>
+<li>reverb: </li>
+<li>different models</li>
+<li>smoothly fade settings (e.g. changing )</li>
+<li>add drum sounds (option to set channels per sound, add seven sounds at most, variable randomizer for duifferent sounds)</li>
+</ul>
+<h2 id="design">Design<a class="headerlink" href="#design" title="Permanent link">&para;</a></h2>
+<p><strong>ICO icon</strong> use a grid icon for the pages</p>
+<p><strong>bg colors</strong> use pure grays for backgrounds instead of current bluish tints.</p>
+<p><strong>option to toggle rounded corners</strong></p>
+<p><strong>Other UI options?</strong> e.g. monochrome, invert, light mode → Dark mode is always default</p>
+<h2 id="uf2-versions">UF2 versions<a class="headerlink" href="#uf2-versions" title="Permanent link">&para;</a></h2>
+<ul>
+<li>delete here and only refer to the release of the og fork?</li>
 </ul>
 
 
