@@ -10,7 +10,7 @@ This UF2 was built from a fork of [okyeron's neotrellis repo](https://github.com
 2. Drag [neotrellis-iii-128-20261024-jonwtr-colorpicker.uf2](https://github.com/jonwaterschoot/diii-neotrellis-emulator/raw/main/uf2s/neotrellis-iii-128-20261024-jonwtr-colorpicker.uf2) into that drive. This is for a 16x8 grid.
 3. The Pico will reboot automatically with the new firmware.
 
-The previous build, [neotrellis-iii-128-20260419-jonwtr-color-memory.uf2](https://github.com/jonwaterschoot/diii-neotrellis-emulator/raw/main/uf2s/neotrellis-iii-128-20260419-jonwtr-color-memory.uf2), is kept as a fallback. The 20261024 build adds a grid coordinate fix and the default color picker below.
+The previous build, [neotrellis-iii-128-20260419-jonwtr-color-memory.uf2](https://github.com/jonwaterschoot/diii-neotrellis-emulator/raw/main/uf2s/neotrellis-iii-128-20260419-jonwtr-color-memory.uf2), is kept as a fallback. The 20261024 build adds the default color picker below.
 
 ---
 
