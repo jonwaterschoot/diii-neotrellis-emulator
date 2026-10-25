@@ -277,14 +277,22 @@ export class LuaLoader {
       api.grid_color_intensity(getInt(L2, 1)); return 0;
     });
 
-    // midi_note_on(note, vel, ch)
+    // midi_note_on(note, vel, ch) — vel defaults to 100 as in iii's lib.lua
     setGlobal('midi_note_on', (L2) => {
-      api.midi_note_on(getInt(L2, 1), getInt(L2, 2), getInt(L2, 3) || 1); return 0;
+      const vel = lua.lua_isnumber(L2, 2) ? getInt(L2, 2) : 100;
+      api.midi_note_on(getInt(L2, 1), vel, getInt(L2, 3) || 1); return 0;
     });
 
-    // midi_note_off(note, ch)
+    // midi_note_off(note, vel, ch) as in iii; the 2-arg form (note, ch) is kept for older scripts
     setGlobal('midi_note_off', (L2) => {
-      api.midi_note_off(getInt(L2, 1), getInt(L2, 2) || 1); return 0;
+      if (lua.lua_gettop(L2) >= 3) api.midi_note_off(getInt(L2, 1), getInt(L2, 2), getInt(L2, 3) || 1);
+      else api.midi_note_off(getInt(L2, 1), getInt(L2, 2) || 1);
+      return 0;
+    });
+
+    // midi_tx(d1, d2, d3) — raw MIDI out (iii built-in)
+    setGlobal('midi_tx', (L2) => {
+      api.midi_tx(getInt(L2, 1), getInt(L2, 2), getInt(L2, 3)); return 0;
     });
 
     // midi_panic()
@@ -299,6 +307,11 @@ export class LuaLoader {
 
     // grid_brightness(val)  — set master brightness (1..15); alias for grid_color_intensity
     setGlobal('grid_brightness', (L2) => {
+      api.grid_color_intensity(getInt(L2, 1)); return 0;
+    });
+
+    // grid_intensity(z)  — firmware global LED brightness (0..15); same master brightness here
+    setGlobal('grid_intensity', (L2) => {
       api.grid_color_intensity(getInt(L2, 1)); return 0;
     });
 
@@ -321,9 +334,34 @@ export class LuaLoader {
     // ps(fmt, ...) — iii firmware status-bar printf, silently ignored in emulator
     setGlobal('ps', (_L2) => 0);
 
+    // collectgarbage(opt) — Fengari has no lua_gc and throws "lua_gc not implemented",
+    // so answer like an idle collector: "count" → 0 KB, "step" → false, others → 0
+    setGlobal('collectgarbage', (L2) => {
+      const opt = lua.lua_isstring(L2, 1) ? lua.lua_tojsstring(L2, 1) : 'collect';
+      if (opt === 'step' || opt === 'isrunning') lua.lua_pushboolean(L2, opt === 'isrunning');
+      else lua.lua_pushnumber(L2, 0);
+      return 1;
+    });
+
+    // Errors from metro ticks and grid events are reported once per distinct message.
+    // The error object must be popped: a leftover on every failing tick overflows the
+    // stack, after which every metro and key press throws and the script goes dead.
+    const reported = new Set();
+    const reportPcall = (L2, status, where) => {
+      if (status === lua.LUA_OK) return;
+      const err = lua.lua_isstring(L2, -1) ? lua.lua_tojsstring(L2, -1) : '(non-string error)';
+      lua.lua_pop(L2, 1);
+      const msg = `${where}: ${err}`;
+      if (reported.has(msg)) return;
+      reported.add(msg);
+      console.error(`[lua] ${msg}`);
+      this.onStatusChange(`Lua runtime error in ${msg}`, 'error');
+      this.onScriptError(msg);
+    };
+
     // math.random / math.randomseed  (already in lualib, but ensure it's active)
-    // metro table: metro.init(fn, interval)
-    this._injectMetro(L, lua, lauxlib, api);
+    // metro table: metro.init(fn, time, count)
+    this._injectMetro(L, lua, lauxlib, api, reportPcall);
 
     // pset_init / pset_write / pset_read  (iii preset persistence, backed by localStorage)
     this._injectPset(L, lua, lauxlib);
@@ -360,7 +398,7 @@ export class LuaLoader {
         lua.lua_pushnumber(L, x);
         lua.lua_pushnumber(L, y);
         lua.lua_pushnumber(L, z);
-        lua.lua_pcall(L, 3, 0, 0);
+        reportPcall(L, lua.lua_pcall(L, 3, 0, 0), 'event_grid');
       });
     }
 
@@ -368,46 +406,59 @@ export class LuaLoader {
     this.onScriptLoad(name, docs);
   }
 
-  _injectMetro(L, lua, lauxlib, api) {
+  _injectMetro(L, lua, lauxlib, api, reportPcall) {
     const { to_luastring } = window.fengari;
     const luaStr = (s) => to_luastring(s);
 
-    // Create a JS-backed metro table to inject at "metro" global
-    // We use a Lua helper that stores metros in a Lua table,
-    // but delegates start/stop to JS via closures.
+    // Mirrors iii's lib.lua metro:
+    //   m = metro.init(fn, time, count)  or  metro.init{event=fn, time=t, count=n}
+    //   m:start([time], [count])  m:stop()
+    //   m.time / m.count / m.event can be read and assigned; m.is_running, m.id are read-only
+    // The callback gets the stage (1..count, or -1 for an endless metro).
 
-    // Strategy: inject metro.init as a C function that returns a userdata-like table
-    // with :start() and :stop() methods pointing to JS functions.
+    const optNum = (L2, idx) => lua.lua_isnumber(L2, idx) ? lua.lua_tonumber(L2, idx) : undefined;
+    const fieldNum = (L2, idx, key) => {
+      lua.lua_getfield(L2, idx, luaStr(key));
+      const v = optNum(L2, -1);
+      lua.lua_pop(L2, 1);
+      return v;
+    };
 
     // Build the `metro` global table
     lua.lua_newtable(L);
 
-    // metro.init = function(fn, interval)  [C closure]
     lua.lua_pushstring(L, luaStr('init'));
     lua.lua_pushcfunction(L, (L2) => {
-      // arg1: function, arg2: interval (optional)
-      const interval = lua.lua_isnumber(L2, 2) ? lua.lua_tonumber(L2, 2) : 1;
+      let interval, count;
+      if (lua.lua_istable(L2, 1)) {
+        interval = fieldNum(L2, 1, 'time');
+        count = fieldNum(L2, 1, 'count');
+        lua.lua_getfield(L2, 1, luaStr('event'));
+      } else {
+        interval = optNum(L2, 2);
+        count = optNum(L2, 3);
+        lua.lua_pushvalue(L2, 1);
+      }
+      // Keep the callback in the registry; m.event = fn swaps it
+      let fnRef = lauxlib.luaL_ref(L2, lua.LUA_REGISTRYINDEX);
 
-      // We store the Lua function ref in a JS closure
-      // by making a reference using the registry
-      lua.lua_pushvalue(L2, 1); // copy fn to top
-      const fnRef = lauxlib.luaL_ref(L2, lua.LUA_REGISTRYINDEX);
-
-      const wrappedFn = () => {
-        lua.lua_rawgeti(L2, lua.LUA_REGISTRYINDEX, fnRef);
-        lua.lua_pcall(L2, 0, 0, 0);
+      const wrappedFn = (stage) => {
+        lua.lua_rawgeti(L, lua.LUA_REGISTRYINDEX, fnRef);
+        if (lua.lua_isnil(L, -1)) { lua.lua_pop(L, 1); return; }
+        lua.lua_pushinteger(L, stage);
+        reportPcall(L, lua.lua_pcall(L, 1, 0, 0), 'metro');
       };
 
-      const metro = api.createMetro(wrappedFn, interval);
+      const metro = api.createMetro(wrappedFn, interval || 1, count === undefined ? -1 : Math.trunc(count));
+      const id = api._metros.length;
 
-      // Build and push back a Lua table with :start() and :stop()
       lua.lua_newtable(L2);
 
-      // :start([interval])
+      // :start([time], [count])  or  :start{time=, count=}
       lua.lua_pushstring(L2, luaStr('start'));
       lua.lua_pushcfunction(L2, (L3) => {
-        const newInterval = lua.lua_isnumber(L3, 2) ? lua.lua_tonumber(L3, 2) : undefined;
-        metro.start(newInterval);
+        if (lua.lua_istable(L3, 2)) metro.start(fieldNum(L3, 2, 'time'), fieldNum(L3, 2, 'count'));
+        else metro.start(optNum(L3, 2), optNum(L3, 3));
         return 0;
       });
       lua.lua_settable(L2, -3);
@@ -420,11 +471,38 @@ export class LuaLoader {
       });
       lua.lua_settable(L2, -3);
 
-      // Add __index metamethod so m:start() works (colon syntax)
       lua.lua_newtable(L2); // metatable
+
       lua.lua_pushstring(L2, luaStr('__index'));
-      lua.lua_pushvalue(L2, -3); // the metro table itself
+      lua.lua_pushcfunction(L2, (L3) => {
+        const key = lua.lua_isstring(L3, 2) ? lua.lua_tojsstring(L3, 2) : null;
+        if (key === 'time') lua.lua_pushnumber(L3, metro._interval);
+        else if (key === 'count') lua.lua_pushinteger(L3, metro._count);
+        else if (key === 'is_running') lua.lua_pushboolean(L3, metro.running);
+        else if (key === 'id') lua.lua_pushinteger(L3, id);
+        else if (key === 'event') lua.lua_rawgeti(L3, lua.LUA_REGISTRYINDEX, fnRef);
+        else lua.lua_pushnil(L3);
+        return 1;
+      });
       lua.lua_settable(L2, -3);
+
+      lua.lua_pushstring(L2, luaStr('__newindex'));
+      lua.lua_pushcfunction(L2, (L3) => {
+        const key = lua.lua_isstring(L3, 2) ? lua.lua_tojsstring(L3, 2) : null;
+        if (key === 'time') metro.setTime(lua.lua_tonumber(L3, 3));
+        else if (key === 'count') metro._count = Math.trunc(lua.lua_tonumber(L3, 3));
+        else if (key === 'event') {
+          lauxlib.luaL_unref(L3, lua.LUA_REGISTRYINDEX, fnRef);
+          lua.lua_pushvalue(L3, 3);
+          fnRef = lauxlib.luaL_ref(L3, lua.LUA_REGISTRYINDEX);
+        } else {
+          lua.lua_settop(L3, 3);
+          lua.lua_rawset(L3, 1);
+        }
+        return 0;
+      });
+      lua.lua_settable(L2, -3);
+
       lua.lua_setmetatable(L2, -2);
 
       return 1; // returns the metro table
