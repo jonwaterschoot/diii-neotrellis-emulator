@@ -2,7 +2,7 @@
   "project_name": "leaveseqr",
   "project_url": "https://github.com/jonwaterschoot/diii-neotrellis-emulator",
   "author": "jonwaterschoot",
-  "description": "Ambient leaf physics sequencer: leaves fall through air, float on water, sink to mud — two generative tracks with triop bass echoes.",
+  "description": "Ambient leaf physics sequencer: leaves fall through air, float on water, sink to mud — three generative tracks with triop bass echoes.",
   "discussion_url": "https://llllllll.co/t/leaveseqr",
   "documentation_url": "https://raw.githubusercontent.com/jonwaterschoot/diii-neotrellis-emulator/main/scripts/leaveseqr/README.md",
   "tags": ["neotrellis", "sequencer", "ambient", "generative"],

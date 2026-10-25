@@ -153,7 +153,7 @@ Okyeron's neotrellis repo: https://github.com/okyeron/neotrellis-monome
 - [serpentineseqr dev](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineseqr_dev.lua) - a snake game with color support for a 128 grid - my main reason to build this seq, and my main focus before i started building this emulator.  
 Its still not working as I envisioned it, but its getting there.  
 
-- [monochrome fallback test](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/monochrome_fallback.lua) - as i needed to test if the monochrome fallback was working
+- [monochrome fallback test](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/colorfallback/monochrome_fallback.lua) - as i needed to test if the monochrome fallback was working
 
 - [power test](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/power_test.lua) - as i needed to test if the power wasnt causing brownouts
 

@@ -2783,13 +2783,25 @@
     async function populateScriptSelect() {
       const manifest = await loader.fetchManifest(BASE_URL);
       if (manifest.length > 0) {
+        // Entries with a "group" go into an <optgroup> of that name, in manifest order
+        const groups = new Map();
         manifest.forEach(entry => {
           _manifestMap.set(entry.file, entry);
           const opt = document.createElement('option');
           opt.value = entry.file;
           opt.textContent = `${entry.name}${entry.version ? ' (' + entry.version + ')' : ''}`;
           opt.title = entry.description || '';
-          scriptSelect.appendChild(opt);
+          let parent = scriptSelect;
+          if (entry.group) {
+            if (!groups.has(entry.group)) {
+              const g = document.createElement('optgroup');
+              g.label = entry.group;
+              scriptSelect.appendChild(g);
+              groups.set(entry.group, g);
+            }
+            parent = groups.get(entry.group);
+          }
+          parent.appendChild(opt);
         });
         scriptSelect.value = manifest[0].file;
         setDownloadEnabled(true);

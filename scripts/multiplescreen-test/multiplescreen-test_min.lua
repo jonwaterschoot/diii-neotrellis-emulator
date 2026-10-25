@@ -1,3 +1,4 @@
+local multi_screen_supported = (grid_set_screen ~= nil)
 local W, H = 16, 8
 local active_screen = 1
 local digits = {}
@@ -19,9 +20,22 @@ function spx(x, y, r, g, b, brightness)
     g = g * brightness
     b = b * brightness
     if grid_led_rgb then
+        r = math.max(0, math.min(255, math.floor(r + 0.5)))
+        g = math.max(0, math.min(255, math.floor(g + 0.5)))
+        b = math.max(0, math.min(255, math.floor(b + 0.5)))
+        local maxc = math.max(r, g, b)
+        if maxc > 0 and maxc < 16 then
+            local scale = 16 / maxc
+            r = math.min(255, math.floor(r * scale + 0.5))
+            g = math.min(255, math.floor(g * scale + 0.5))
+            b = math.min(255, math.floor(b * scale + 0.5))
+        end
         grid_led_rgb(x, y, r, g, b)
     else
         local level = math.floor(math.max(r, g, b) / 17)
+        if level < 4 and (r > 0 or g > 0 or b > 0) then
+            level = 4
+        end
         grid_led(x, y, level)
     end
 end
@@ -85,15 +99,25 @@ function draw_editor_screen(digit_idx)
     end
 end
 function redraw()
-    grid_set_screen('live')
-    grid_led_all(0)
-    draw_control_row(1)
-    draw_main_screen()
-    for i = 1, 3 do
-        grid_set_screen('edit' .. i)
+    if multi_screen_supported then
+        grid_set_screen('live')
         grid_led_all(0)
-        draw_control_row(i + 1)
-        draw_editor_screen(i)
+        draw_control_row(1)
+        draw_main_screen()
+        for i = 1, 3 do
+            grid_set_screen('edit' .. i)
+            grid_led_all(0)
+            draw_control_row(i + 1)
+            draw_editor_screen(i)
+        end
+    else
+        grid_led_all(0)
+        draw_control_row(active_screen)
+        if active_screen == 1 then
+            draw_main_screen()
+        else
+            draw_editor_screen(active_screen - 1)
+        end
     end
     grid_refresh()
 end
