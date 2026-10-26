@@ -32,7 +32,7 @@ The status bar next to them shows what's happening, including errors and warning
 - **Right-click** holds a pad down; right-click again to let go. Use it for chords, or for a button you'd otherwise hold.
 - **Grid** sets the size (8×8, 16×8, 8×16, 16×16), **↻ 0°** rotates it, and the zoom slider and **⤢ Fit** set how big it is on screen.
 - **Full View** shows only the grid. Its buttons open the sound and zoom controls; Esc leaves.
-- **◐ View** sets the theme (dark or light), the keys (**NeoTrellis**: the whole pad lights up; **Mechatrellis**: dark keys close together, with an LED at the top), the pad corners (square, slightly round, round), and the grid: **Colour** like a NeoTrellis grid, or **Monochrome** like a monome grid. In monochrome the script doesn't get `grid_led_rgb`, `grid_color` and `grid_color_intensity`, so it runs its own fallback; the grid label says "mono".
+- **◐ View** sets the theme (dark or light; in light, unlit pads have a fine texture and lit ones are smooth, so even dim white LEDs stand out), the keys (**NeoTrellis**: the whole pad lights up; **Mechatrellis**: dark keys close together, with an LED at the top), the pad corners (square, slightly round, round), and the grid: **Colour** like a NeoTrellis grid, or **Monochrome** like a monome grid. In monochrome the script doesn't get `grid_led_rgb`, `grid_color` and `grid_color_intensity`, so it runs its own fallback; the grid label says "mono".
 
 The line under the grid shows the script's own keyboard shortcuts, if it lists any.
 

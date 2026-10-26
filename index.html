@@ -113,13 +113,39 @@
       --cyan: #0e7490;
       --grid-panel: #cfcfcf;
       --grid-panel-border: #bcbcbc;
-      --pad-empty: #e4e4e4;
-      --pad-border: #c4c4c4;
+      --pad-empty: #b4b4b4;
+      --pad-border: #9a9a9a;
       --keycap: #e6e6e6;
       --keycap-edge: #c2c2c2;
-      --led-off: #c4c4c4;
+      --led-off: #a0a0a0;
     }
     :root[data-theme="light"] .tok-s { color: #3d7a37; }
+    /* Light theme: unlit pads and keys have a texture (fine noise, a highlight at the top,
+       a shade at the bottom), lit ones are smooth, so lit and unlit stay apart even when a
+       white LED is only a little lighter than the key. */
+    :root[data-theme="light"] {
+      --pad-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.26 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    :root[data-theme="light"]:not([data-keys="mech"]) .pad:not([data-lit]) {
+      background-image:
+        radial-gradient(ellipse at 50% 25%, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 65%),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.1)),
+        var(--pad-noise);
+    }
+    /* A lit pad keeps a clear edge, or a dim one blends into the light panel */
+    :root[data-theme="light"]:not([data-keys="mech"]) .pad[data-lit] {
+      border-color: var(--pad-border);
+    }
+    /* On a light key, a white LED dot needs an edge to be seen */
+    :root[data-theme="light"][data-keys="mech"] .pad::before {
+      outline: 1px solid rgba(0, 0, 0, 0.3);
+    }
+    :root[data-theme="light"][data-keys="mech"] .pad,
+    :root[data-theme="light"][data-keys="mech"] .pad[data-lit] {
+      background-image:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.35), rgba(0, 0, 0, 0.08)),
+        var(--pad-noise);
+    }
     /* The second grid dims with opacity; on light grey, less of it keeps it readable */
     :root[data-theme="light"] .map-ghost-wrap { opacity: 0.7; }
     :root[data-theme="light"] body.map-mode .map-ghost-wrap { opacity: 0.85; }
@@ -2899,7 +2925,8 @@
     // Light theme: an LED behind a light key tints it rather than darkening it. The LED's
     // hue at full strength is mixed into the key's colour by how bright the LED is.
     function ledOnLightKey(r, g, b) {
-      const keyOff = document.documentElement.dataset.keys === 'mech' ? 196 : 228;
+      // the unlit pad (--pad-empty), or the unlit LED dot on a Mechatrellis key (--led-off)
+      const keyOff = document.documentElement.dataset.keys === 'mech' ? 160 : 180;
       const m = Math.max(r, g, b);
       const a = m / 255;
       return [r, g, b].map(c => Math.round(keyOff + ((c * 255) / m - keyOff) * a));
