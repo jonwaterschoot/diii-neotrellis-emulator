@@ -13,12 +13,13 @@ Work through the steps in order: fix what's broken first, document once behavior
 - External scripts can be fetched with `gh api repos/<owner>/<repo>/contents/<file>.lua --jq .content | base64 -d`.
 
 ### Step 1 — Compatibility, round 2
-- [ ] **`event_midi`**: when the script defines `event_midi(d1, d2, d3)`, send incoming MIDI there and skip the note→pad mapping in `grid-api.js` `_handleMidiInput`. Fixes external clock (stepiii/arpiii clock source 2) and arpiii's MIDI keyboard. Confirm the approach with me first.
-- [ ] **sandman**: `midi_note_off(note, ch)` → `midi_note_off(note, 0, ch)` (5 calls in `scripts/sandman/sandman.lua`), then regenerate `sandman_min.lua` with `minify_lines()` from `scripts/minify.py`.
-- [ ] **`grid_led_get(x, y)`**: returns the 0–15 level, as on the firmware.
-- [ ] **Metro limit**: iii has 12 metros. Warn in the status bar when a script creates more.
-- [ ] **selector in the emulator**: provide `fs_list_files()` and `fs_run_file(name)` from `scripts/manifest.json`, and mark selector (and many-roads) as loader scripts.
-- [ ] **Re-test the external list** below (kria_iii playback, fell, sluiiice, iiinvert, fugace, arpiii by ear) and update the notes.
+- [x] **`event_midi`**: when the script defines `event_midi(d1, d2, d3)`, send incoming MIDI there and skip the note→pad mapping in `grid-api.js` `_handleMidiInput`. The filter CC keeps working. The status bar warns once when the script receives its own output (same bytes sent within 20 ms). Node test: stepiii and arpiii follow external clock, arpiii arpeggiates a chord from MIDI in. Still to try with a real MIDI device.
+- [x] **sandman**: `midi_note_off(note, ch)` → `midi_note_off(note, 0, ch)` (5 calls in `scripts/sandman/sandman.lua`), then regenerate `sandman_min.lua` with `minify_lines()` from `scripts/minify.py`.
+- [x] **`grid_led_get(x, y)`**: returns the 0–15 level, as on the firmware. Also added the firmware's `rel` flag: `grid_led(x, y, z, rel)` and `grid_led_all(z, rel)` add to the current level.
+- [x] **Metro limit**: iii has 12 metros. Warn in the status bar when a script creates more. Added `metro.free(id)` and `metro.free_all()` too.
+- [x] **selector in the emulator**: provide `fs_list_files()` and `fs_run_file(name)` from `scripts/manifest.json`. Selector and many-roads both work (node test). Marking them as loader scripts moves to the Step 3 registry.
+- [x] **lib.lua helpers** (found while re-testing kria_iii): `engine/iii-lib.js` runs the firmware's lib.lua helpers before every script: `midi_out`, `midi_to_msg`, `ps`, `pt`, `round`, `linlin`, `wrap`, `clamp`, `_quote`, `slew`. `require` is `fs_run_file`, as on the device.
+- [x] **Re-test the external list** below and update the notes. Done in node; arpiii and fell also checked by ear in the dev server (2026-10-26).
 
 ### Step 2 — Sound glitches
 - [ ] Short fade on play/pause to remove clicks.
@@ -76,6 +77,7 @@ https://github.com/nolliegray/stepiii
 https://github.com/duncangeere/sluiiice
 
   - ok it's a 90° script, but we cannot know this from any settings file, so it's ok
+  - script bug, shows on the device: `strum()` calls `metro.free(strumclock)` with the metro instead of its id (`strumclock.id`). On iii that throws, so every strum leaks a metro, and after about 10 strums `metro.init` returns nil. The emulator now throws the same error ("pass m.id, not the metro"). Worth reporting upstream.
 
 https://github.com/aktsom/kria_iii
   
@@ -88,18 +90,22 @@ https://github.com/aktsom/kria_iii
     Error: kria_iii.lua:2: lua_gc not implemented
     ```
   - fixed (2026-10-25): fengari has no garbage collector API, so `collectgarbage()` now gets a stand-in that returns 0. Loads; playback not tested yet.
-  - uses 11 metros. iii has 12, the emulator has no limit (yet).
+  - uses 11 metros. iii has 12, and lib.lua's slew takes one at boot, so kria fits exactly.
+  - fixed (2026-10-26): play (row 7, step 15) failed with `attempt to call a nil value (global 'midi_out')`. The emulator now runs the lib.lua helpers. Plays notes and MIDI clock in a node test.
 
 https://github.com/nolliegray/arpiii
 
   - loads but doesn't seem to play, or respond beyond initial loading. Is it a clock issue?
   - fixed (2026-10-25): same stack problem, caused by `collectgarbage("step")` every 0.1 s. It also relies on metro counts (one-shot gate-off) and `m.time = x` (swing); emulator metros now follow iii for both. Plays in a node test.
   - MIDI keyboard input still won't work: see "Open compatibility issues" below.
+  - re-tested (2026-10-26): no errors, sends clock and notes; sounds right in the dev server.
+  - fixed (2026-10-26): MIDI keyboard and external clock now reach `event_midi` (node test).
 
 
 https://github.com/liamelliot/iiinvert/
 
-  - works
+  - works (re-tested 2026-10-26, node: plays, no errors)
+  - uses `metro.free_all()`, which the emulator now has. On the device this also stops slew's metro.
   - geared towards drums, perhaps the emulator should include a few drum options (e.g. take the models I used in WAV.builder Mangler)
 
 https://github.com/liamelliot/fell
@@ -108,16 +114,19 @@ https://github.com/liamelliot/fell
   - only lua file, no readme for docs → https://llllllll.co/t/fell/72593
 
   - This makes a good case for also allowing to view the content of lua files inside the inspector (even allowing to change parameters!)
+  - re-tested (2026-10-26): no errors, and its 5 ms metro sounds right in the dev server (node on Windows can't time below ~15 ms, so node tests undercount its notes).
 
 
 https://github.com/behindkeyframes/fugace
 
-  - works
+  - works (re-tested 2026-10-26, node: piano roll + play on row 7 x5 plays notes)
+  - uses `ps()` a lot; the emulator now prints it to the console instead of dropping it.
 
 https://github.com/boreal-ground/many-roads-grid
 
   - stays empty, but that's logical since it's needing those lua's in place, we could mark it as a script loader
   - I made my own version: selector
+  - works (2026-10-26, node): it runs `many-roads-data.lua` from its own repo, lists the bundled scripts and `require`s the one you press. Files that aren't bundled scripts are looked up next to the running script.
 
 C:\Users\jonwa\Documents\GitHub\neotrellis-monome\neotrellis_monome_picosdk_iii\doc\scripts\selector\selector.lua  
 
@@ -128,14 +137,17 @@ Lua runtime error: selector.lua:52: attempt to call a nil value (global 'fs_list
 Error: selector.lua:52: attempt to call a nil value (global 'fs_list_files')
 ```
    - also mark as a selecting script and use the scripts in the the loader
-   - idea: provide `fs_list_files()` (and `fs_run_file()`) from `scripts/manifest.json`, so selector shows the bundled scripts
+   - done (2026-10-26): `fs_list_files()` lists the bundled scripts by file name and `fs_run_file()` runs one. Load selector with the file picker or the GitHub import (`github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii/doc/scripts/selector`).
 
 ## Open compatibility issues (found 2026-10-25)
 
-- **`event_midi` is never called.** Incoming MIDI notes are turned into grid presses and nothing reaches the script, so external clock sync (stepiii/arpiii clock source 2) and arpiii's MIDI keyboard don't work. Proposal: when a script defines `event_midi`, send incoming MIDI there and skip the note→pad mapping.
+- **`event_midi`** (fixed 2026-10-26): a script that defines it gets all incoming MIDI; notes no longer become pad presses for that script. Scripts without it keep the note→pad mapping, which is emulator-only. The filter CC (74) is emulator-only too and works either way.
 - **sandman note-offs on hardware**: `midi_note_off(note, ch)` uses the 2-argument form. On iii the second argument is the velocity, so on the device the note-offs go to channel 1. The emulator still accepts the 2-argument form, so this doesn't show here. Fix in sandman: `midi_note_off(note, 0, ch)`.
-- **Metro limit**: iii has 12 metros, the emulator has none. Warn when a script makes more than 12?
-- **Not in the emulator yet**: `grid_led_get`, `fs_*` functions, `metro.free`.
+- **Metro limit**: iii has 12 metros and slew takes one, so scripts get 11. The emulator has no limit but warns in the status bar past 12 (slew included). On the device `metro.init` returns nil instead.
+- **Filesystem is read-only**: `fs_list_files`, `fs_read_file`, `fs_run_file` work; `fs_write_file`, `fs_remove_file`, `fs_file_size`, `fs_free_space` don't exist. `pset_*` is stored in browser storage instead of files.
+- **Firmware bug**: lib.lua's `slew.deinit()` calls `metro.free(slew.id)`, but `slew.id` is the metro, not its number, so it throws on the device and in the emulator.
+- **Numbers**: `event_grid` coordinates and `grid_size_x/y()` are integers now, as on the device (they printed as `1.0` before).
+- **Metro timing**: very short metros (fell: 5 ms) depend on browser timer resolution; fell sounds right in the browser.
 - **Emulator-only**: `grid_brightness`, `grid_set_screen`, `display_screen`, `get_focused_screen` don't exist on the device. Scripts should check `if grid_brightness then` (leaveseqr does).
 - All of this belongs on the "Hardware vs. Emulation Differences" page above.
 

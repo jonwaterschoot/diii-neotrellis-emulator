@@ -91,10 +91,11 @@ All MonomeAPI functions are injected as C-closures that delegate to the JS
 
 | Lua call | JS result |
 |---|---|
-| `grid_led(x, y, lum)` | writes mono `{r,g,b}` to frame buffer, using current global tint |
+| `grid_led(x, y, lum, rel)` | writes mono `{r,g,b}` to frame buffer, using current global tint; `rel` adds `lum` to the current level |
+| `grid_led_get(x, y)` | returns the pad's 0–15 level (`grid_led_rgb` doesn't change it) |
 | `grid_led_rgb(x, y, r, g, b)` | writes RGB to frame buffer |
 | `grid_color(r, g, b)` | sets a global tint for subsequent `grid_led()` / `grid_led_all()` output |
-| `grid_led_all(lum)` | fills entire frame buffer, respecting current global tint |
+| `grid_led_all(lum, rel)` | fills entire frame buffer, respecting current global tint |
 | `grid_refresh()` | flushes buffer → updates `.pad` DOM elements |
 | `grid_color_intensity(val)` | sets master brightness multiplier |
 

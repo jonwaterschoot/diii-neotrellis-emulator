@@ -21,7 +21,7 @@ https://raw.githubusercontent.com/jonwaterschoot/diii-neotrellis-emulator/main/S
 | Grid size | 16 columns × 8 rows. `W=16, H=8`. Coordinates are 1-based. |
 | Memory | Pico RAM is ~200 KB. Pre-allocate fixed buffers; avoid growing tables in hot loops. No deep string table expansion inside ticks. |
 | MIDI | `midi_note_on(note, vel)`, `midi_note_off(note)`, `midi_panic()`. Always pair every `note_on` with exactly one `note_off`. |
-| Timing | `metro.new(callback, interval_seconds)`. Never use `sleep()`. |
+| Timing | `metro.init(callback, interval_seconds)`, then `:start()`. iii has 12 metros and slew uses one, so a script gets 11. Never use `sleep()`. |
 | No `require` | The emulator sandbox provides a fixed API — no require or external modules. |
 
 ---
@@ -181,7 +181,7 @@ local function tick()
   redraw()
 end
 
-m_clock = metro.new(tick, 60 / bpm / 4)  -- interval in seconds
+m_clock = metro.init(tick, 60 / bpm / 4)  -- interval in seconds
 m_clock:start()
 
 -- To change interval without restarting:

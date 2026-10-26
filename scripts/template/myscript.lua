@@ -129,7 +129,7 @@ end
 --   redraw()
 -- end
 --
--- m_clock = metro.new(clock_tick, 0.5)  -- 0.5s interval = 120 BPM quarter note
+-- m_clock = metro.init(clock_tick, 0.5)  -- 0.5s interval = 120 BPM quarter note
 -- m_clock:start()
 
 -- ============================================================
