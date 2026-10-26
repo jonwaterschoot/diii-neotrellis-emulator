@@ -54,6 +54,10 @@ export class LuaLoader {
 
     // Virtual filesystem for fs_* and require: file name → URL, plus the running script's folder
     this.readFileSync = opts.readFileSync || readUrlSync;
+
+    // Monochrome: the script doesn't get the NeoTrellis colour functions, as on a monome
+    // grid, so it runs its own fallback. Takes effect on the next load.
+    this.monochrome = false;
     this._fsFiles = new Map();
     this._scriptDir = null;
 
@@ -366,6 +370,13 @@ export class LuaLoader {
     setGlobal('get_time', (L2) => {
       lua.lua_pushnumber(L2, api.get_time()); return 1;
     });
+
+    if (this.monochrome) {
+      for (const fn of ['grid_led_rgb', 'grid_color', 'grid_color_intensity']) {
+        lua.lua_pushnil(L);
+        lua.lua_setglobal(L, luaStr(fn));
+      }
+    }
 
     // wrap, clamp, ps and the other lib.lua helpers come from III_LIB below
 

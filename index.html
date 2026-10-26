@@ -2262,6 +2262,9 @@
             <div class="menu-heading">Theme</div>
             <button data-theme-option="dark">Dark</button>
             <button data-theme-option="light">Light</button>
+            <div class="menu-heading">Grid</div>
+            <button data-grid-option="colour" title="NeoTrellis: the script can use colour">Colour</button>
+            <button data-grid-option="mono" title="Like a monome grid: grid_led_rgb, grid_color and grid_color_intensity don't exist, so the script runs its monochrome fallback">Monochrome</button>
             <div class="menu-heading">Pad corners</div>
             <button data-corners-option="square">Square</button>
             <button data-corners-option="slight">Slightly round</button>
@@ -4404,6 +4407,14 @@
     githubInput.addEventListener('keydown', e => { if (e.key === 'Enter') runGithubImport(); });
 
     // ─── INIT ────────────────────────────────────────────────────────────────
+    // Grid mode from ◐ View: monochrome hides the colour functions from scripts
+    function setGridMode(mode) {
+      loader.monochrome = mode === 'mono';
+      document.documentElement.dataset.gridMode = mode;
+      updateGridLabel(loader.currentScriptName || null);
+    }
+    try { setGridMode(localStorage.getItem('diii.gridMode') || 'colour'); } catch (e) { setGridMode('colour'); }
+
     populateScriptSelect().then(() => {
       if (scriptSelect.value) loadBundledScript(scriptSelect.value);
     });
@@ -4568,7 +4579,7 @@
 
     function updateGridLabel(scriptName) {
       const vc = vCOLS(), vr = vROWS();
-      const rotSuffix = gridRotation > 0 ? ` · ${gridRotation * 90}°` : '';
+      const rotSuffix = (gridRotation > 0 ? ` · ${gridRotation * 90}°` : '') + (loader?.monochrome ? ' · mono' : '');
       const el = document.getElementById('grid-label');
       if (scriptName) {
         el.textContent = `1 · ${vc} × ${vr}${rotSuffix} · ${scriptName}`;
@@ -5531,6 +5542,7 @@
       const root = document.documentElement;
       viewMenu.querySelectorAll('[data-theme-option]').forEach(b => b.classList.toggle('active', b.dataset.themeOption === root.dataset.theme));
       viewMenu.querySelectorAll('[data-corners-option]').forEach(b => b.classList.toggle('active', b.dataset.cornersOption === root.dataset.corners));
+      viewMenu.querySelectorAll('[data-grid-option]').forEach(b => b.classList.toggle('active', (b.dataset.gridOption === 'mono') === loader.monochrome));
     }
     document.getElementById('btn-view-menu').addEventListener('click', e => {
       e.stopPropagation();
@@ -5548,6 +5560,11 @@
       if (b.dataset.cornersOption) {
         root.dataset.corners = b.dataset.cornersOption;
         try { localStorage.setItem('diii.corners', root.dataset.corners); } catch (err) { /* not kept */ }
+      }
+      if (b.dataset.gridOption && (b.dataset.gridOption === 'mono') !== loader.monochrome) {
+        setGridMode(b.dataset.gridOption);
+        try { localStorage.setItem('diii.gridMode', b.dataset.gridOption); } catch (err) { /* not kept */ }
+        if (loader.currentScriptName) loader.reload(BASE_URL);
       }
       syncViewMenu();
     });

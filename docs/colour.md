@@ -21,7 +21,7 @@ On a monome grid, calling a function that doesn't exist stops the script with an
 if grid_color then grid_color(255, 120, 20) end
 ```
 
-The emulator has all of these functions, so it doesn't catch a missing check. To test without colour, run the script in [viii](https://dessertplanet.github.io/viii/), which only has `grid_led`.
+To test your script without colour, pick **◐ View → Monochrome** in the emulator: the colour functions disappear, as on a monome grid, and a missing check shows up as an error. On hardware, [viii](https://dessertplanet.github.io/viii/) does the same, since it only has `grid_led`.
 
 ![The same demo after running in viii, then back on the device](img/neotrellis_diii_color_fallback_viii.gif)
 

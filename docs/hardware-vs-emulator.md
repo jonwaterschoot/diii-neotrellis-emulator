@@ -77,7 +77,7 @@ The REPL helpers from iii's `lib.lua` (`first`, `ls`, `rm`, `cat`, `mem`, `gc`) 
 | Functions | Where |
 |---|---|
 | `grid_led` (with `rel`), `grid_led_all` (with `rel`), `grid_led_get`, `grid_refresh`, `grid_size_x`, `grid_size_y`, `grid_intensity` | Device and emulator |
-| `grid_led_rgb`, `grid_color`, `grid_color_intensity` | NeoTrellis firmware and emulator. Not on a monochrome monome grid: check `if grid_led_rgb then` ([monochrome fallback](colour.md)) |
+| `grid_led_rgb`, `grid_color`, `grid_color_intensity` | NeoTrellis firmware and emulator. Not on a monochrome monome grid: check `if grid_led_rgb then` ([monochrome fallback](colour.md)). **◐ View → Monochrome** hides them in the emulator, to test that |
 | `grid_set_screen`, `display_screen`, `get_focused_screen`, `grid_brightness` | Emulator only ([multiple screens](multi-screen-test.md)) |
 | `event_key(key)` | Emulator only: the device has no keyboard, so it never calls it |
 
