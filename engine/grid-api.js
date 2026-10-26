@@ -24,19 +24,10 @@
  *   event_key(key)                – called BY the emulator on a key press, when the script defines it (emulator only)
  */
 
-import { DrumKit } from './drums.js';
-import { buildVoice } from './synth.js';
+import { SoundEngine } from './sound.js';
 
 /** Incoming bytes that match something sent within this window count as our own output echoed back */
 const MIDI_ECHO_WINDOW_MS = 20;
-
-// Audio parameter changes ramp instead of jumping, which clicks
-const GAIN_SMOOTHING = 0.02;      // time constant (s) for volume, mute and FX amounts
-// Reverb decay and delay time can't be ramped without artifacts, so a change starts a new
-// reverb or delay line: new sound fades over to it while the old one rings out.
-const FX_INPUT_FADE = 0.03;       // s
-const DELAY_MAX_RING_OUT = 3;     // s; an old delay line fades out by then even with high feedback
-const DELAY_UPDATE_MS = 80;       // while dragging, the delay time changes at most this often
 
 export class MonomeAPI {
   /**
@@ -70,46 +61,9 @@ export class MonomeAPI {
     // MIDI
     this.midiOut = null;
     this.midiIn = null;
-    this._activeNodes = new Map();
-    this._audioCtx = null;
-    this._masterGain = null;
 
-    // Volume/attack/release controlled by emulator UI
-    this.volume = 0.7;
-    this.muted = false;
-    this.adsr = {
-      attack: 0.005,
-      decay: 0.1,
-      sustain: 0.6,
-      release: 0.2,
-    };
-
-    // Synth model (see synth.js), and how much each voice drifts in pitch and moves its filter
-    this.synth = { model: 'triangle', drift: 0, movement: 0 };
-
-    // FX controlled by emulator UI
-    this.reverb = {
-      amount: 0.2,
-      decay: 1.5,
-      stereo: true,
-    };
-    this.delay = {
-      amount: 0.2,
-      time: 0.25,
-      feedback: 0.3,
-    };
-
-    // Filter controlled by MIDI CC/UI
-    this.filter = {
-      enabled: true,
-      cc: 74,
-      cutoff: 1.0,
-    };
-    this._filterNode = null;
-    this._delayTimer = null;
-
-    // Drum kit: notes it takes (by channel and General MIDI note) play drums, not the synth
-    this.drums = new DrumKit();
+    // Everything the emulator plays: synth parts, drum kit, effects (see sound.js)
+    this.sound = new SoundEngine();
 
     // Metro registry
     this._metros = [];
@@ -249,14 +203,6 @@ export class MonomeAPI {
     }
   }
 
-  setFilterCutoff(val) {
-    this.filter.cutoff = Math.max(0, Math.min(1, val));
-    if (this._filterNode && this._audioCtx) {
-      const freq = 20 * Math.pow(1000, this.filter.cutoff);
-      this._filterNode.frequency.setTargetAtTime(freq, this._audioCtx.currentTime, 0.05);
-    }
-  }
-
   /**
    * Incoming MIDI. A script that defines event_midi gets every message, as on iii;
    * otherwise notes are mapped to pad presses. The filter CC works either way.
@@ -282,13 +228,8 @@ export class MonomeAPI {
         this.handlePadEvent(x, y, isPress ? 1 : 0);
       }
     } else if (type === 0xB0) {
-      // Control Change
-      const cc = data1;
-      const val = data2;
-      if (this.filter.enabled && cc === this.filter.cc) {
-        this.setFilterCutoff(val / 127);
-        if (this.onFilterUpdate) this.onFilterUpdate(this.filter.cutoff);
-      }
+      // A CC can move a synth part's filter
+      this.sound.cc(data1, data2, (status & 0x0F) + 1);
     }
   }
 
@@ -305,193 +246,12 @@ export class MonomeAPI {
     if (this.onMidiMonitor) this.onMidiMonitor('out', bytes, now);
   }
 
-  // ─── SOUND SETTINGS (ramped, so changes don't click) ─────────────────────
-
-  _smooth(param, value, timeConstant = GAIN_SMOOTHING) {
-    if (this._audioCtx) param.setTargetAtTime(value, this._audioCtx.currentTime, timeConstant);
-  }
-
-  setVolume(volume) {
-    this.volume = volume;
-    if (this._masterGain) this._smooth(this._masterGain.gain, this.muted ? 0 : volume);
-  }
-
-  /** Mute fades out and unmute fades in */
-  setMuted(muted) {
-    this.muted = muted;
-    if (this._masterGain) this._smooth(this._masterGain.gain, muted ? 0 : this.volume);
-  }
-
-  setReverbAmount(amount) {
-    this.reverb.amount = amount;
-    if (this._reverbGain) this._smooth(this._reverbGain.gain, amount);
-  }
-
-  /** Builds a new impulse: call it when the setting is final (slider released), not while dragging */
-  setReverbDecay(decay) {
-    this.reverb.decay = decay;
-    if (this._audioCtx) this._swapReverb();
-  }
-
-  setDelayAmount(amount) {
-    this.delay.amount = amount;
-    if (this._delayGain) this._smooth(this._delayGain.gain, amount);
-  }
-
-  /** Starts a new delay line (see _swapDelay); while dragging, at most every DELAY_UPDATE_MS */
-  setDelayTime(time) {
-    this.delay.time = time;
-    if (!this._audioCtx || this._delayTimer) return;
-    this._swapDelay();
-    this._delayTimer = setTimeout(() => {
-      this._delayTimer = null;
-      if (this._delayLine.time !== this.delay.time) this.setDelayTime(this.delay.time);
-    }, DELAY_UPDATE_MS);
-  }
-
-  setDelayFeedback(feedback) {
-    this.delay.feedback = feedback;
-    if (this._delayLine) this._smooth(this._delayLine.feedback.gain, feedback);
-  }
-
-  _ensureAudio() {
-    if (this._audioCtx) return;
-    this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    this._masterGain = this._audioCtx.createGain();
-    this._masterGain.gain.value = this.muted ? 0 : this.volume;
-    this._masterGain.connect(this._audioCtx.destination);
-
-    // Create FX chain. Reverb: _reverbIn → (input fade → convolver) → _reverbGain;
-    // _swapReverb replaces the convolver when the decay changes.
-    this._reverbIn = this._audioCtx.createGain();
-    this._reverbGain = this._audioCtx.createGain();
-    this._reverbGain.gain.value = this.reverb.amount;
-    this._reverbGain.connect(this._masterGain);
-    this._reverb = null;
-    this._swapReverb();
-
-    // Delay: _delayIn → (input fade → delay ⟲ feedback → output) → _delayGain;
-    // _swapDelay replaces the line when the delay time changes.
-    this._delayIn = this._audioCtx.createGain();
-    this._delayGain = this._audioCtx.createGain();
-    this._delayGain.gain.value = this.delay.amount;
-    this._delayGain.connect(this._masterGain);
-    this._delayLine = null;
-    this._swapDelay();
-
-    // Create Filter node (placed before FX/Master split)
-    this._filterNode = this._audioCtx.createBiquadFilter();
-    this._filterNode.type = 'lowpass';
-    const initialFreq = 20 * Math.pow(1000, this.filter.cutoff);
-    this._filterNode.frequency.value = initialFreq;
-    
-    // The filter connects to the master and FX nodes
-    this._filterNode.connect(this._masterGain);
-    this._filterNode.connect(this._reverbIn);
-    this._filterNode.connect(this._delayIn);
-
-    // Drum kit: dry to the master, plus a send into the reverb (not the synth's filter or delay)
-    this._drumBus = this._audioCtx.createGain();
-    this._drumSend = this._audioCtx.createGain();
-    this._drumSend.gain.value = 0.35;
-    this._drumBus.connect(this._masterGain);
-    this._drumBus.connect(this._drumSend).connect(this._reverbIn);
-    this.drums.connect(this._audioCtx, this._drumBus);
-  }
-
-  /**
-   * Start a delay line with the current time. New sound fades over to it; the old line
-   * keeps repeating what it holds at the old spacing and fades out once its echoes
-   * have died away (at most DELAY_MAX_RING_OUT).
-   */
-  _swapDelay() {
-    const ctx = this._audioCtx;
-    const now = ctx.currentTime;
-    const input = ctx.createGain();
-    const delay = ctx.createDelay(1.0);
-    const feedback = ctx.createGain();
-    const output = ctx.createGain();
-    delay.delayTime.value = this.delay.time;
-    feedback.gain.value = this.delay.feedback;
-    input.gain.setValueAtTime(this._delayLine ? 0 : 1, now);
-    input.gain.linearRampToValueAtTime(1, now + FX_INPUT_FADE);
-    this._delayIn.connect(input).connect(delay);
-    delay.connect(feedback).connect(delay);
-    delay.connect(output).connect(this._delayGain);
-
-    const old = this._delayLine;
-    if (old) {
-      old.input.gain.cancelScheduledValues(now);
-      old.input.gain.setValueAtTime(old.input.gain.value, now);
-      old.input.gain.linearRampToValueAtTime(0, now + FX_INPUT_FADE);
-      // Echoes fall below -60 dB after log(0.001)/log(feedback) repeats
-      const fb = this.delay.feedback;
-      const repeats = fb > 0.001 ? 1 + Math.log(0.001) / Math.log(fb) : 1;
-      const ringOut = Math.min(DELAY_MAX_RING_OUT, FX_INPUT_FADE + repeats * Math.max(old.time, 0.01));
-      old.output.gain.setValueAtTime(1, now + ringOut * 0.6);
-      old.output.gain.linearRampToValueAtTime(0, now + ringOut);
-      setTimeout(() => {
-        this._delayIn.disconnect(old.input);
-        old.delay.disconnect();
-        old.feedback.disconnect();
-        old.output.disconnect();
-      }, (ringOut + 0.1) * 1000);
-    }
-    this._delayLine = { input, delay, feedback, output, time: this.delay.time };
-  }
-
-  /**
-   * Start a convolver with an impulse for the current decay. New sound fades over to it,
-   * and the old one keeps its output until its tail has rung out, so nothing is cut off.
-   */
-  _swapReverb() {
-    const ctx = this._audioCtx;
-    const now = ctx.currentTime;
-    const input = ctx.createGain();
-    const conv = ctx.createConvolver();
-    conv.buffer = this._makeReverbImpulse();
-    input.gain.setValueAtTime(this._reverb ? 0 : 1, now);
-    input.gain.linearRampToValueAtTime(1, now + FX_INPUT_FADE);
-    this._reverbIn.connect(input).connect(conv).connect(this._reverbGain);
-
-    const old = this._reverb;
-    if (old) {
-      old.input.gain.cancelScheduledValues(now);
-      old.input.gain.setValueAtTime(old.input.gain.value, now);
-      old.input.gain.linearRampToValueAtTime(0, now + FX_INPUT_FADE);
-      setTimeout(() => {
-        this._reverbIn.disconnect(old.input);
-        old.conv.disconnect();
-      }, (FX_INPUT_FADE + old.decay + 0.2) * 1000);
-    }
-    this._reverb = { input, conv, decay: this.reverb.decay };
-  }
-
-  _makeReverbImpulse() {
-    const sr = this._audioCtx.sampleRate;
-    const len = Math.max(1, Math.round(sr * this.reverb.decay)); // decay 0 would be an empty buffer, which throws
-    const impulse = this._audioCtx.createBuffer(this.reverb.stereo ? 2 : 1, len, sr);
-    const dataL = impulse.getChannelData(0);
-    for (let i = 0; i < len; i++) {
-      dataL[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.5);
-    }
-    if (this.reverb.stereo) {
-      const dataR = impulse.getChannelData(1);
-      for (let i = 0; i < len; i++) {
-        dataR[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.5);
-      }
-    }
-    return impulse;
-  }
-
   midi_note_on(note, vel, ch = 1) {
     note = note & 0x7F;
     vel = vel & 0x7F;
     const status = 0x90 + ((ch - 1) & 0x0F);
     this._sendOut([status, note, vel]);
-    this._ensureAudio();
-    if (this.drums.noteOn(note, vel, ch)) return;
-    this._synthOn(note, vel);
+    this.sound.noteOn(note, vel, ch);
   }
 
   midi_note_off(note, p2, p3) {
@@ -508,8 +268,7 @@ export class MonomeAPI {
     note = note & 0x7F;
     const status = 0x80 + ((ch - 1) & 0x0F);
     this._sendOut([status, note, vel & 0x7F]);
-    if (this.drums.takes(note, ch)) return; // drums ring out
-    this._synthOff(note);
+    this.sound.noteOff(note, ch);
   }
 
   midi_cc(cc, val, ch = 1) {
@@ -517,17 +276,12 @@ export class MonomeAPI {
     val = val & 0x7F;
     const status = 0xB0 + ((ch - 1) & 0x0F);
     this._sendOut([status, cc, val]);
-    // Self-apply: if this CC targets the internal filter, route it there too.
-    // Mirrors what _handleMidiInput does for incoming hardware CC.
-    if (this.filter.enabled && cc === this.filter.cc) {
-      this.setFilterCutoff(val / 127);
-      if (this.onFilterUpdate) this.onFilterUpdate(this.filter.cutoff, val);
-    }
+    this.sound.cc(cc, val, ch); // as for incoming CCs: may move a synth part's filter
   }
 
   /**
    * Raw MIDI out, like iii's midi_tx(d1, d2, d3). Note and CC messages go through
-   * midi_note_on/off and midi_cc so they also reach the internal synth and filter.
+   * midi_note_on/off and midi_cc so they also reach the emulator's sound.
    * Clock and transport (0xF8, 0xFA, 0xFC, ...) are sent as single bytes.
    */
   midi_tx(d1, d2 = 0, d3 = 0) {
@@ -548,61 +302,7 @@ export class MonomeAPI {
   midi_panic() {
     this._sendOut([0xB0, 120, 0]); // all sound off
     this._sendOut([0xB0, 123, 0]); // all notes off
-    for (const note of [...this._activeNodes.keys()]) {
-      this._synthOff(note);
-    }
-  }
-
-  _synthOn(note, vel) {
-    this._ensureAudio();
-    this._synthOff(note);
-    const freq = 440 * Math.pow(2, (note - 69) / 12);
-    const g = this._audioCtx.createGain();
-    const now = this._audioCtx.currentTime;
-    const voice = buildVoice(this._audioCtx, this.synth.model, freq, now, this.synth);
-    const attackTime = now + this.adsr.attack;
-    const decayTime = attackTime + this.adsr.decay;
-    const peakGain = (vel / 127) * 0.4;
-    const sustainGain = peakGain * this.adsr.sustain;
-
-    g.gain.setValueAtTime(0, now);
-    g.gain.linearRampToValueAtTime(peakGain, attackTime);
-    g.gain.linearRampToValueAtTime(sustainGain, decayTime);
-    
-    voice.output.connect(g);
-    
-    // Connect to filter (which connects to master, reverb, delay)
-    if (this._filterNode) {
-        g.connect(this._filterNode);
-    } else {
-        // Fallback if audio not fully initialized or filter removed
-        g.connect(this._masterGain);
-        g.connect(this._reverbIn);
-        g.connect(this._delayIn);
-    }
-    
-    const tid = setTimeout(() => this._synthOff(note), 3000);
-    this._activeNodes.set(note, { ...voice, g, tid });
-  }
-
-  _synthOff(note) {
-    const n = this._activeNodes.get(note);
-    if (!n) return;
-    clearTimeout(n.tid);
-    const rel = this.adsr.release;
-    const now = this._audioCtx.currentTime;
-    n.g.gain.cancelScheduledValues(now);
-    n.g.gain.setValueAtTime(n.g.gain.value, now);
-    n.g.gain.exponentialRampToValueAtTime(0.0001, now + rel);
-    setTimeout(() => {
-      for (const src of n.sources) {
-        try { src.stop(); } catch (e) {}
-        src.disconnect();
-      }
-      n.output.disconnect();
-      n.g.disconnect();
-    }, (rel + 0.1) * 1000);
-    this._activeNodes.delete(note);
+    this.sound.allOff();
   }
 
   // ─── METRO ────────────────────────────────────────────────────────────────
@@ -677,7 +377,7 @@ export class MonomeAPI {
   }
 
   stopAllNotes() {
-    for (const [note] of this._activeNodes) this._synthOff(note);
+    this.sound.allOff();
   }
 
   // ─── TIMING ───────────────────────────────────────────────────────────────

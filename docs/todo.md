@@ -72,8 +72,12 @@ Target nav: Home · Getting started · Using the emulator (Walkthrough, Hardware
 - [x] Drum sounds (2026-10-26): `engine/drums.js`, seven drums ported from the Mangler (WAV.builder). General MIDI notes on one channel (36–51 = 4×4 pads), or a channel per drum; ⚄ re-rolls a drum; closed hat chokes open hat. In a new Sound tab.
 - [x] Sound tab pops out into a movable, resizable window (desktop); docked on mobile.
 - [x] Synth models (`engine/synth.js`): Triangle, Sine, Soft saw, Hollow square, Wide pad, Pluck, FM bell, with Drift (pitch wander) and Movement (filter sweep). Loudness matched (RMS 0.54–0.58).
-- [ ] Listen to all of it in the dev server: drum levels against the synth, the models, drift/movement depths.
-- [ ] Reverb models (not started).
+- [x] One place for sound (2026-10-26): the sound module under the grid is now volume, mute and ⚙ Sound; everything else is in the Sound tab (or its window). Engine in `engine/sound.js`.
+- [x] Several synths at once, each a tab with its own channel, preset (built-in or saved), model, envelope, drift, movement, filter (+ CC), level and sends to reverb, delay and chorus. The drum kit has level and sends too.
+- [x] Envelope editor: drag the points.
+- [x] Chorus; reverb types Large room / hall and Plate / spring.
+- [x] Quality: Auto / Full / Light (light on phones: 6 voices per synth, short mono reverb, no chorus, no drift or movement).
+- [ ] Listen to all of it in the dev server: drum levels against the synths, the models and presets, both reverbs, the chorus.
 - [ ] Notes still stop after 3 s if the script never sends a note off (a guard against stuck notes); long pads may want more.
 
 ### Step 6 — Design

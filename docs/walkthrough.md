@@ -78,34 +78,41 @@ The buttons at the top filter what's shown: notes, CC, clock, other messages, in
 
 ## Sound
 
-The emulator plays every note the script sends: drum notes on the drum kit, the rest on the synth. The sound module under the grid has the general controls:
-
-- **Vol** and the speaker button. Sound starts muted; the first click on the grid turns it on.
-- **ADSR:** attack, decay, sustain and release of each note.
-- **Delay:** amount, time and feedback.
-- **Reverb:** amount and decay. A new decay applies when you let go of the slider.
-- **Filter:** a low-pass filter, which also follows a MIDI CC (74 by default) from the script or from MIDI in.
+The emulator plays every note the script sends: drum notes on the drum kit, the others on the synths. Under the grid are the volume, the speaker button and **⚙ Sound**, which opens the Sound tab (or, in Full View, the Sound window). Sound starts muted; the first click on the grid turns it on.
 
 The sound also plays when a MIDI output is selected. Mute it to hear only your own synth.
 
 ### The Sound tab
 
-**Synth:**
+Along the top: a tab for each synth, **Drums**, **+** to add a synth, and **Effects**.
 
-- **Sound:** Triangle, Sine, Soft saw, Hollow square, Wide pad, Pluck or FM bell. **▶ Try** plays a few notes.
-- **Drift** puts each note a little out of tune and lets it wander slowly, as on an analogue synth.
-- **Movement** sweeps each note's filter slowly up and down.
+**A synth** plays the notes on its channel (or on any channel) that the drum kit doesn't take. Synths on the same channel play together, so two can be layered.
 
-**Drum kit:** seven drums (kick, snare, closed and open hat, clap, tom, perc), made by the emulator rather than recorded.
+- **Name** and **channel**, **▶ Try** to hear it, **✕** to remove it.
+- **Preset:** a starting point (Soft keys, Warm pad, Glass bell, Pluck, Drifting lead, Hollow bass), or one you saved with **Save as…** (kept in this browser).
+- **Sound:** Triangle, Sine, Soft saw, Hollow square, Wide pad, Pluck or FM bell.
+- **Envelope:** drag the points. The first sets the attack, the second the decay and sustain level, the line after it the sustain level, the last the release.
+- **Drift** puts each note a little out of tune and lets it wander slowly; **Movement** sweeps each note's filter slowly.
+- **Filter:** a low-pass filter, which also follows a CC (74 to start with) on the synth's channel, from the script or from MIDI in.
+- **Level**, and how much it sends to the reverb, delay and chorus.
 
-- **Plays drum notes on channel …:** notes on that channel (10 by default, or any) play drums by their General MIDI number: 36 kick, 38 snare, 39 clap, 42 closed hat, 46 open hat, and so on. Notes 36 to 51, the usual 4×4 pad layout, are all covered. Other notes on that channel, and all other channels, go to the synth.
+**Drums:** seven drums (kick, snare, closed and open hat, clap, tom, perc), made by the emulator rather than recorded.
+
+- **Plays drum notes on channel …:** notes on that channel (10 to start with, or any) play drums by their General MIDI number: 36 kick, 38 snare, 39 clap, 42 closed hat, 46 open hat, and so on. Notes 36 to 51, the usual 4×4 pad layout, are all covered. Other notes go to the synths.
 - **Plays a channel per drum:** each drum plays on any note on its own channel (10 to 16 to start with).
 - **▶** plays a drum, and flashes whenever the script plays it. **⚄** makes a new version of that drum; **⚄ All** does all of them.
-- The closed hat cuts off the open hat, as on a real kit.
+- The closed hat cuts off the open hat, as on a real kit. The kit has its own level and effect sends.
 
 A script such as iiinvert sends its drums on channel 1: set the kit to channel 1 to hear them as drums.
 
-**⧉ Pop out** moves these controls into a window of their own, which you can drag by its title and resize from its corner, for instance next to the grid in Full View. **Dock** puts them back. The synth and kit settings are kept in this browser.
+**Effects**, shared by all synths and the kit:
+
+- **Reverb:** *Large room / hall* (a short gap, then a tail that darkens) or *Plate / spring* (bright and dense straight away). A new decay applies when you let go of the slider.
+- **Delay:** time and feedback.
+- **Chorus:** rate and depth.
+- **Quality:** *Light* plays fewer notes at once and has a shorter reverb, no chorus and no drift or movement, for phones. *Auto* picks light on phones.
+
+**⧉ Pop out** moves the Sound controls into a window of their own, which you can drag by its title and resize from its corner; **Dock** puts them back. Everything in the Sound tab is kept in this browser.
 
 ## MIDI
 
@@ -144,6 +151,6 @@ The emulator remembers, in this browser only:
 - presets that scripts save with `pset_write`
 - the Source tab's Wrap and Auto-run settings
 - the theme, keys, pad corners and grid mode from ◐ View
-- the synth and drum kit settings, and where the Sound window was
+- the synths, drum kit, effects and quality settings, your saved presets, and where the Sound window was
 
 Clearing the site's data in your browser removes them.

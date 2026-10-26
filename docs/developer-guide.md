@@ -8,7 +8,10 @@ How the emulator works inside, for changing or extending it. To write scripts in
 index.html               The whole interface: grid, toolbar, side panel, sound, MIDI
 serve.js                 Development server, and live reload over a WebSocket
 engine/
-  grid-api.js            Grid, LEDs, MIDI, synth and metro timing (the "hardware")
+  grid-api.js            Grid, LEDs, MIDI and metro timing (the "hardware")
+  sound.js               Everything that plays: synth parts, drum kit, reverb, delay, chorus
+  synth.js               The synth models (one voice's oscillators and filter)
+  drums.js               The drum kit: seven synthesised drums (from the Mangler in WAV.builder)
   lua-loader.js          Runs a script in Fengari and gives it the iii functions
   iii-lib.js             Parts of iii's lib.lua, run before every script
   doc-extractor.js       Reads the script's comments for the Docs tab and Live Manual
