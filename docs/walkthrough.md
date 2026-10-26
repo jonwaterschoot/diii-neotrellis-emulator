@@ -78,7 +78,9 @@ The buttons at the top filter what's shown: notes, CC, clock, other messages, in
 
 ## Sound
 
-The emulator plays every note the script sends: drum notes on the drum kit, the others on the synths. Under the grid are the volume, the speaker button and **⚙ Sound**, which opens the Sound tab (or, in Full View, the Sound window). Sound starts muted; the first click on the grid turns it on.
+The emulator plays every note the script sends: drum notes on the drum kit, the others on the synths. Under the grid are the volume, the speaker button, **■** and **⚙ Sound**, which opens the Sound tab (or, in Full View, the Sound window). Sound starts muted; the first click on the grid turns it on.
+
+**■** stops every note at once: it sends All Sound Off and All Notes Off on all 16 MIDI channels, so your MIDI devices stop too, and stops the emulator's own sound.
 
 The sound also plays when a MIDI output is selected. Mute it to hear only your own synth.
 
@@ -111,6 +113,7 @@ A script such as iiinvert sends its drums on channel 1: set the kit to channel 1
 - **Delay:** time and feedback.
 - **Chorus:** rate and depth.
 - **Quality:** *Light* plays fewer notes at once and has a shorter reverb, no chorus and no drift or movement, for phones. *Auto* picks light on phones.
+- **Stuck notes:** a note the script never ends stops by itself after 30 s, or the time you pick (3 s to 1 min, or never).
 
 **⧉ Pop out** moves the Sound controls into a window of their own, which you can drag by its title and resize from its corner; **Dock** puts them back. Everything in the Sound tab is kept in this browser.
 

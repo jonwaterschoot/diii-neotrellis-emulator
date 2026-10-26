@@ -333,6 +333,11 @@ export class DrumKit {
     if (this.onTrigger) this.onTrigger(i, vel);
   }
 
+  /** Cut a ringing open hat (the other drums are short) */
+  stopAll() {
+    if (this._open && this._ctx) this._choke(this._open);
+  }
+
   /** The closed hat cuts off the open one, as on a real kit */
   _choke({ src, g }) {
     const now = this._ctx.currentTime;

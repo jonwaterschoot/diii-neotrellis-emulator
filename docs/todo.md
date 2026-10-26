@@ -78,7 +78,7 @@ Target nav: Home · Getting started · Using the emulator (Walkthrough, Hardware
 - [x] Chorus; reverb types Large room / hall and Plate / spring.
 - [x] Quality: Auto / Full / Light (light on phones: 6 voices per synth, short mono reverb, no chorus, no drift or movement).
 - [ ] Listen to all of it in the dev server: drum levels against the synths, the models and presets, both reverbs, the chorus.
-- [ ] Notes still stop after 3 s if the script never sends a note off (a guard against stuck notes); long pads may want more.
+- [x] Long notes: the stuck-note guard is a setting (3 s, 10 s, 30 s, 1 min, never; 30 s to start with), and ■ next to the volume stops everything (All Sound Off + All Notes Off on all 16 channels, and the emulator's sound).
 
 ### Step 6 — Design
 - [x] Favicon (grid icon, `docs/img/favicon.svg`, also the docs site's) and pure-grey backgrounds: every colour is a token now, the blue tints became neutral greys of the same brightness (2026-10-26).

@@ -2525,6 +2525,7 @@
             <button class="btn sm" id="sound-toggle-btn" title="Mute/Unmute Sound" style="padding: 4px;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="ico-speaker"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
             </button>
+            <button class="btn sm" id="sound-stop-btn" title="Stop all notes: All Notes Off on every MIDI channel" style="padding: 4px 7px;">■</button>
             <button class="btn sm" id="sound-open-btn" title="Synths, drums and effects">⚙ Sound</button>
           </div>
         </div>
@@ -3000,6 +3001,11 @@
     const soundFsBtn = document.getElementById('btn-sound-fs');
     const zoomFsBtn = document.getElementById('btn-zoom-fs');
     const zoomFsModal = document.getElementById('fs-zoom-modal');
+
+    document.getElementById('sound-stop-btn').addEventListener('click', () => {
+      api.stopAllMidi();
+      setStatus('All notes stopped (All Notes Off sent on every MIDI channel)', 'info');
+    });
 
     // ⚙ Sound: the Sound tab, or the Sound window in Full View (the side panel is hidden there)
     document.getElementById('sound-open-btn').addEventListener('click', () => {
@@ -4706,14 +4712,28 @@
           </div>
           <p class="snd-help">Light is for phones: fewer notes at once, a shorter reverb, no chorus, no drift or movement.</p>
         </div>
+        <div class="snd-group">
+          <div class="doc-section-title">Stuck notes</div>
+          <div class="snd-controls">
+            <label>A note without a note off stops after
+              <select data-g="guard">
+                <option value="3">3 s</option><option value="10">10 s</option><option value="30">30 s</option>
+                <option value="60">1 min</option><option value="0">never</option>
+              </select>
+            </label>
+          </div>
+          <p class="snd-help">■ next to the volume stops every note at once, here and on your MIDI devices.</p>
+        </div>
         <p class="snd-help">Each synth and the drum kit choose how much they send to these effects.</p>`;
       sndPane.querySelector('[data-f="reverb:type"]').value = reverb.type;
       sndPane.querySelector('[data-q=quality]').value = quality;
+      sndPane.querySelector('[data-g=guard]').value = String(sound.noteGuard);
     }
 
     const FX_SCALE = { 'reverb:decay': [4, ms], 'delay:time': [1, ms], 'delay:feedback': [0.9, pct], 'chorus:rate': [4, v => `${v.toFixed(2)} Hz`] };
     function onFxInput(e) {
       const t = e.target;
+      if (t.dataset.g) { sound.noteGuard = +t.value; saveSound(); return; }
       if (t.dataset.q) { quality = t.value; try { localStorage.setItem('diii.quality', quality); } catch (err) { /* not kept */ } applyQuality(); return; }
       if (t.dataset.f === 'reverb:type') { sound.setFx('reverb', { type: t.value }); saveSound(); return; }
       const k = t.dataset.k;

@@ -25,7 +25,6 @@ const FX_INPUT_FADE = 0.03;       // s; a new reverb or delay line takes over ne
 const DELAY_MAX_RING_OUT = 3;     // s
 const DELAY_UPDATE_MS = 80;       // while dragging, the delay time changes at most this often
 const LIGHT_VOICES = 6;           // per part, in light quality
-const NOTE_GUARD_MS = 3000;       // a note with no note off stops after this
 
 /** Built-in starting points for a synth part */
 export const SYNTH_PRESETS = {
@@ -60,6 +59,7 @@ export class SoundEngine {
     this.parts = [newSynthPart('Synth 1')];
     this.drums = new DrumKit();
     this.drumSends = { reverb: 0.35, delay: 0, chorus: 0 };
+    this.noteGuard = 30;       // s: a note with no note off stops after this; 0 = never
     this.onPartChange = null;  // (partIndex) — a CC moved a part's filter
     this._graphs = new Map();  // part → its audio nodes
     this._delayTimer = null;
@@ -68,7 +68,7 @@ export class SoundEngine {
   // ── Settings to keep ────────────────────────────────────────────────────────
 
   toJSON() {
-    return { fx: this.fx, parts: this.parts, drums: this.drums.toJSON(), drumSends: this.drumSends };
+    return { fx: this.fx, parts: this.parts, drums: this.drums.toJSON(), drumSends: this.drumSends, noteGuard: this.noteGuard };
   }
 
   load(saved) {
@@ -83,6 +83,7 @@ export class SoundEngine {
     }
     if (saved.drums) this.drums.load(saved.drums);
     if (saved.drumSends) Object.assign(this.drumSends, saved.drumSends);
+    if (typeof saved.noteGuard === 'number') this.noteGuard = saved.noteGuard;
   }
 
   // ── Audio graph ──────────────────────────────────────────────────────────────
@@ -208,7 +209,7 @@ export class SoundEngine {
     env.gain.linearRampToValueAtTime(peak, now + attack);
     env.gain.linearRampToValueAtTime(peak * sustain, now + attack + decay);
     voice.output.connect(env).connect(g.input);
-    const tid = setTimeout(() => this._voiceOff(part, note), NOTE_GUARD_MS);
+    const tid = this.noteGuard ? setTimeout(() => this._voiceOff(part, note), this.noteGuard * 1000) : 0;
     g.voices.set(note, { ...voice, env, tid });
   }
 
@@ -233,11 +234,13 @@ export class SoundEngine {
     }, (rel + 0.1) * 1000);
   }
 
+  /** Release every synth note, and cut a ringing open hat */
   allOff() {
     for (const part of this.parts) {
       const g = this._graphs.get(part);
       if (g) for (const note of [...g.voices.keys()]) this._voiceOff(part, note);
     }
+    this.drums.stopAll();
   }
 
   // ── Parts ────────────────────────────────────────────────────────────────────

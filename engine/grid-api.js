@@ -299,6 +299,15 @@ export class MonomeAPI {
     this._sendOut(bytes);
   }
 
+  /** The ■ button: All Sound Off and All Notes Off on every MIDI channel, and stop the emulator's sound */
+  stopAllMidi() {
+    for (let ch = 0; ch < 16; ch++) {
+      this._sendOut([0xB0 | ch, 120, 0]);
+      this._sendOut([0xB0 | ch, 123, 0]);
+    }
+    this.sound.allOff();
+  }
+
   midi_panic() {
     this._sendOut([0xB0, 120, 0]); // all sound off
     this._sendOut([0xB0, 123, 0]); // all notes off
