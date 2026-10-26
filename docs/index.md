@@ -22,7 +22,7 @@ A browser emulator for monome iii grid scripts. It runs the same Lua scripts as 
 
 ## Scripts
 
-- [LeaveSeqr](leaveseqr.md), [Sandman](sandman.md), [Serpentine](serpentine-sequencer.md) ([changelog](changelog.md)), [Multi-screen test](multi-screen-test.md)
+- [LeaveSeqr](leaveseqr.md), [Sandman](sandman.md), [Serpentine](serpentine-sequencer.md), [Multi-screen test](multi-screen-test.md)
 
 ## Project
 

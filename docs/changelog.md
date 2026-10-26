@@ -1,1 +1,0 @@
-{% include-markdown "../scripts/serpentineSeqr/CHANGELOG.md" %}
