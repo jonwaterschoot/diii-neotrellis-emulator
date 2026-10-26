@@ -9,9 +9,12 @@ A browser emulator for [monome iii](https://monome.org/docs/iii/) grid scripts. 
 ## What you can do
 
 - **Play scripts:** the bundled ones, scripts by others (loaded from their own repositories), any GitHub or Codeberg repository, or a file from your computer.
-- **Hear them:** a built-in synth with delay and reverb, MIDI out to a synth or DAW, and MIDI in for scripts that follow a clock or a keyboard.
+- **Hear them:** several synths at once (from soft keys to Karplus–Strong strings) and a drum kit, with reverb, delay and chorus; MIDI out to a synth or DAW, and MIDI in for scripts that follow a clock or a keyboard.
 - **Read them:** each script's controls are drawn over the grid, its README shows in the Guide tab and its code in the Source tab.
 - **Write them:** edit and run a script in the browser, or in your own editor with live reload. **↓ Device** makes a smaller copy for uploading and warns about code the device won't load.
+- **See them your way:** NeoTrellis pads or Mechatrellis keys, dark or light, in colour or as a monochrome monome grid.
+
+![LeaveSeqr on Mechatrellis keys, with a Karplus–Strong synth open in the Sound tab](docs/img/emulator_mechatrellis.png)
 
 ## Getting started
 

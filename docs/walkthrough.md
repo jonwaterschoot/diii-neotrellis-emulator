@@ -86,6 +86,8 @@ The sound also plays when a MIDI output is selected. Mute it to hear only your o
 
 ### The Sound tab
 
+![The Sound tab with a Karplus–Strong synth and its envelope; the grid shows Mechatrellis keys](img/emulator_mechatrellis.png)
+
 Along the top: a tab for each synth, **Drums**, **+** to add a synth, and **Effects**.
 
 **A synth** plays the notes on its channel (or on any channel) that the drum kit doesn't take. Synths on the same channel play together, so two can be layered.
