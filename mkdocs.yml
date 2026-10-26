@@ -8,6 +8,9 @@ repo_url: https://jonwaterschoot.github.io/diii-neotrellis-emulator/
 
 docs_dir: docs
 
+exclude_docs: |
+  drafts/
+
 nav:
   - Home: index.md
   - Getting Started: getting-started.md

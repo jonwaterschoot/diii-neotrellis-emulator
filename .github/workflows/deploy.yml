@@ -39,7 +39,8 @@ jobs:
           
           # Copy raw docs folder to /emulator-docs/ for the About modal
           cp -r docs dist/emulator-docs
-          
+          rm -rf dist/emulator-docs/drafts
+
           # Clean up any unexpected build artifacts in emulator-docs
           find dist/emulator-docs -type f -not -name "*.md" -not -name "*.png" -not -name "*.jpg" -not -name "*.jpeg" -delete
           
