@@ -4,7 +4,7 @@
 
 You are helping a developer write a Lua script for the **NeoTrellis 16×8 RGB grid emulator**.
 The emulator runs in a browser and mirrors the API surface of a Raspberry Pi Pico running the
-**monome iii/diii firmware** — a C program that embeds a standard Lua 5.4 interpreter.
+**monome iii/diii firmware** — a C program that embeds a standard Lua 5.5 interpreter.
 Scripts also target real hardware, so compatibility matters.
 
 This instruction file is the canonical reference for code generation.
@@ -17,7 +17,7 @@ https://raw.githubusercontent.com/jonwaterschoot/diii-neotrellis-emulator/main/S
 
 | Constraint | Detail |
 |------------|--------|
-| Language | Lua 5.4 (Pico via iii firmware) / Lua 5.3 via Fengari (browser emulator). No external libraries. |
+| Language | Lua 5.5 (Pico via iii firmware) / Lua 5.3 via Fengari (browser emulator). No external libraries. Write code both accept: no `<const>`/`<close>` (5.4+, the emulator can't run them), and never assign to a `for` loop variable (read-only in 5.5, so the device won't load it). |
 | Grid size | 16 columns × 8 rows. `W=16, H=8`. Coordinates are 1-based. |
 | Memory | Pico RAM is ~200 KB. Pre-allocate fixed buffers; avoid growing tables in hot loops. No deep string table expansion inside ticks. |
 | MIDI | `midi_note_on(note, vel)`, `midi_note_off(note)`, `midi_panic()`. Always pair every `note_on` with exactly one `note_off`. |

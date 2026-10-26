@@ -35,6 +35,7 @@ This is a universal development tool that runs **real `.lua` scripts natively** 
 
 **Emulator Usage**
 - [Walkthrough](walkthrough.md) - Detailed guide to using the emulator UI
+- [Hardware vs. Emulator](hardware-vs-emulator.md) - Where scripts behave differently on the device, and what to check before uploading
 - [Script Documentation Standard](script-standards.md) - How to write LDoc comments for the emulator
 
 **Hardware & Firmware**

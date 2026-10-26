@@ -38,7 +38,8 @@ Done 2026-10-26; the UI part is not yet tried in a browser.
 - [x] README links and images now resolve against the script's own folder instead of the emulator page.
 
 ### Step 4 — Docs (the four tasks below)
-- [ ] Hardware vs. Emulation Differences: start from "Open compatibility issues" plus what step 1 settles.
+- [x] Hardware vs. Emulation Differences: `docs/hardware-vs-emulator.md` (in the docs nav under Emulator Usage), 2026-10-26.
+- [x] Found while writing it: **↓ Device** checked for Lua 5.1, but the device runs Lua 5.5, so it flagged valid code (`//`, bit operators). It now flags what the device really refuses: assigning to a `for` loop variable (read-only in 5.5). `LLM_INSTRUCTIONS.md` said Lua 5.4; now 5.5.
 - [ ] Consolidate Getting Started: firmware now comes from the release; `building-firmware.md` (a copy of the firmware README) can become a link to the firmware repo.
 - [ ] README script list: list all bundled scripts by group (Music / Color demos / Tests, from `scripts/manifest.json`) and point to the template (`scripts/template/`, "Write your own" in the dropdown). "Available Scripts" and "My scripts" are out of date (e.g. the `serpentineseqr_dev.lua` link is broken).
 - [ ] Restructure the Walkthrough: UI only, developer content to a developer guide.
@@ -149,17 +150,11 @@ Error: selector.lua:52: attempt to call a nil value (global 'fs_list_files')
 
 ## Open compatibility issues (found 2026-10-25)
 
-- **`event_midi`** (fixed 2026-10-26): a script that defines it gets all incoming MIDI; notes no longer become pad presses for that script. Scripts without it keep the note→pad mapping, which is emulator-only. The filter CC (74) is emulator-only too and works either way.
-- **sandman note-offs on hardware**: `midi_note_off(note, ch)` uses the 2-argument form. On iii the second argument is the velocity, so on the device the note-offs go to channel 1. The emulator still accepts the 2-argument form, so this doesn't show here. Fix in sandman: `midi_note_off(note, 0, ch)`.
-- **Metro limit**: iii has 12 metros and slew takes one, so scripts get 11. The emulator has no limit but warns in the status bar past 12 (slew included). On the device `metro.init` returns nil instead.
-- **Filesystem is read-only**: `fs_list_files`, `fs_read_file`, `fs_run_file` work; `fs_write_file`, `fs_remove_file`, `fs_file_size`, `fs_free_space` don't exist. `pset_*` is stored in browser storage instead of files.
-- **Firmware bug**: lib.lua's `slew.deinit()` calls `metro.free(slew.id)`, but `slew.id` is the metro, not its number, so it throws on the device and in the emulator.
-- **Numbers**: `event_grid` coordinates and `grid_size_x/y()` are integers now, as on the device (they printed as `1.0` before).
-- **Metro timing**: very short metros (fell: 5 ms) depend on browser timer resolution; fell sounds right in the browser.
-- **Emulator-only**: `grid_brightness`, `grid_set_screen`, `display_screen`, `get_focused_screen` don't exist on the device. Scripts should check `if grid_brightness then` (leaveseqr does).
-- All of this belongs on the "Hardware vs. Emulation Differences" page above.
+Settled in Step 1; what's left for script writers is on the [Hardware vs. Emulator](hardware-vs-emulator.md) page.
 
- 
+- **Firmware bug** (for the firmware fork): lib.lua's `slew.deinit()` calls `metro.free(slew.id)`, but `slew.id` is the metro, not its number, so it throws on the device and in the emulator. Fix: `metro.free(slew.id.id)`, or store the number.
+- **sluiiice** calls `metro.free(strumclock)` with the metro; worth reporting to its author (see its note above).
+
 ## Synth / sound
 
 - play pause small fade to avoid clicks

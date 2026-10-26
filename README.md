@@ -148,7 +148,7 @@ Okyeron's neotrellis repo: https://github.com/okyeron/neotrellis-monome
 
 ## Scripts by others
 
-The emulator's script list also offers scripts by other people. They are not my work and they are not part of this project or copied into this repo: [`scripts/external.json`](scripts/external.json) only holds their names and repository links, and the emulator fetches each script from its author's repository when you load it. All credit goes to the authors.
+The emulator's script list also offers scripts by other people. They are not my work and they are not part of this project or copied into this repo: [`scripts/external.json`](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/external.json) only holds their names and repository links, and the emulator fetches each script from its author's repository when you load it. All credit goes to the authors.
 
 If you wrote one of these and would rather not be listed, please [open an issue](https://github.com/jonwaterschoot/diii-neotrellis-emulator/issues) and I'll take it out.
 

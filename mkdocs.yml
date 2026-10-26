@@ -16,6 +16,7 @@ nav:
     - To Do: todo.md
   - Emulator Usage:
     - Walkthrough: walkthrough.md
+    - Hardware vs. Emulator: hardware-vs-emulator.md
     - Script Standards: script-standards.md
   - Hardware & Firmware:
     - Firmware Installation: firmware-installation.md

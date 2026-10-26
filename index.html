@@ -2116,7 +2116,7 @@
         </select>
         <button class="btn primary" id="btn-load" title="Load selected script">▶ Load</button>
         <button class="btn" id="btn-download-src" title="Download source file (with all comments)" disabled>↓ Source</button>
-        <button class="btn" id="btn-download-dev" title="Download minified for device (strips comments, checks Lua 5.1)" disabled>↓ Device</button>
+        <button class="btn" id="btn-download-dev" title="Download minified for device (strips comments, checks for code the device's Lua 5.5 won't load)" disabled>↓ Device</button>
       </div>
       <label class="file-pick-label" title="Open a .lua file from disk">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -3224,8 +3224,8 @@
       const { output, warnings } = minifier.minify(source);
 
       if (warnings.length > 0) {
-        setStatus(`⚠ Lua 5.1 issues in minified output: ${warnings[0]}${warnings.length > 1 ? ` (+${warnings.length - 1} more)` : ''}`, 'warn');
-        console.warn('[lua-minifier] Lua 5.1 compatibility warnings:\n' + warnings.join('\n'));
+        setStatus(`⚠ Won't load on the device: ${warnings[0]}${warnings.length > 1 ? ` (+${warnings.length - 1} more)` : ''}`, 'warn');
+        console.warn('[lua-minifier] code the device (Lua 5.5) won\'t load:\n' + warnings.join('\n'));
       } else {
         const origLines = source.split('\n').length;
         const newLines = output.split('\n').length;
