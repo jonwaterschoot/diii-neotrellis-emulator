@@ -69,8 +69,12 @@ The README is the pillar: what this is, what it can do, and links into the docs.
 Target nav: Home · Getting started · Using the emulator (Walkthrough, Hardware vs. emulator) · Writing scripts (Start a script, Script standard, Colour & monochrome, Developer guide) · Scripts · Project (README, To do).
 
 ### Step 5 — New sound features
-- [ ] Drum sounds (up to seven, channel per sound, randomizer; helps iiinvert).
-- [ ] More synth models, reverb models.
+- [x] Drum sounds (2026-10-26): `engine/drums.js`, seven drums ported from the Mangler (WAV.builder). General MIDI notes on one channel (36–51 = 4×4 pads), or a channel per drum; ⚄ re-rolls a drum; closed hat chokes open hat. In a new Sound tab.
+- [x] Sound tab pops out into a movable, resizable window (desktop); docked on mobile.
+- [x] Synth models (`engine/synth.js`): Triangle, Sine, Soft saw, Hollow square, Wide pad, Pluck, FM bell, with Drift (pitch wander) and Movement (filter sweep). Loudness matched (RMS 0.54–0.58).
+- [ ] Listen to all of it in the dev server: drum levels against the synth, the models, drift/movement depths.
+- [ ] Reverb models (not started).
+- [ ] Notes still stop after 3 s if the script never sends a note off (a guard against stuck notes); long pads may want more.
 
 ### Step 6 — Design
 - [x] Favicon (grid icon, `docs/img/favicon.svg`, also the docs site's) and pure-grey backgrounds: every colour is a token now, the blue tints became neutral greys of the same brightness (2026-10-26).

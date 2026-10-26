@@ -2715,6 +2715,18 @@
           </div>
           <div id="sound-ui">
             <div class="doc-section">
+              <div class="doc-section-title">Synth</div>
+              <div class="snd-controls">
+                <label>Sound <select id="synth-model"></select></label>
+                <button class="btn sm" id="synth-try" title="Play a few notes">▶ Try</button>
+              </div>
+              <div class="snd-controls">
+                <label title="Each voice a little out of tune, wandering slowly">Drift <input type="range" id="synth-drift" min="0" max="100" style="width: 90px;"></label>
+                <label title="Each voice's filter sweeps slowly up and down">Movement <input type="range" id="synth-movement" min="0" max="100" style="width: 90px;"></label>
+              </div>
+              <p class="snd-help">Plays the notes the drum kit doesn't take. Volume, envelope, delay, reverb and the filter are in the sound module under the grid.</p>
+            </div>
+            <div class="doc-section">
               <div class="doc-section-title">Drum kit</div>
               <div class="snd-controls">
                 <label title="Notes the kit takes play drums instead of the synth"><input type="checkbox" id="drum-enabled"> On</label>
@@ -2806,6 +2818,7 @@
     import { LuaLoader } from './engine/lua-loader.js';
     import { LuaMinifier } from './engine/lua-minifier.js';
     import { ScriptImporter } from './engine/script-importer.js';
+    import { SYNTH_MODELS } from './engine/synth.js';
 
     // ─── STATE ─────────────────────────────────────────────────────────────────
     let _pendingReadme = null;      // set before _execute so onScriptLoad can pick it up
@@ -4601,6 +4614,30 @@
 
     btnGithubImport.addEventListener('click', runGithubImport);
     githubInput.addEventListener('keydown', e => { if (e.key === 'Enter') runGithubImport(); });
+
+    // ─── SOUND TAB: synth ─────────────────────────────────────────────────────
+    try { Object.assign(api.synth, JSON.parse(localStorage.getItem('diii.synth')) || {}); } catch (e) { /* defaults */ }
+    if (!SYNTH_MODELS[api.synth.model]) api.synth.model = 'triangle';
+    const saveSynth = () => { try { localStorage.setItem('diii.synth', JSON.stringify(api.synth)); } catch (e) { /* not kept */ } };
+    const synthModel = document.getElementById('synth-model');
+    synthModel.innerHTML = Object.entries(SYNTH_MODELS).map(([k, m]) => `<option value="${k}">${m.label}</option>`).join('');
+    synthModel.value = api.synth.model;
+    document.getElementById('synth-drift').value = Math.round(api.synth.drift * 100);
+    document.getElementById('synth-movement').value = Math.round(api.synth.movement * 100);
+    synthModel.addEventListener('change', () => { api.synth.model = synthModel.value; saveSynth(); });
+    document.getElementById('synth-drift').addEventListener('input', e => { api.synth.drift = e.target.value / 100; saveSynth(); });
+    document.getElementById('synth-movement').addEventListener('input', e => { api.synth.movement = e.target.value / 100; saveSynth(); });
+
+    // A short arpeggio straight through the synth (no MIDI out)
+    document.getElementById('synth-try').addEventListener('click', () => {
+      api._ensureAudio();
+      if (api._audioCtx.state === 'suspended') api._audioCtx.resume();
+      if (api.muted) setStatus('Sound is muted: click the speaker to hear it', 'warn');
+      [60, 64, 67, 72].forEach((n, i) => {
+        setTimeout(() => api._synthOn(n, 100), i * 220);
+        setTimeout(() => api._synthOff(n), i * 220 + 700);
+      });
+    });
 
     // ─── SOUND TAB: drum kit ──────────────────────────────────────────────────
     const kit = api.drums;

@@ -25,6 +25,7 @@
  */
 
 import { DrumKit } from './drums.js';
+import { buildVoice } from './synth.js';
 
 /** Incoming bytes that match something sent within this window count as our own output echoed back */
 const MIDI_ECHO_WINDOW_MS = 20;
@@ -82,6 +83,9 @@ export class MonomeAPI {
       sustain: 0.6,
       release: 0.2,
     };
+
+    // Synth model (see synth.js), and how much each voice drifts in pitch and moves its filter
+    this.synth = { model: 'triangle', drift: 0, movement: 0 };
 
     // FX controlled by emulator UI
     this.reverb = {
@@ -553,21 +557,19 @@ export class MonomeAPI {
     this._ensureAudio();
     this._synthOff(note);
     const freq = 440 * Math.pow(2, (note - 69) / 12);
-    const osc = this._audioCtx.createOscillator();
     const g = this._audioCtx.createGain();
     const now = this._audioCtx.currentTime;
+    const voice = buildVoice(this._audioCtx, this.synth.model, freq, now, this.synth);
     const attackTime = now + this.adsr.attack;
     const decayTime = attackTime + this.adsr.decay;
     const peakGain = (vel / 127) * 0.4;
     const sustainGain = peakGain * this.adsr.sustain;
 
-    osc.type = 'triangle';
-    osc.frequency.value = freq;
     g.gain.setValueAtTime(0, now);
     g.gain.linearRampToValueAtTime(peakGain, attackTime);
     g.gain.linearRampToValueAtTime(sustainGain, decayTime);
     
-    osc.connect(g);
+    voice.output.connect(g);
     
     // Connect to filter (which connects to master, reverb, delay)
     if (this._filterNode) {
@@ -579,9 +581,8 @@ export class MonomeAPI {
         g.connect(this._delayIn);
     }
     
-    osc.start();
     const tid = setTimeout(() => this._synthOff(note), 3000);
-    this._activeNodes.set(note, { osc, g, tid });
+    this._activeNodes.set(note, { ...voice, g, tid });
   }
 
   _synthOff(note) {
@@ -594,8 +595,11 @@ export class MonomeAPI {
     n.g.gain.setValueAtTime(n.g.gain.value, now);
     n.g.gain.exponentialRampToValueAtTime(0.0001, now + rel);
     setTimeout(() => {
-      try { n.osc.stop(); } catch (e) {}
-      n.osc.disconnect();
+      for (const src of n.sources) {
+        try { src.stop(); } catch (e) {}
+        src.disconnect();
+      }
+      n.output.disconnect();
       n.g.disconnect();
     }, (rel + 0.1) * 1000);
     this._activeNodes.delete(note);

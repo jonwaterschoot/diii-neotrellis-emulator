@@ -61,6 +61,7 @@ The **Live Manual** switch draws the script's controls over the grid: labels wit
 | **Source** | The script's code, coloured, with line numbers; see below |
 | **Console** | Everything the status bar showed. The script's own `print` output goes to the browser's developer console (F12) |
 | **MIDI** | Every MIDI message going in and out; see below |
+| **Sound** | The synth's sound and the drum kit; see [Sound](#sound) |
 
 Drag the edge of the panel to make it wider.
 
@@ -77,7 +78,7 @@ The buttons at the top filter what's shown: notes, CC, clock, other messages, in
 
 ## Sound
 
-The sound module under the grid plays every note the script sends:
+The emulator plays every note the script sends: drum notes on the drum kit, the rest on the synth. The sound module under the grid has the general controls:
 
 - **Vol** and the speaker button. Sound starts muted; the first click on the grid turns it on.
 - **ADSR:** attack, decay, sustain and release of each note.
@@ -85,7 +86,26 @@ The sound module under the grid plays every note the script sends:
 - **Reverb:** amount and decay. A new decay applies when you let go of the slider.
 - **Filter:** a low-pass filter, which also follows a MIDI CC (74 by default) from the script or from MIDI in.
 
-The synth also plays when a MIDI output is selected. Mute it to hear only your own synth.
+The sound also plays when a MIDI output is selected. Mute it to hear only your own synth.
+
+### The Sound tab
+
+**Synth:**
+
+- **Sound:** Triangle, Sine, Soft saw, Hollow square, Wide pad, Pluck or FM bell. **▶ Try** plays a few notes.
+- **Drift** puts each note a little out of tune and lets it wander slowly, as on an analogue synth.
+- **Movement** sweeps each note's filter slowly up and down.
+
+**Drum kit:** seven drums (kick, snare, closed and open hat, clap, tom, perc), made by the emulator rather than recorded.
+
+- **Plays drum notes on channel …:** notes on that channel (10 by default, or any) play drums by their General MIDI number: 36 kick, 38 snare, 39 clap, 42 closed hat, 46 open hat, and so on. Notes 36 to 51, the usual 4×4 pad layout, are all covered. Other notes on that channel, and all other channels, go to the synth.
+- **Plays a channel per drum:** each drum plays on any note on its own channel (10 to 16 to start with).
+- **▶** plays a drum, and flashes whenever the script plays it. **⚄** makes a new version of that drum; **⚄ All** does all of them.
+- The closed hat cuts off the open hat, as on a real kit.
+
+A script such as iiinvert sends its drums on channel 1: set the kit to channel 1 to hear them as drums.
+
+**⧉ Pop out** moves these controls into a window of their own, which you can drag by its title and resize from its corner, for instance next to the grid in Full View. **Dock** puts them back. The synth and kit settings are kept in this browser.
 
 ## MIDI
 
@@ -124,5 +144,6 @@ The emulator remembers, in this browser only:
 - presets that scripts save with `pset_write`
 - the Source tab's Wrap and Auto-run settings
 - the theme, keys, pad corners and grid mode from ◐ View
+- the synth and drum kit settings, and where the Sound window was
 
 Clearing the site's data in your browser removes them.
