@@ -2503,11 +2503,7 @@
     const minVolSlider = document.getElementById('min-vol-slider');
 
     function syncVolume(value) {
-        const volume = value / 100;
-        api.volume = volume;
-        if (api._masterGain && !isMuted) {
-            api._masterGain.gain.value = volume;
-        }
+        api.setVolume(value / 100);
         if (minVolSlider) minVolSlider.value = value;
     }
 
@@ -2623,7 +2619,9 @@
         toggleFullscreen();
     });
 
+    // Sound starts muted, matching the speaker icon; clicking the grid or the speaker unmutes
     let isMuted = true;
+    api.setMuted(isMuted);
     let hasGridInteracted = false;
     
     const SPEAKER_ON = '<path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>';
@@ -2638,9 +2636,7 @@
 
     document.getElementById('sound-toggle-btn').addEventListener('click', e => {
         isMuted = !isMuted;
-        if (api._masterGain) {
-            api._masterGain.gain.value = isMuted ? 0 : api.volume;
-        }
+        api.setMuted(isMuted);
         updateSoundIcons(isMuted);
         hasGridInteracted = true;
     });
@@ -2654,31 +2650,22 @@
 
     // FX slider bindings
     document.getElementById('reverb-slider').addEventListener('input', e => {
-      const amount = e.target.value / 100;
-      api.reverb.amount = amount;
-      if (api._reverbGain) api._reverbGain.gain.value = amount;
+      api.setReverbAmount(e.target.value / 100);
     });
     document.getElementById('delay-slider').addEventListener('input', e => {
-      const amount = e.target.value / 100;
-      api.delay.amount = amount;
-      if (api._delayGain) api._delayGain.gain.value = amount;
+      api.setDelayAmount(e.target.value / 100);
     });
 
     // FX detail sliders
-    document.getElementById('reverb-decay-slider').addEventListener('input', e => {
-        const decay = e.target.value / 100 * 4; // 0-4s range
-        api.reverb.decay = decay;
-        if (api._reverbNode) api._generateReverbImpulse();
+    // Decay builds a new reverb impulse, so it applies on release ('change'), not while dragging
+    document.getElementById('reverb-decay-slider').addEventListener('change', e => {
+        api.setReverbDecay(e.target.value / 100 * 4); // 0-4s range
     });
     document.getElementById('delay-time-slider').addEventListener('input', e => {
-        const time = e.target.value / 100; // 0-1s range
-        api.delay.time = time;
-        if (api._delayNode) api._delayNode.delayTime.value = time;
+        api.setDelayTime(e.target.value / 100); // 0-1s range
     });
     document.getElementById('delay-feedback-slider').addEventListener('input', e => {
-        const feedback = e.target.value / 100 * 0.9; // 0-0.9 range
-        api.delay.feedback = feedback;
-        if (api._delayFeedback) api._delayFeedback.gain.value = feedback;
+        api.setDelayFeedback(e.target.value / 100 * 0.9); // 0-0.9 range
     });
 
     // Filter controls

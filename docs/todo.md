@@ -22,9 +22,10 @@ Work through the steps in order: fix what's broken first, document once behavior
 - [x] **Re-test the external list** below and update the notes. Done in node; arpiii and fell also checked by ear in the dev server (2026-10-26).
 
 ### Step 2 — Sound glitches
-- [ ] Short fade on play/pause to remove clicks.
-- [ ] Smooth delay-time changes (no crackles).
-- [ ] Smooth reverb setting changes.
+Done in `grid-api.js` (2026-10-26), checked with a mocked Web Audio in node; confirm by ear in the dev server.
+- [x] Short fade on play/pause to remove clicks. The speaker toggle and volume fade (~60 ms) instead of jumping. Sound now really starts muted, as the speaker icon shows; clicking the grid or the speaker unmutes.
+- [x] Smooth delay-time changes (no crackles). A tape-style glide still crackled, so each time change now starts a new delay line (at most every 80 ms while dragging): new sound goes to it while the old line's echoes ring out (≤ 3 s). Delay amount and feedback ramp.
+- [x] Smooth reverb setting changes. Amount ramps. Decay applies on slider release: new sound goes to a new reverb while the old tail rings out. Decay 0 no longer throws.
 
 ### Step 3 — Script list and loader
 - [ ] JSON registry of external scripts that links to the originals (no copies), shown in the dropdown or a modal. See "Scripts dedicated list / modal?".

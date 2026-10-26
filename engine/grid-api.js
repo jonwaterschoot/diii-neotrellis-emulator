@@ -26,6 +26,14 @@
 /** Incoming bytes that match something sent within this window count as our own output echoed back */
 const MIDI_ECHO_WINDOW_MS = 20;
 
+// Audio parameter changes ramp instead of jumping, which clicks
+const GAIN_SMOOTHING = 0.02;      // time constant (s) for volume, mute and FX amounts
+// Reverb decay and delay time can't be ramped without artifacts, so a change starts a new
+// reverb or delay line: new sound fades over to it while the old one rings out.
+const FX_INPUT_FADE = 0.03;       // s
+const DELAY_MAX_RING_OUT = 3;     // s; an old delay line fades out by then even with high feedback
+const DELAY_UPDATE_MS = 80;       // while dragging, the delay time changes at most this often
+
 export class MonomeAPI {
   /**
    * @param {Object} opts
@@ -64,6 +72,7 @@ export class MonomeAPI {
 
     // Volume/attack/release controlled by emulator UI
     this.volume = 0.7;
+    this.muted = false;
     this.adsr = {
       attack: 0.005,
       decay: 0.1,
@@ -90,6 +99,7 @@ export class MonomeAPI {
       cutoff: 1.0,
     };
     this._filterNode = null;
+    this._delayTimer = null;
 
     // Metro registry
     this._metros = [];
@@ -284,30 +294,79 @@ export class MonomeAPI {
     if (this.onMidiMonitor) this.onMidiMonitor('out', bytes, now);
   }
 
+  // ─── SOUND SETTINGS (ramped, so changes don't click) ─────────────────────
+
+  _smooth(param, value, timeConstant = GAIN_SMOOTHING) {
+    if (this._audioCtx) param.setTargetAtTime(value, this._audioCtx.currentTime, timeConstant);
+  }
+
+  setVolume(volume) {
+    this.volume = volume;
+    if (this._masterGain) this._smooth(this._masterGain.gain, this.muted ? 0 : volume);
+  }
+
+  /** Mute fades out and unmute fades in */
+  setMuted(muted) {
+    this.muted = muted;
+    if (this._masterGain) this._smooth(this._masterGain.gain, muted ? 0 : this.volume);
+  }
+
+  setReverbAmount(amount) {
+    this.reverb.amount = amount;
+    if (this._reverbGain) this._smooth(this._reverbGain.gain, amount);
+  }
+
+  /** Builds a new impulse: call it when the setting is final (slider released), not while dragging */
+  setReverbDecay(decay) {
+    this.reverb.decay = decay;
+    if (this._audioCtx) this._swapReverb();
+  }
+
+  setDelayAmount(amount) {
+    this.delay.amount = amount;
+    if (this._delayGain) this._smooth(this._delayGain.gain, amount);
+  }
+
+  /** Starts a new delay line (see _swapDelay); while dragging, at most every DELAY_UPDATE_MS */
+  setDelayTime(time) {
+    this.delay.time = time;
+    if (!this._audioCtx || this._delayTimer) return;
+    this._swapDelay();
+    this._delayTimer = setTimeout(() => {
+      this._delayTimer = null;
+      if (this._delayLine.time !== this.delay.time) this.setDelayTime(this.delay.time);
+    }, DELAY_UPDATE_MS);
+  }
+
+  setDelayFeedback(feedback) {
+    this.delay.feedback = feedback;
+    if (this._delayLine) this._smooth(this._delayLine.feedback.gain, feedback);
+  }
+
   _ensureAudio() {
     if (this._audioCtx) return;
     this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     this._masterGain = this._audioCtx.createGain();
-    this._masterGain.gain.value = this.volume;
+    this._masterGain.gain.value = this.muted ? 0 : this.volume;
     this._masterGain.connect(this._audioCtx.destination);
 
-    // Create FX chain
-    this._reverbNode = this._audioCtx.createConvolver();
+    // Create FX chain. Reverb: _reverbIn → (input fade → convolver) → _reverbGain;
+    // _swapReverb replaces the convolver when the decay changes.
+    this._reverbIn = this._audioCtx.createGain();
     this._reverbGain = this._audioCtx.createGain();
     this._reverbGain.gain.value = this.reverb.amount;
-    this._reverbNode.connect(this._reverbGain).connect(this._masterGain);
-    this._generateReverbImpulse();
+    this._reverbGain.connect(this._masterGain);
+    this._reverb = null;
+    this._swapReverb();
 
-    this._delayNode = this._audioCtx.createDelay(1.0);
+    // Delay: _delayIn → (input fade → delay ⟲ feedback → output) → _delayGain;
+    // _swapDelay replaces the line when the delay time changes.
+    this._delayIn = this._audioCtx.createGain();
     this._delayGain = this._audioCtx.createGain();
-    this._delayFeedback = this._audioCtx.createGain();
     this._delayGain.gain.value = this.delay.amount;
-    this._delayNode.delayTime.value = this.delay.time;
-    this._delayFeedback.gain.value = this.delay.feedback;
-
-    this._delayNode.connect(this._delayFeedback);
-    this._delayFeedback.connect(this._delayNode);
-    this._delayNode.connect(this._delayGain).connect(this._masterGain);
+    this._delayGain.connect(this._masterGain);
+    this._delayLine = null;
+    this._swapDelay();
 
     // Create Filter node (placed before FX/Master split)
     this._filterNode = this._audioCtx.createBiquadFilter();
@@ -317,13 +376,81 @@ export class MonomeAPI {
     
     // The filter connects to the master and FX nodes
     this._filterNode.connect(this._masterGain);
-    this._filterNode.connect(this._reverbNode);
-    this._filterNode.connect(this._delayNode);
+    this._filterNode.connect(this._reverbIn);
+    this._filterNode.connect(this._delayIn);
   }
 
-  _generateReverbImpulse() {
+  /**
+   * Start a delay line with the current time. New sound fades over to it; the old line
+   * keeps repeating what it holds at the old spacing and fades out once its echoes
+   * have died away (at most DELAY_MAX_RING_OUT).
+   */
+  _swapDelay() {
+    const ctx = this._audioCtx;
+    const now = ctx.currentTime;
+    const input = ctx.createGain();
+    const delay = ctx.createDelay(1.0);
+    const feedback = ctx.createGain();
+    const output = ctx.createGain();
+    delay.delayTime.value = this.delay.time;
+    feedback.gain.value = this.delay.feedback;
+    input.gain.setValueAtTime(this._delayLine ? 0 : 1, now);
+    input.gain.linearRampToValueAtTime(1, now + FX_INPUT_FADE);
+    this._delayIn.connect(input).connect(delay);
+    delay.connect(feedback).connect(delay);
+    delay.connect(output).connect(this._delayGain);
+
+    const old = this._delayLine;
+    if (old) {
+      old.input.gain.cancelScheduledValues(now);
+      old.input.gain.setValueAtTime(old.input.gain.value, now);
+      old.input.gain.linearRampToValueAtTime(0, now + FX_INPUT_FADE);
+      // Echoes fall below -60 dB after log(0.001)/log(feedback) repeats
+      const fb = this.delay.feedback;
+      const repeats = fb > 0.001 ? 1 + Math.log(0.001) / Math.log(fb) : 1;
+      const ringOut = Math.min(DELAY_MAX_RING_OUT, FX_INPUT_FADE + repeats * Math.max(old.time, 0.01));
+      old.output.gain.setValueAtTime(1, now + ringOut * 0.6);
+      old.output.gain.linearRampToValueAtTime(0, now + ringOut);
+      setTimeout(() => {
+        this._delayIn.disconnect(old.input);
+        old.delay.disconnect();
+        old.feedback.disconnect();
+        old.output.disconnect();
+      }, (ringOut + 0.1) * 1000);
+    }
+    this._delayLine = { input, delay, feedback, output, time: this.delay.time };
+  }
+
+  /**
+   * Start a convolver with an impulse for the current decay. New sound fades over to it,
+   * and the old one keeps its output until its tail has rung out, so nothing is cut off.
+   */
+  _swapReverb() {
+    const ctx = this._audioCtx;
+    const now = ctx.currentTime;
+    const input = ctx.createGain();
+    const conv = ctx.createConvolver();
+    conv.buffer = this._makeReverbImpulse();
+    input.gain.setValueAtTime(this._reverb ? 0 : 1, now);
+    input.gain.linearRampToValueAtTime(1, now + FX_INPUT_FADE);
+    this._reverbIn.connect(input).connect(conv).connect(this._reverbGain);
+
+    const old = this._reverb;
+    if (old) {
+      old.input.gain.cancelScheduledValues(now);
+      old.input.gain.setValueAtTime(old.input.gain.value, now);
+      old.input.gain.linearRampToValueAtTime(0, now + FX_INPUT_FADE);
+      setTimeout(() => {
+        this._reverbIn.disconnect(old.input);
+        old.conv.disconnect();
+      }, (FX_INPUT_FADE + old.decay + 0.2) * 1000);
+    }
+    this._reverb = { input, conv, decay: this.reverb.decay };
+  }
+
+  _makeReverbImpulse() {
     const sr = this._audioCtx.sampleRate;
-    const len = sr * this.reverb.decay;
+    const len = Math.max(1, Math.round(sr * this.reverb.decay)); // decay 0 would be an empty buffer, which throws
     const impulse = this._audioCtx.createBuffer(this.reverb.stereo ? 2 : 1, len, sr);
     const dataL = impulse.getChannelData(0);
     for (let i = 0; i < len; i++) {
@@ -335,7 +462,7 @@ export class MonomeAPI {
         dataR[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.5);
       }
     }
-    this._reverbNode.buffer = impulse;
+    return impulse;
   }
 
   midi_note_on(note, vel, ch = 1) {
@@ -430,8 +557,8 @@ export class MonomeAPI {
     } else {
         // Fallback if audio not fully initialized or filter removed
         g.connect(this._masterGain);
-        g.connect(this._reverbNode);
-        g.connect(this._delayNode);
+        g.connect(this._reverbIn);
+        g.connect(this._delayIn);
     }
     
     osc.start();
