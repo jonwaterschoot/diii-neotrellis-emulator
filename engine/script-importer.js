@@ -10,7 +10,7 @@
  *
  * Resolution order per host:
  *   1. Fetch manifest.json → lua_file, documentation_url
- *   2. Find .lua: manifest lua_file → <repo>.lua → index.lua → API scan
+ *   2. Find .lua: opts.file → manifest lua_file → <repo>.lua → index.lua → API scan
  *   3. Try branch "main", fall back to "master" if any fetch 404s
  *   4. Fetch README.md (or documentation_url from manifest)
  */
@@ -91,9 +91,11 @@ export class ScriptImporter {
    * Import a script from a repo URL or owner/repo string.
    * @param {string} input
    * @param {function} onProgress – optional (message: string) => void
-   * @returns {{ source, name, readme, repoUrl, branch, host }}
+   * @param {Object} opts
+   * @param {string} opts.file – the .lua file to load, when the repo's name doesn't match it
+   * @returns {{ source, name, readme, repoUrl, rawDir, branch, host }}  rawDir: raw URL of the script's folder
    */
-  async import(input, onProgress = () => {}) {
+  async import(input, onProgress = () => {}, opts = {}) {
     const parsed = this.parseRepo(input);
     if (!parsed) {
       throw new Error(
@@ -127,6 +129,7 @@ export class ScriptImporter {
 
     // ── 2. Find and fetch .lua ────────────────────────────────────────────────
     const candidates = [];
+    if (opts.file) candidates.push(`${prefix}${opts.file}`);
     if (luaFile) candidates.push(`${prefix}${luaFile}`);
     candidates.push(`${prefix}${repo}.lua`, `${prefix}index.lua`);
 
@@ -190,6 +193,7 @@ export class ScriptImporter {
       name,
       readme,
       repoUrl: h.repoUrl(owner, repo),
+      rawDir: h.raw(owner, repo, resolvedBranch, prefix),
       branch: resolvedBranch,
       host,
     };

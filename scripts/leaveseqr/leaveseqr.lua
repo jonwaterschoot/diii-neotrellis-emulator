@@ -1512,7 +1512,8 @@ end
 -- KEYBOARD (BPM via 1/2/3/4 keys)
 -- ===========================================================================
 function event_key(key)
-  if     key=="1" then bpm=math.max(20,bpm-10); if m_seq then m_seq:stop(); m_seq:start(get_interval()) end; show_hud("BPM", bpm, 192, 112, 16)
+  if     key=="tab" then cycle_screen(); is_dirty = true
+  elseif key=="1" then bpm=math.max(20,bpm-10); if m_seq then m_seq:stop(); m_seq:start(get_interval()) end; show_hud("BPM", bpm, 192, 112, 16)
   elseif key=="2" then bpm=math.max(20,bpm-1);  if m_seq then m_seq:stop(); m_seq:start(get_interval()) end; show_hud("BPM", bpm, 192, 112, 16)
   elseif key=="3" then bpm=math.min(200,bpm+1); if m_seq then m_seq:stop(); m_seq:start(get_interval()) end; show_hud("BPM", bpm, 192, 112, 16)
   elseif key=="4" then bpm=math.min(200,bpm+10);if m_seq then m_seq:stop(); m_seq:start(get_interval()) end; show_hud("BPM", bpm, 192, 112, 16)

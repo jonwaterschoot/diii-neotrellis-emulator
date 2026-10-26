@@ -2,50 +2,62 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/</loc>
-         <lastmod>2026-10-25</lastmod>
-    </url>
-    <url>
-         <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/building-firmware/</loc>
-         <lastmod>2026-10-25</lastmod>
+         <lastmod>2026-10-26</lastmod>
     </url>
     <url>
          <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/changelog/</loc>
-         <lastmod>2026-10-25</lastmod>
+         <lastmod>2026-10-26</lastmod>
     </url>
     <url>
-         <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/firmware-installation/</loc>
-         <lastmod>2026-10-25</lastmod>
+         <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/colour/</loc>
+         <lastmod>2026-10-26</lastmod>
+    </url>
+    <url>
+         <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/developer-guide/</loc>
+         <lastmod>2026-10-26</lastmod>
+    </url>
+    <url>
+         <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/getting-started/</loc>
+         <lastmod>2026-10-26</lastmod>
+    </url>
+    <url>
+         <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/hardware-vs-emulator/</loc>
+         <lastmod>2026-10-26</lastmod>
+    </url>
+    <url>
+         <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/leaveseqr/</loc>
+         <lastmod>2026-10-26</lastmod>
     </url>
     <url>
          <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/main-readme/</loc>
-         <lastmod>2026-10-25</lastmod>
+         <lastmod>2026-10-26</lastmod>
     </url>
     <url>
          <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/multi-screen-test/</loc>
-         <lastmod>2026-10-25</lastmod>
-    </url>
-    <url>
-         <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/roadmap/</loc>
-         <lastmod>2026-10-25</lastmod>
+         <lastmod>2026-10-26</lastmod>
     </url>
     <url>
          <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/sandman/</loc>
-         <lastmod>2026-10-25</lastmod>
+         <lastmod>2026-10-26</lastmod>
     </url>
     <url>
          <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/script-standards/</loc>
-         <lastmod>2026-10-25</lastmod>
+         <lastmod>2026-10-26</lastmod>
     </url>
     <url>
          <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/serpentine-sequencer/</loc>
-         <lastmod>2026-10-25</lastmod>
+         <lastmod>2026-10-26</lastmod>
+    </url>
+    <url>
+         <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/start-a-script/</loc>
+         <lastmod>2026-10-26</lastmod>
     </url>
     <url>
          <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/todo/</loc>
-         <lastmod>2026-10-25</lastmod>
+         <lastmod>2026-10-26</lastmod>
     </url>
     <url>
          <loc>https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/walkthrough/</loc>
-         <lastmod>2026-10-25</lastmod>
+         <lastmod>2026-10-26</lastmod>
     </url>
 </urlset>

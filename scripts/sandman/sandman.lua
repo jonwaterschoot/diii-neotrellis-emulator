@@ -6,8 +6,7 @@
 -- A living portrait: falling sand, leaves and water that become music.
 -- Rotate device 90 degrees CCW (power cable at top). Portrait: 8 wide x 16 tall.
 --
--- @key Tab: Seq Settings
--- @key Space: Scale Settings
+-- @key Tab/Space: Next screen (Live → Seq → Scale)
 
 -- ---------------------------------------------------------------------------
 -- @section Global Controls
@@ -254,10 +253,10 @@ for i = 1, 4 do ECHO[i] = {active=false, note=0, vel=0, ticks=0, ch=1} end
 
 local function notes_off()
   for i = 1, MAX_ACT do
-    if ANS[i].active then midi_note_off(ANS[i].note, ANS[i].ch); ANS[i].active=false end
+    if ANS[i].active then midi_note_off(ANS[i].note, 0, ANS[i].ch); ANS[i].active=false end
   end
   for i = 1, 4 do
-    if ECHO[i].active then midi_note_off(ECHO[i].note, ECHO[i].ch); ECHO[i].active=false end
+    if ECHO[i].active then midi_note_off(ECHO[i].note, 0, ECHO[i].ch); ECHO[i].active=false end
   end
   if midi_panic then midi_panic() end
 end
@@ -272,7 +271,7 @@ local function play_note(note, vel, dur, ch)
   for i = 1, MAX_ACT do
     if not ANS[i].active then slot = i; break end
   end
-  if ANS[slot].active then midi_note_off(ANS[slot].note, ANS[slot].ch) end
+  if ANS[slot].active then midi_note_off(ANS[slot].note, 0, ANS[slot].ch) end
   midi_note_on(note, vel, ch)
   ANS[slot].note=note; ANS[slot].active=true; ANS[slot].ticks=dur; ANS[slot].ch=ch
 end
@@ -503,13 +502,13 @@ local function process_seq_ticks()
   for i=1,MAX_ACT do
     if ANS[i].active then
       ANS[i].ticks=ANS[i].ticks-1
-      if ANS[i].ticks<=0 then midi_note_off(ANS[i].note, ANS[i].ch); ANS[i].active=false end
+      if ANS[i].ticks<=0 then midi_note_off(ANS[i].note, 0, ANS[i].ch); ANS[i].active=false end
     end
   end
   for i=1,4 do
     if ECHO[i].active then
       ECHO[i].ticks=ECHO[i].ticks-1
-      if ECHO[i].ticks<=0 then midi_note_off(ECHO[i].note, ECHO[i].ch); ECHO[i].active=false end
+      if ECHO[i].ticks<=0 then midi_note_off(ECHO[i].note, 0, ECHO[i].ch); ECHO[i].active=false end
     end
   end
 

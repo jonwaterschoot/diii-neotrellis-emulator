@@ -4,10 +4,11 @@
  * This module is injected into the Fengari Lua runtime as globals before script execution.
  *
  * API Contract (what a Lua script can call):
- *   grid_led(x, y, lum)            – set pad at (x,y) to mono brightness 0–15
+ *   grid_led(x, y, lum, rel)       – set pad at (x,y) to mono brightness 0–15 (rel: add to current level)
+ *   grid_led_get(x, y)             – current mono level 0–15 of a pad (grid_led_rgb leaves it alone)
  *   grid_led_rgb(x, y, r, g, b)    – set pad at (x,y) to RGB (0–255 each)
  *   grid_color(r, g, b)            – set global tint for grid_led output
- *   grid_led_all(lum)              – set all pads to brightness
+ *   grid_led_all(lum, rel)         – set all pads to brightness (rel: add to current levels)
  *   grid_refresh()                 – flush frame buffer to DOM
  *   grid_color_intensity(val)      – set master brightness multiplier
  *   midi_note_on(note, vel)        – send MIDI note on + Web Audio fallback
@@ -19,7 +20,14 @@
  *   metro:start([time], [count])   – start the metro (on a running metro: change its period)
  *   metro:stop()                   – stop the metro timer
  *   event_grid(x, y, z)           – called BY the emulator when a pad is clicked
+ *   event_midi(d1, d2, d3)        – called BY the emulator for incoming MIDI, when the script defines it
+ *   event_key(key)                – called BY the emulator on a key press, when the script defines it (emulator only)
  */
+
+import { SoundEngine } from './sound.js';
+
+/** Incoming bytes that match something sent within this window count as our own output echoed back */
+const MIDI_ECHO_WINDOW_MS = 20;
 
 export class MonomeAPI {
   /**
@@ -44,6 +52,8 @@ export class MonomeAPI {
     this._screenBuffers = {
       live: new Array(this.cols * this.rows).fill(null).map(() => ({ r: 0, g: 0, b: 0 }))
     };
+    // 0–15 level per pad and screen, as the firmware's mmap: what grid_led_get returns
+    this._levelBuffers = { live: new Array(this.cols * this.rows).fill(0) };
     this._currentScreen = 'live';
     this._globalTint = { r: 255, g: 255, b: 255 };
     this.masterBright = 12; // 1–15 scale
@@ -51,44 +61,19 @@ export class MonomeAPI {
     // MIDI
     this.midiOut = null;
     this.midiIn = null;
-    this._activeNodes = new Map();
-    this._audioCtx = null;
-    this._masterGain = null;
 
-    // Volume/attack/release controlled by emulator UI
-    this.volume = 0.7;
-    this.adsr = {
-      attack: 0.005,
-      decay: 0.1,
-      sustain: 0.6,
-      release: 0.2,
-    };
-
-    // FX controlled by emulator UI
-    this.reverb = {
-      amount: 0.2,
-      decay: 1.5,
-      stereo: true,
-    };
-    this.delay = {
-      amount: 0.2,
-      time: 0.25,
-      feedback: 0.3,
-    };
-
-    // Filter controlled by MIDI CC/UI
-    this.filter = {
-      enabled: true,
-      cc: 74,
-      cutoff: 1.0,
-    };
-    this._filterNode = null;
+    // Everything the emulator plays: synth parts, drum kit, effects (see sound.js)
+    this.sound = new SoundEngine();
 
     // Metro registry
     this._metros = [];
 
-    // Lua event function – set once the script is loaded
+    // Lua event functions – set once the script is loaded
     this._luaEventGrid = null;
+    this._luaEventMidi = null;
+    this._luaEventKey = null;
+    // Bytes of recently sent messages → time sent, to spot our own output coming back in
+    this._recentOut = new Map();
     this._startTime = performance.now();
 
     // Tracks which screen the most recent user interaction came from
@@ -100,14 +85,21 @@ export class MonomeAPI {
 
   // ─── GRID LED API ─────────────────────────────────────────────────────────
 
-  /** Set single pad to monochrome brightness (0–15) */
-  grid_led(x, y, lum) {
-    const level = Math.max(0, Math.min(15, Math.floor(lum || 0)));
-    const scale = level / 15;
-    const r = Math.max(0, Math.min(255, Math.floor(this._globalTint.r * scale)));
-    const g = Math.max(0, Math.min(255, Math.floor(this._globalTint.g * scale)));
-    const b = Math.max(0, Math.min(255, Math.floor(this._globalTint.b * scale)));
+  /** Set single pad to monochrome brightness (0–15); with rel, lum is added to the current level */
+  grid_led(x, y, lum, rel = false) {
+    let level = Math.floor(lum || 0);
+    if (rel && this._inBounds(x, y)) level += this._levelBuffers[this._currentScreen][this._cellIndex(x, y)];
+    level = Math.max(0, Math.min(15, level));
+    const [r, g, b] = this._tinted(level);
     this._setCell(x, y, r, g, b);
+    if (this._inBounds(x, y)) this._levelBuffers[this._currentScreen][this._cellIndex(x, y)] = level;
+  }
+
+  /** Current mono level (0–15) of a pad. Coordinates wrap around the grid, as on the firmware. */
+  grid_led_get(x, y) {
+    const cx = ((Math.floor(x) - 1) % this.cols + this.cols) % this.cols;
+    const cy = ((Math.floor(y) - 1) % this.rows + this.rows) % this.rows;
+    return this._levelBuffers[this._currentScreen][cy * this.cols + cx];
   }
 
   /** Set single pad to RGB color (0–255 each) */
@@ -128,6 +120,7 @@ export class MonomeAPI {
   grid_set_screen(name) {
     if (!this._screenBuffers[name]) {
       this._screenBuffers[name] = new Array(this.cols * this.rows).fill(null).map(() => ({ r: 0, g: 0, b: 0 }));
+      this._levelBuffers[name] = new Array(this.cols * this.rows).fill(0);
     }
     this._currentScreen = name;
   }
@@ -141,15 +134,15 @@ export class MonomeAPI {
     };
   }
 
-  /** Clear all pads of the current screen to a brightness level (0–15), default 0 */
-  grid_led_all(lum) {
-    const level = Math.max(0, Math.min(15, Math.floor(lum || 0)));
-    const scale = level / 15;
-    const r = Math.max(0, Math.min(255, Math.floor(this._globalTint.r * scale)));
-    const g = Math.max(0, Math.min(255, Math.floor(this._globalTint.g * scale)));
-    const b = Math.max(0, Math.min(255, Math.floor(this._globalTint.b * scale)));
+  /** Set all pads of the current screen to a brightness level (0–15), default 0; with rel, add to each level */
+  grid_led_all(lum, rel = false) {
     const buf = this._screenBuffers[this._currentScreen];
-    for (let i = 0; i < buf.length; i++) { buf[i].r = r; buf[i].g = g; buf[i].b = b; }
+    const levels = this._levelBuffers[this._currentScreen];
+    for (let i = 0; i < buf.length; i++) {
+      const level = Math.max(0, Math.min(15, Math.floor(lum || 0) + (rel ? levels[i] : 0)));
+      [buf[i].r, buf[i].g, buf[i].b] = this._tinted(level);
+      levels[i] = level;
+    }
   }
 
   /** Flush ALL screen buffers to the DOM — each screen fires onLedUpdate with its name */
@@ -174,12 +167,22 @@ export class MonomeAPI {
     this.masterBright = Math.max(1, Math.min(15, val));
   }
 
+  /** RGB for a 0–15 level in the current grid_color tint */
+  _tinted(level) {
+    const scale = level / 15;
+    const t = this._globalTint;
+    return [t.r, t.g, t.b].map(c => Math.max(0, Math.min(255, Math.floor(c * scale))));
+  }
+
+  _inBounds(x, y) { return x >= 1 && x <= this.cols && y >= 1 && y <= this.rows; }
+  _cellIndex(x, y) { return (y - 1) * this.cols + (x - 1); }
+
   _setCell(x, y, r, g, b) {
-    if (x < 1 || x > this.cols || y < 1 || y > this.rows) {
+    if (!this._inBounds(x, y)) {
       if (r > 0 || g > 0 || b > 0) this._outOfBoundsWriteCount++;
       return;
     }
-    const i = (y - 1) * this.cols + (x - 1);
+    const i = this._cellIndex(x, y);
     const buf = this._screenBuffers[this._currentScreen];
     buf[i].r = r; buf[i].g = g; buf[i].b = b;
   }
@@ -200,23 +203,24 @@ export class MonomeAPI {
     }
   }
 
-  setFilterCutoff(val) {
-    this.filter.cutoff = Math.max(0, Math.min(1, val));
-    if (this._filterNode && this._audioCtx) {
-      const freq = 20 * Math.pow(1000, this.filter.cutoff);
-      this._filterNode.frequency.setTargetAtTime(freq, this._audioCtx.currentTime, 0.05);
-    }
-  }
-
+  /**
+   * Incoming MIDI. A script that defines event_midi gets every message, as on iii;
+   * otherwise notes are mapped to pad presses. The filter CC works either way.
+   */
   _handleMidiInput(msg) {
-    const [status, data1, data2] = msg.data;
+    const [status, data1 = 0, data2 = 0] = msg.data;
     const type = status & 0xF0;
+    const now = performance.now();
 
     // Emit to MIDI monitor (all incoming messages)
-    if (this.onMidiMonitor) this.onMidiMonitor('in', msg.data, performance.now());
+    if (this.onMidiMonitor) this.onMidiMonitor('in', msg.data, now);
+
+    const sentAt = this._recentOut.get(msg.data.join(','));
+    const echo = sentAt !== undefined && now - sentAt < MIDI_ECHO_WINDOW_MS;
+    const toScript = this._luaEventMidi ? this._luaEventMidi(status, data1, data2, echo) : false;
 
     // Simplistic mapping: MIDI notes to grid coordinates
-    if (type === 0x90 || type === 0x80) {
+    if (!toScript && (type === 0x90 || type === 0x80)) {
       const isPress = (type === 0x90 && data2 > 0);
       const x = (data1 % 16) + 1;
       const y = Math.floor(data1 / 16) + 1;
@@ -224,78 +228,30 @@ export class MonomeAPI {
         this.handlePadEvent(x, y, isPress ? 1 : 0);
       }
     } else if (type === 0xB0) {
-      // Control Change
-      const cc = data1;
-      const val = data2;
-      if (this.filter.enabled && cc === this.filter.cc) {
-        this.setFilterCutoff(val / 127);
-        if (this.onFilterUpdate) this.onFilterUpdate(this.filter.cutoff);
-      }
+      // A CC can move a synth part's filter
+      this.sound.cc(data1, data2, (status & 0x0F) + 1);
     }
   }
 
-  _ensureAudio() {
-    if (this._audioCtx) return;
-    this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    this._masterGain = this._audioCtx.createGain();
-    this._masterGain.gain.value = this.volume;
-    this._masterGain.connect(this._audioCtx.destination);
-
-    // Create FX chain
-    this._reverbNode = this._audioCtx.createConvolver();
-    this._reverbGain = this._audioCtx.createGain();
-    this._reverbGain.gain.value = this.reverb.amount;
-    this._reverbNode.connect(this._reverbGain).connect(this._masterGain);
-    this._generateReverbImpulse();
-
-    this._delayNode = this._audioCtx.createDelay(1.0);
-    this._delayGain = this._audioCtx.createGain();
-    this._delayFeedback = this._audioCtx.createGain();
-    this._delayGain.gain.value = this.delay.amount;
-    this._delayNode.delayTime.value = this.delay.time;
-    this._delayFeedback.gain.value = this.delay.feedback;
-
-    this._delayNode.connect(this._delayFeedback);
-    this._delayFeedback.connect(this._delayNode);
-    this._delayNode.connect(this._delayGain).connect(this._masterGain);
-
-    // Create Filter node (placed before FX/Master split)
-    this._filterNode = this._audioCtx.createBiquadFilter();
-    this._filterNode.type = 'lowpass';
-    const initialFreq = 20 * Math.pow(1000, this.filter.cutoff);
-    this._filterNode.frequency.value = initialFreq;
-    
-    // The filter connects to the master and FX nodes
-    this._filterNode.connect(this._masterGain);
-    this._filterNode.connect(this._reverbNode);
-    this._filterNode.connect(this._delayNode);
-  }
-
-  _generateReverbImpulse() {
-    const sr = this._audioCtx.sampleRate;
-    const len = sr * this.reverb.decay;
-    const impulse = this._audioCtx.createBuffer(this.reverb.stereo ? 2 : 1, len, sr);
-    const dataL = impulse.getChannelData(0);
-    for (let i = 0; i < len; i++) {
-      dataL[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.5);
-    }
-    if (this.reverb.stereo) {
-      const dataR = impulse.getChannelData(1);
-      for (let i = 0; i < len; i++) {
-        dataR[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.5);
+  /** Send to the MIDI output (if any), show in the monitor, and remember it for echo detection */
+  _sendOut(bytes) {
+    const now = performance.now();
+    if (this.midiOut) {
+      try { this.midiOut.send(bytes); } catch (e) { console.warn('[midi out]', e); }
+      this._recentOut.set(bytes.join(','), now);
+      if (this._recentOut.size > 64) {
+        for (const [k, t] of this._recentOut) if (now - t >= MIDI_ECHO_WINDOW_MS) this._recentOut.delete(k);
       }
     }
-    this._reverbNode.buffer = impulse;
+    if (this.onMidiMonitor) this.onMidiMonitor('out', bytes, now);
   }
 
   midi_note_on(note, vel, ch = 1) {
     note = note & 0x7F;
     vel = vel & 0x7F;
     const status = 0x90 + ((ch - 1) & 0x0F);
-    const bytes = [status, note, vel];
-    if (this.midiOut) this.midiOut.send(bytes);
-    if (this.onMidiMonitor) this.onMidiMonitor('out', bytes, performance.now());
-    this._synthOn(note, vel);
+    this._sendOut([status, note, vel]);
+    this.sound.noteOn(note, vel, ch);
   }
 
   midi_note_off(note, p2, p3) {
@@ -311,30 +267,21 @@ export class MonomeAPI {
     }
     note = note & 0x7F;
     const status = 0x80 + ((ch - 1) & 0x0F);
-    const bytes = [status, note, vel & 0x7F];
-    if (this.midiOut) this.midiOut.send(bytes);
-    if (this.onMidiMonitor) this.onMidiMonitor('out', bytes, performance.now());
-    this._synthOff(note);
+    this._sendOut([status, note, vel & 0x7F]);
+    this.sound.noteOff(note, ch);
   }
 
   midi_cc(cc, val, ch = 1) {
     cc = cc & 0x7F;
     val = val & 0x7F;
     const status = 0xB0 + ((ch - 1) & 0x0F);
-    const bytes = [status, cc, val];
-    if (this.midiOut) this.midiOut.send(bytes);
-    if (this.onMidiMonitor) this.onMidiMonitor('out', bytes, performance.now());
-    // Self-apply: if this CC targets the internal filter, route it there too.
-    // Mirrors what _handleMidiInput does for incoming hardware CC.
-    if (this.filter.enabled && cc === this.filter.cc) {
-      this.setFilterCutoff(val / 127);
-      if (this.onFilterUpdate) this.onFilterUpdate(this.filter.cutoff, val);
-    }
+    this._sendOut([status, cc, val]);
+    this.sound.cc(cc, val, ch); // as for incoming CCs: may move a synth part's filter
   }
 
   /**
    * Raw MIDI out, like iii's midi_tx(d1, d2, d3). Note and CC messages go through
-   * midi_note_on/off and midi_cc so they also reach the internal synth and filter.
+   * midi_note_on/off and midi_cc so they also reach the emulator's sound.
    * Clock and transport (0xF8, 0xFA, 0xFC, ...) are sent as single bytes.
    */
   midi_tx(d1, d2 = 0, d3 = 0) {
@@ -349,79 +296,22 @@ export class MonomeAPI {
     else if (d1 >= 0xF6) bytes = [d1];
     else if (type === 0xC0 || type === 0xD0 || d1 === 0xF1 || d1 === 0xF3) bytes = [d1, d2 & 0x7F];
     else bytes = [d1, d2 & 0x7F, d3 & 0x7F];
-    if (this.midiOut) {
-      try { this.midiOut.send(bytes); } catch (e) { console.warn('[midi_tx]', e); }
+    this._sendOut(bytes);
+  }
+
+  /** The ■ button: All Sound Off and All Notes Off on every MIDI channel, and stop the emulator's sound */
+  stopAllMidi() {
+    for (let ch = 0; ch < 16; ch++) {
+      this._sendOut([0xB0 | ch, 120, 0]);
+      this._sendOut([0xB0 | ch, 123, 0]);
     }
-    if (this.onMidiMonitor) this.onMidiMonitor('out', bytes, performance.now());
+    this.sound.allOff();
   }
 
   midi_panic() {
-    const soundOff = [0xB0, 120, 0];
-    const notesOff = [0xB0, 123, 0];
-    if (this.midiOut) {
-      this.midiOut.send(soundOff);
-      this.midiOut.send(notesOff);
-    }
-    if (this.onMidiMonitor) {
-      const t = performance.now();
-      this.onMidiMonitor('out', soundOff, t);
-      this.onMidiMonitor('out', notesOff, t);
-    }
-    for (const note of [...this._activeNodes.keys()]) {
-      this._synthOff(note);
-    }
-  }
-
-  _synthOn(note, vel) {
-    this._ensureAudio();
-    this._synthOff(note);
-    const freq = 440 * Math.pow(2, (note - 69) / 12);
-    const osc = this._audioCtx.createOscillator();
-    const g = this._audioCtx.createGain();
-    const now = this._audioCtx.currentTime;
-    const attackTime = now + this.adsr.attack;
-    const decayTime = attackTime + this.adsr.decay;
-    const peakGain = (vel / 127) * 0.4;
-    const sustainGain = peakGain * this.adsr.sustain;
-
-    osc.type = 'triangle';
-    osc.frequency.value = freq;
-    g.gain.setValueAtTime(0, now);
-    g.gain.linearRampToValueAtTime(peakGain, attackTime);
-    g.gain.linearRampToValueAtTime(sustainGain, decayTime);
-    
-    osc.connect(g);
-    
-    // Connect to filter (which connects to master, reverb, delay)
-    if (this._filterNode) {
-        g.connect(this._filterNode);
-    } else {
-        // Fallback if audio not fully initialized or filter removed
-        g.connect(this._masterGain);
-        g.connect(this._reverbNode);
-        g.connect(this._delayNode);
-    }
-    
-    osc.start();
-    const tid = setTimeout(() => this._synthOff(note), 3000);
-    this._activeNodes.set(note, { osc, g, tid });
-  }
-
-  _synthOff(note) {
-    const n = this._activeNodes.get(note);
-    if (!n) return;
-    clearTimeout(n.tid);
-    const rel = this.adsr.release;
-    const now = this._audioCtx.currentTime;
-    n.g.gain.cancelScheduledValues(now);
-    n.g.gain.setValueAtTime(n.g.gain.value, now);
-    n.g.gain.exponentialRampToValueAtTime(0.0001, now + rel);
-    setTimeout(() => {
-      try { n.osc.stop(); } catch (e) {}
-      n.osc.disconnect();
-      n.g.disconnect();
-    }, (rel + 0.1) * 1000);
-    this._activeNodes.delete(note);
+    this._sendOut([0xB0, 120, 0]); // all sound off
+    this._sendOut([0xB0, 123, 0]); // all notes off
+    this.sound.allOff();
   }
 
   // ─── METRO ────────────────────────────────────────────────────────────────
@@ -496,7 +386,7 @@ export class MonomeAPI {
   }
 
   stopAllNotes() {
-    for (const [note] of this._activeNodes) this._synthOff(note);
+    this.sound.allOff();
   }
 
   // ─── TIMING ───────────────────────────────────────────────────────────────
@@ -536,6 +426,29 @@ export class MonomeAPI {
     this._luaEventGrid = fn;
   }
 
+  /**
+   * Register the event_midi bridge (called by lua-loader after script init).
+   * fn(d1, d2, d3, echo) returns true when the script handled the message;
+   * echo is true when the same bytes were sent out moments ago.
+   */
+  setEventMidiHandler(fn) {
+    this._luaEventMidi = fn;
+  }
+
+  /**
+   * A key press, by name ("space", "tab", "up", "a", "1"…). Goes to the script's event_key
+   * if it has one (a held key's repeats are swallowed, not passed on); returns false when the
+   * script has no event_key, so the caller can press its fixed pads instead.
+   */
+  handleKeyEvent(key, repeat = false) {
+    return this._luaEventKey ? this._luaEventKey(key, repeat) : false;
+  }
+
+  /** Register the event_key bridge (called by lua-loader after script init); fn returns true when handled */
+  setEventKeyHandler(fn) {
+    this._luaEventKey = fn;
+  }
+
   // ─── CLEANUP ──────────────────────────────────────────────────────────────
 
   /** Full cleanup before reloading a script */
@@ -546,8 +459,12 @@ export class MonomeAPI {
     this._screenBuffers = {
       live: new Array(this.cols * this.rows).fill(null).map(() => ({ r: 0, g: 0, b: 0 }))
     };
+    this._levelBuffers = { live: new Array(this.cols * this.rows).fill(0) };
     this._currentScreen = 'live';
     this._luaEventGrid = null;
+    this._luaEventMidi = null;
+    this._luaEventKey = null;
+    this._recentOut.clear();
     this._startTime = performance.now();
     this._outOfBoundsWriteCount = 0;
   }

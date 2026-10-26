@@ -43,7 +43,7 @@
     "name": "Color Fallback Demo",
     "group": "Color demos",
     "file": "colorfallback/color_fallback_demo.lua",
-    "description": "Made to test the color_fallback() function, shows how you can use it to make a monochrome version of your script that still looks good on a monochrome grid, more info in the github folder uf2s",
+    "description": "Four colour zones drawn through one helper that falls back to brightness levels, so the script also looks right on a monochrome grid. See the Colour and monochrome page in the docs.",
     "author": "jonwaterschoot",
     "version": "",
     "gridSize": [16, 8]
@@ -108,6 +108,16 @@
     "group": "Tests",
     "file": "powertest/power_test.lua",
     "description": "Tests the Power Limiter and grid_color_intensity() function, was made to test brownout of the leds. Needs a color grid.",
+    "author": "jonwaterschoot",
+    "version": "",
+    "gridSize": [16, 8]
+  },
+  {
+    "name": "Script template",
+    "group": "Write your own",
+    "file": "template/myscript.lua",
+    "readme": "template/GUIDE.md",
+    "description": "Starting point for your own script. The Guide tab walks you through it; LLM_INSTRUCTIONS.md is the version to give to an LLM.",
     "author": "jonwaterschoot",
     "version": "",
     "gridSize": [16, 8]

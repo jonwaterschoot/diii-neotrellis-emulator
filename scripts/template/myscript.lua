@@ -111,6 +111,9 @@ end
 -- KEYBOARD INPUT (emulator only — ignored on hardware)
 -- ============================================================
 -- Uncomment and implement if your script uses keyboard shortcuts.
+-- key is the key's name: "space", "tab", "enter", "up", "down", "left",
+-- "right", or the character in lower case ("a", "1"). Called on each press;
+-- R always reloads. List the keys with -- @key lines in the header.
 --
 -- function event_key(key)
 --   if key == "space" then
@@ -129,7 +132,7 @@ end
 --   redraw()
 -- end
 --
--- m_clock = metro.new(clock_tick, 0.5)  -- 0.5s interval = 120 BPM quarter note
+-- m_clock = metro.init(clock_tick, 0.5)  -- 0.5s interval = 120 BPM quarter note
 -- m_clock:start()
 
 -- ============================================================

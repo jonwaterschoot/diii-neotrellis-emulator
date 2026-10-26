@@ -10,6 +10,16 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet">
 
+  <link rel="icon" type="image/svg+xml" href="docs/img/favicon.svg">
+  <script>
+    // View settings (theme, pad corners) before the first paint, so a light page doesn't flash dark
+    try {
+      document.documentElement.dataset.theme = localStorage.getItem('diii.theme') || 'dark';
+      document.documentElement.dataset.corners = localStorage.getItem('diii.corners') || 'slight';
+      document.documentElement.dataset.keys = localStorage.getItem('diii.keys') || 'neotrellis';
+    } catch (e) { /* storage blocked: defaults */ }
+  </script>
+
   <!-- Fengari Lua 5.3 runtime -->
   <script src="https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js"></script>
   <!-- Markdown renderer (for README guide panel) -->
@@ -18,13 +28,27 @@
   <style>
     /* ── DESIGN TOKENS ───────────────────────────────────────────────── */
     :root {
-      --bg: #080a0f;
-      --surface: #0e1117;
-      --surface2: #151b24;
-      --border: #1c2535;
-      --border2: #253045;
-      --text: #d6e0f0;
-      --muted: #4a6080;
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --surface2: #181818;
+      --surface-deep: #0c0c0c;   /* console, code */
+      --card: #141414;           /* cards, status pill */
+      --hover: #202020;          /* button hover */
+      --chip: #1b1b1b;           /* key hints */
+      --border: #242424;
+      --border2: #2e2e2e;
+      --text: #e0e0e0;
+      --text-dim: #9e9e9e;       /* descriptions */
+      --muted: #636363;
+      --faint: #424242;
+      --code-comment: #7d7d7d;
+      --map-line: #8c8c8c;
+      /* r, g, b of translucent overlays, used as rgba(var(--overlay), alpha) */
+      --overlay: 20, 20, 20;
+      --overlay-deep: 12, 12, 12;
+      --overlay-label: 27, 27, 27;
+      --divider: rgba(36, 36, 36, 0.6);
+      --slider-track: rgba(255, 255, 255, 0.1);
       --slider-tint: #968971;
       --slider-tint-active: #b0a48e;
       --accent: #dda43c;
@@ -33,8 +57,14 @@
       --amber: #f59e0b;
       --red: #ef4444;
       --cyan: #06b6d4;
-      --pad-empty: #111620;
-      --pad-border: #1c2535;
+      --pad-empty: #151515;
+      --pad-border: #242424;
+      --grid-panel: #111111;
+      --grid-panel-border: #242424;
+      --pad-radius: 3px;
+      --keycap: #1d1d1d;          /* Mechatrellis keys */
+      --keycap-edge: #2c2c2c;
+      --led-off: #2e2e2e;
       --font-mono: 'JetBrains Mono', monospace;
       --font-ui: 'Inter', sans-serif;
 
@@ -47,6 +77,80 @@
       /* Sidebar tokens */
       --sidebar-width: 320px;
     }
+
+    /* Pad corners (View menu) */
+    :root[data-corners="square"] { --pad-radius: 0; }
+    :root[data-corners="round"]  { --pad-radius: calc(var(--pad-size) * 0.3); }
+
+    /* Light theme (View menu). The grid keeps its dark panel and pads, like the hardware:
+       lit pads glow against dark. Accent colours get darker shades to read on white. */
+    :root[data-theme="light"] {
+      --bg: #f2f2f2;
+      --surface: #ffffff;
+      --surface2: #ebebeb;
+      --surface-deep: #fafafa;
+      --card: #f7f7f7;
+      --hover: #e6e6e6;
+      --chip: #ececec;
+      --border: #d9d9d9;
+      --border2: #c7c7c7;
+      --text: #1c1c1c;
+      --text-dim: #555555;
+      --muted: #767676;
+      --faint: #b0b0b0;
+      --code-comment: #8a8a8a;
+      --map-line: #8c8c8c;
+      --overlay: 250, 250, 250;
+      --overlay-deep: 255, 255, 255;
+      --overlay-label: 240, 240, 240;
+      --divider: rgba(0, 0, 0, 0.08);
+      --slider-track: rgba(0, 0, 0, 0.15);
+      --accent: #b8800f;
+      --accent-glow: #8a5f0b;
+      --green: #15803d;
+      --amber: #b45309;
+      --red: #dc2626;
+      --cyan: #0e7490;
+      --grid-panel: #cfcfcf;
+      --grid-panel-border: #bcbcbc;
+      --pad-empty: #b4b4b4;
+      --pad-border: #9a9a9a;
+      --keycap: #e6e6e6;
+      --keycap-edge: #c2c2c2;
+      --led-off: #a0a0a0;
+    }
+    :root[data-theme="light"] .tok-s { color: #3d7a37; }
+    /* Light theme: unlit pads and keys have a texture (fine noise, a highlight at the top,
+       a shade at the bottom), lit ones are smooth, so lit and unlit stay apart even when a
+       white LED is only a little lighter than the key. */
+    :root[data-theme="light"] {
+      --pad-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.26 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    :root[data-theme="light"]:not([data-keys="mech"]) .pad:not([data-lit]) {
+      background-image:
+        radial-gradient(ellipse at 50% 25%, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 65%),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.1)),
+        var(--pad-noise);
+    }
+    /* A lit pad keeps a clear edge, or a dim one blends into the light panel */
+    :root[data-theme="light"]:not([data-keys="mech"]) .pad[data-lit] {
+      border-color: var(--pad-border);
+    }
+    /* On a light key, a white LED dot needs an edge to be seen */
+    :root[data-theme="light"][data-keys="mech"] .pad::before {
+      outline: 1px solid rgba(0, 0, 0, 0.3);
+    }
+    :root[data-theme="light"][data-keys="mech"] .pad,
+    :root[data-theme="light"][data-keys="mech"] .pad[data-lit] {
+      background-image:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.35), rgba(0, 0, 0, 0.08)),
+        var(--pad-noise);
+    }
+    /* The second grid dims with opacity; on light grey, less of it keeps it readable */
+    :root[data-theme="light"] .map-ghost-wrap { opacity: 0.7; }
+    :root[data-theme="light"] body.map-mode .map-ghost-wrap { opacity: 0.85; }
+    :root[data-theme="light"] .map-ghost-wrap:hover { opacity: 1; }
+    :root[data-theme="light"] .tok-k { color: #7c3aed; }
 
     *,
     *::before,
@@ -159,7 +263,7 @@
 
     .btn:hover {
       border-color: var(--accent);
-      background: #1a2030;
+      background: var(--hover);
     }
 
     .btn.primary {
@@ -214,6 +318,14 @@
     }
     .grid-preset-menu button:hover { background: var(--surface); }
     .grid-preset-menu button.active { color: var(--accent); }
+    .view-menu { min-width: 130px; }
+    .view-menu .menu-heading {
+      padding: 6px 10px 2px;
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
 
     /* Nav Links */
     .topbar-links {
@@ -262,7 +374,7 @@
 
     .file-pick-label:hover {
       border-color: var(--accent);
-      background: #1a2030;
+      background: var(--hover);
     }
 
     input[type=file] {
@@ -278,7 +390,7 @@
       border-radius: 20px;
       font-size: 11px;
       font-weight: 500;
-      background: #0c1520;
+      background: var(--card);
       border: 1px solid var(--border);
       font-family: var(--font-mono);
       min-width: 180px;
@@ -422,7 +534,7 @@
     }
     .map-frame.hl { opacity: 1; border-style: solid; }
     .map-label {
-      background: rgba(8, 12, 20, 0.92);
+      background: rgba(var(--overlay-deep), 0.92);
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 7px;
       padding: 8px 10px;
@@ -478,7 +590,7 @@
       white-space: nowrap;
       z-index: 62;
       line-height: 1;
-      background: rgba(20, 28, 40, 0.5);
+      background: rgba(var(--overlay-label), 0.5);
       border: 1px solid var(--border2);
       border-radius: 4px;
       padding: 2px 5px;
@@ -964,10 +1076,10 @@
     }
 
     .grid-panel {
-      background: var(--surface);
+      background: var(--grid-panel);
       padding: var(--pad-size);
       border-radius: 14px;
-      border: 1px solid var(--border);
+      border: 1px solid var(--grid-panel-border);
       box-shadow: 0 20px 60px #000a, inset 0 1px 0 rgba(255, 255, 255, 0.03);
       max-width: 95vw;
       max-height: 85vh;
@@ -987,7 +1099,7 @@
     .pad {
       background: var(--pad-empty);
       border: 1px solid var(--pad-border);
-      border-radius: 3px;
+      border-radius: var(--pad-radius);
       cursor: pointer;
       transition: background 50ms linear, box-shadow 50ms linear, border-color 50ms linear;
       user-select: none;
@@ -1002,9 +1114,48 @@
       transform: scale(0.94);
     }
 
-    .pad.lit {
-      /* Dynamic brightness set via JS */
-      filter: brightness(1.5);
+    /* A lit pad: the renderer sets --led (its colour), --led-glow and --led-edge */
+    .pad[data-lit] {
+      background: var(--led);
+      box-shadow: var(--led-glow);
+      border-color: var(--led-edge);
+    }
+
+    /* Mechatrellis keys (View menu): dark keycaps close together, with a small LED at the top */
+    :root[data-keys="mech"] #grid-container,
+    :root[data-keys="mech"] .map-ghost-grid {
+      gap: calc(var(--pad-gap) * 0.35);
+    }
+    :root[data-keys="mech"] .pad,
+    :root[data-keys="mech"] .pad[data-lit] {
+      background: var(--keycap);
+      border-color: var(--keycap-edge);
+      box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+    /* A lit key: the LED's light shows at the edges and spills out underneath */
+    :root[data-keys="mech"] .pad[data-lit] {
+      border-color: var(--led-edge);
+      box-shadow:
+        inset 0 -2px 0 rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 0 calc(var(--pad-size) * 0.22) var(--led-edge),
+        0 calc(var(--pad-size) * 0.06) calc(var(--pad-size) * 0.16) var(--led-edge);
+    }
+    :root[data-keys="mech"] .pad::before {
+      content: '';
+      position: absolute;
+      top: 13%;
+      left: 50%;
+      width: 26%;
+      aspect-ratio: 1;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: var(--led-off);
+      pointer-events: none;
+    }
+    :root[data-keys="mech"] .pad[data-lit]::before {
+      background: var(--led);
+      box-shadow: 0 0 calc(var(--pad-size) * 0.08) var(--led), 0 0 calc(var(--pad-size) * 0.4) var(--led);
     }
 
     .pad.locked::after {
@@ -1072,13 +1223,13 @@
     }
 
     .hint-key {
-      background: #141c28;
+      background: var(--chip);
       border: 1px solid var(--border2);
       border-radius: 4px;
       padding: 1px 6px;
       font-family: var(--font-mono);
       font-size: 10px;
-      color: #8aa0c0;
+      color: var(--text-dim);
     }
 
     /* ── SIDE PANEL ─────────────────────────────────────────────────── */
@@ -1088,11 +1239,15 @@
     }
 
     .side-tab {
-      flex: 1;
-      padding: 10px 6px;
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding: 10px 3px;
       text-align: center;
-      font-size: 11px;
-      letter-spacing: 1px;
+      font-size: 10.5px;
+      letter-spacing: 0.3px;
       text-transform: uppercase;
       color: var(--muted);
       cursor: pointer;
@@ -1131,7 +1286,7 @@
 
     /* Docs panel */
     .doc-script-meta {
-      background: #0c1520;
+      background: var(--card);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 10px 12px;
@@ -1160,6 +1315,177 @@
 
     .doc-section {
       margin-bottom: 18px;
+    }
+
+    /* Sound tab: drum kit and synth. It can pop out into a floating window. */
+    .snd-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .snd-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 12px;
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .snd-controls label,
+    .snd-row label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .snd-controls select,
+    .snd-row select {
+      min-width: 0;
+      padding: 2px 4px;
+      font-size: 11px;
+    }
+    .snd-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 72px 64px auto;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+    }
+    .snd-row input[type=range] { width: 64px; }
+    .snd-voice {
+      justify-content: flex-start;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: background 0.08s, color 0.08s;
+    }
+    .snd-voice.flash { background: var(--accent); color: #000; }
+    .snd-notes {
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      white-space: nowrap;
+    }
+    .snd-help {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .snd-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+    .snd-tabs .btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .snd-group {
+      margin-bottom: 14px;
+    }
+    .snd-group .doc-section-title {
+      margin-bottom: 6px;
+    }
+    .snd-sliders {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 4px 10px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .snd-sliders input[type=range] { width: 100%; }
+    .snd-val {
+      min-width: 44px;
+      text-align: right;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+    .snd-name {
+      width: 110px;
+      padding: 3px 6px;
+      font-size: 11px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+    }
+    .adsr-edit {
+      width: 100%;
+      height: 96px;
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface-deep);
+      touch-action: none;
+      cursor: pointer;
+    }
+    .adsr-readout {
+      margin-top: 4px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .float-window {
+      position: fixed;
+      z-index: 1100;
+      top: 120px;
+      right: 40px;
+      width: 380px;
+      height: 520px;
+      min-width: 260px;
+      min-height: 160px;
+      resize: both;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    .float-window[hidden],
+    #panel-sound [hidden],
+    #sound-window [hidden] { display: none !important; }
+    .float-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: move;
+      user-select: none;
+      touch-action: none;
+    }
+    .float-body {
+      flex: 1;
+      overflow: auto;
+      padding: 12px;
+      font-size: 12px;
+    }
+    @media (max-width: 900px) {
+      #sound-popout { display: none; }
+      /* On a phone the window only opens from Full View; it takes most of the screen */
+      .float-window {
+        left: 8px !important;
+        right: 8px !important;
+        top: 56px !important;
+        width: auto !important;
+        height: 70vh !important;
+        resize: none;
+      }
     }
 
     .doc-section-title {
@@ -1200,7 +1526,7 @@
     }
 
     .fn-item {
-      background: #0c1520;
+      background: var(--card);
       border: 1px solid var(--border);
       border-radius: 6px;
       padding: 8px 10px;
@@ -1216,7 +1542,7 @@
 
     .fn-desc {
       font-size: 11px;
-      color: #8aa0c0;
+      color: var(--text-dim);
     }
 
     .fn-param {
@@ -1271,7 +1597,7 @@
       font-family: var(--font-mono);
       font-size: 11px;
       color: var(--text);
-      background: #060d14;
+      background: var(--surface-deep);
       border: 1px solid var(--border);
       border-radius: 6px;
       padding: 12px;
@@ -1305,6 +1631,221 @@
       color: var(--muted);
       font-size: 12px;
       line-height: 1.8;
+    }
+
+    /* Source panel: Lua source with line numbers and colours, or an editor.
+       It fills the panel height and scrolls by itself, so its scrollbars stay in view. */
+    #panel-source.active {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .src-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 10px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .src-info {
+      flex: 1 1 100%;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .src-toolbar label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .src-err-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      font: inherit;
+      color: var(--red);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .src-code,
+    .src-edit-wrap {
+      flex: 1;
+      min-height: 0;
+      background: var(--surface-deep);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+
+    .src-code,
+    .src-edit-layer {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.6;
+      tab-size: 2;
+      font-variant-ligatures: none;
+    }
+
+    .src-code {
+      position: relative;
+      padding: 8px 0;
+      overflow: auto;
+    }
+
+    /* Editor: a transparent textarea over a coloured copy of its text. Both layers
+       have the same box, font and scrollbars, so the text lines up. */
+    .src-edit-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .src-edit-wrap:focus-within {
+      border-color: var(--cyan);
+    }
+
+    .src-edit-layer {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      border: 0;
+      overflow: scroll;
+      white-space: pre;
+      overflow-wrap: normal;
+    }
+
+    .src-edit-wrap.wrap .src-edit-layer {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    /* Coloured copy with line numbers. Extra padding at the end means it can always
+       scroll as far as the textarea, so the two never come apart at the edges. */
+    .src-edit-hl {
+      padding: 8px 0 48px;
+      color: var(--text);
+      pointer-events: none;
+      scrollbar-color: transparent transparent; /* keeps the space, hides the bars */
+    }
+
+    .src-edit-wrap:not(.wrap) .src-edit-hl .src-lines {
+      padding-right: 48px;
+    }
+
+    /* Text starts right of the line-number gutter, as in .src-line */
+    .src-editor {
+      padding: 8px 10px 8px calc(4ch + 24px);
+      color: transparent;
+      background: transparent;
+      caret-color: var(--text);
+      resize: none;
+      outline: none;
+    }
+
+    /* Change flags over the gutter: click one to restore that change */
+    .src-flags {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 7px;
+      overflow: hidden;
+      z-index: 1;
+      pointer-events: none; /* only the flags take clicks; the rest goes to the editor */
+    }
+
+    .src-flags-inner {
+      position: relative;
+    }
+
+    .src-flag {
+      pointer-events: auto;
+      position: absolute;
+      left: 1px;
+      width: 4px;
+      min-height: 4px;
+      padding: 0;
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .src-flag:hover {
+      width: 6px;
+    }
+
+    .src-flag.chg { background: var(--amber); }
+    .src-flag.add { background: var(--green); }
+    .src-flag.del { background: var(--red); height: 4px; }
+
+    .src-changes {
+      color: var(--amber);
+    }
+
+    .src-editor::selection {
+      color: transparent;
+      background: rgba(6, 182, 212, 0.3);
+    }
+
+    .src-lines {
+      width: max-content;
+      min-width: 100%;
+      white-space: pre;
+    }
+
+    .src-code.wrap .src-lines,
+    .src-edit-wrap.wrap .src-lines {
+      width: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    /* Gutter: 4ch + 24px = number box (7px flag space, 4ch digits, 6px, 1px border) + 10px.
+       Wrapped lines continue right of it, where the textarea's text starts too. */
+    .src-line {
+      padding: 0 10px 0 calc(4ch + 24px);
+      text-indent: calc(-4ch - 24px);
+    }
+
+    .src-line::before {
+      content: attr(data-n);
+      display: inline-block;
+      width: calc(4ch + 14px);
+      margin-right: 10px;
+      padding: 0 6px 0 7px;
+      text-indent: 0;
+      text-align: right;
+      color: var(--muted);
+      border-right: 1px solid var(--border);
+      user-select: none;
+    }
+
+    /* Lines changed from the loaded script (view mode; the editor has clickable flags) */
+    .src-line.chg::before { box-shadow: inset 4px 0 0 var(--amber); }
+    .src-line.add::before { box-shadow: inset 4px 0 0 var(--green); }
+    .src-line.del::before { box-shadow: inset 0 2px 0 var(--red); }
+
+    #panel-source [hidden] { display: none !important; }
+
+    .tok-c { color: var(--code-comment); font-style: italic; }
+    .tok-s { color: #8fc98a; }
+    .tok-n { color: var(--amber); }
+    .tok-k { color: #c49cf0; }
+    .tok-a { color: var(--cyan); }
+
+    .src-line.err {
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    .src-line.err::before {
+      color: var(--red);
     }
 
     .empty-state strong {
@@ -1415,7 +1956,7 @@
       align-items: center;
       gap: 12px;
       z-index: 1000;
-      background: rgba(14, 20, 30, 0.4);
+      background: rgba(var(--overlay), 0.4);
       backdrop-filter: blur(10px);
       padding: 8px 12px;
       border-radius: 60px;
@@ -1463,7 +2004,7 @@
         position: fixed;
         right: 30px; 
         top: calc(95px + env(safe-area-inset-top, 0px)); /* Flow below the icon bar */
-        background: rgba(14, 20, 30, 0.96);
+        background: rgba(var(--overlay), 0.96);
         backdrop-filter: blur(15px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 14px;
@@ -1491,7 +2032,7 @@
         max-height: calc(100vh - 100px);
         overflow-y: auto;
         z-index: 1001;
-        background: rgba(14, 20, 30, 0.98);
+        background: rgba(var(--overlay), 0.98);
         backdrop-filter: blur(15px);
         border: 1px solid rgba(255, 255, 255, 0.12);
         box-shadow: 0 15px 50px rgba(0,0,0,0.8);
@@ -1534,7 +2075,7 @@
       width: 100%;
       height: 4px;
       cursor: pointer;
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--slider-track);
       border-radius: 2px;
     }
 
@@ -1542,7 +2083,7 @@
       width: 100%;
       height: 4px;
       cursor: pointer;
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--slider-track);
       border-radius: 2px;
     }
 
@@ -1618,7 +2159,7 @@
         right: 30px;
         transform: translateY(-50%);
         flex-direction: column-reverse; /* Swap icons order for natural thumb reach */
-        background: rgba(14, 20, 30, 0.6);
+        background: rgba(var(--overlay), 0.6);
         gap: 16px;
         padding: 16px 10px;
       }
@@ -1753,7 +2294,7 @@
       gap: 4px 8px;
       align-items: baseline;
       padding: 3px 10px 3px 10px;
-      border-bottom: 1px solid rgba(28,37,53,0.6);
+      border-bottom: 1px solid var(--divider);
       /* No animation/transition — too expensive at MIDI event rates */
     }
     .mm-entry:hover { background: rgba(255,255,255,0.03); }
@@ -1774,9 +2315,9 @@
     .mm-dir.out { color: var(--green); }
     .mm-type { font-size: 11px; }
     .mm-type.note-on  { color: var(--green); }
-    .mm-type.note-off { color: #4a6080; }
+    .mm-type.note-off { color: var(--muted); }
     .mm-type.cc       { color: var(--amber); }
-    .mm-type.clock    { color: #33445a; }
+    .mm-type.clock    { color: var(--faint); }
     .mm-type.other    { color: var(--muted); }
     .mm-bytes {
       font-size: 9px;
@@ -1796,7 +2337,7 @@
     }
     .mm-counter-note  { color: var(--green); }
     .mm-counter-cc    { color: var(--amber); }
-    .mm-counter-clock { color: #33445a; }
+    .mm-counter-clock { color: var(--faint); }
     .mm-counter-in    { color: var(--cyan); }
     .mm-counter-out   { color: var(--green); }
     #panel-midi {
@@ -1897,7 +2438,7 @@
         </select>
         <button class="btn primary" id="btn-load" title="Load selected script">▶ Load</button>
         <button class="btn" id="btn-download-src" title="Download source file (with all comments)" disabled>↓ Source</button>
-        <button class="btn" id="btn-download-dev" title="Download minified for device (strips comments, checks Lua 5.1)" disabled>↓ Device</button>
+        <button class="btn" id="btn-download-dev" title="Download minified for device (strips comments, checks for code the device's Lua 5.5 won't load)" disabled>↓ Device</button>
       </div>
       <label class="file-pick-label" title="Open a .lua file from disk">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1954,12 +2495,30 @@
           Live Manual
         </label>
         <button class="btn" id="btn-dual-view" title="Toggle secondary screen (dual view)">⊞ Dual View</button>
-        <button class="btn" id="btn-fullscreen" title="Toggle Fullscreen (F)">
+        <button class="btn" id="btn-fullscreen" title="Full view: only the grid (Esc leaves)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
           </svg>
           Full View
         </button>
+        <div class="grid-preset-wrap" id="view-menu-wrap">
+          <button class="btn" id="btn-view-menu" title="Theme and pad shape">◐ View ▾</button>
+          <div class="grid-preset-menu view-menu" id="view-menu">
+            <div class="menu-heading">Theme</div>
+            <button data-theme-option="dark">Dark</button>
+            <button data-theme-option="light">Light</button>
+            <div class="menu-heading">Grid</div>
+            <button data-grid-option="colour" title="NeoTrellis: the script can use colour">Colour</button>
+            <button data-grid-option="mono" title="Like a monome grid: grid_led_rgb, grid_color and grid_color_intensity don't exist, so the script runs its monochrome fallback">Monochrome</button>
+            <div class="menu-heading">Keys</div>
+            <button data-keys-option="neotrellis" title="The whole pad lights up">NeoTrellis</button>
+            <button data-keys-option="mech" title="Dark keys close together, with an LED at the top">Mechatrellis</button>
+            <div class="menu-heading">Pad corners</div>
+            <button data-corners-option="square">Square</button>
+            <button data-corners-option="slight">Slightly round</button>
+            <button data-corners-option="round">Round</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1981,10 +2540,10 @@
     <!-- Emulator pane -->
     <div class="emulator-pane">
 
-      <!-- Sound Module -->
-      <div id="sound-module-container" class="minimized">
+      <!-- Sound quick bar: volume, mute, and the way to the Sound controls -->
+      <div id="sound-module-container">
         <div class="sound-module-header">
-          <span>Sound Module</span>
+          <span>Sound</span>
           <div class="header-volume-control">
             <label>Vol <input type="range" id="min-vol-slider" min="0" max="100" value="70"></label>
           </div>
@@ -1992,41 +2551,9 @@
             <button class="btn sm" id="sound-toggle-btn" title="Mute/Unmute Sound" style="padding: 4px;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="ico-speaker"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
             </button>
-            <button class="btn sm" id="minimize-sound-btn" title="Expand">+</button>
+            <button class="btn sm" id="sound-stop-btn" title="Stop all notes: All Notes Off on every MIDI channel" style="padding: 4px 7px;">■</button>
+            <button class="btn sm" id="sound-open-btn" title="Synths, drums and effects">⚙ Sound</button>
           </div>
-        </div>
-        <div class="sound-module-body">
-            <div class="sm-part adsr-container">
-                <h5>ADSR</h5>
-                <div class="adsr-controls">
-                    <canvas id="adsr-canvas" width="180" height="70"></canvas>
-                    <div class="adsr-sliders">
-                        <label>A <input type="range" id="attack-slider" min="0" max="100" value="5"></label>
-                        <label>D <input type="range" id="decay-slider" min="0" max="100" value="10"></label>
-                        <label>S <input type="range" id="sustain-slider" min="0" max="100" value="60"></label>
-                        <label>R <input type="range" id="release-slider" min="10" max="200" value="80"></label>
-                    </div>
-                </div>
-            </div>
-            <div class="sm-part">
-                <h5>Delay</h5>
-                <label>Amount <input type="range" id="delay-slider" min="0" max="100" value="20"></label>
-                <label>Time <input type="range" id="delay-time-slider" min="0" max="100" value="25"></label>
-                <label>Feedback <input type="range" id="delay-feedback-slider" min="0" max="100" value="30"></label>
-            </div>
-            <div class="sm-part">
-                <h5>Reverb</h5>
-                <label>Amount <input type="range" id="reverb-slider" min="0" max="100" value="20"></label>
-                <label>Decay <input type="range" id="reverb-decay-slider" min="0" max="100" value="50"></label>
-            </div>
-            <div class="sm-part">
-                <h5>Filter</h5>
-                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                  Enabled <input type="checkbox" id="filter-enable-check" checked style="width:14px; height:14px; accent-color:var(--accent);">
-                </label>
-                <label>CC # <input type="number" id="filter-cc-num" min="0" max="127" value="74" style="width:50px; background:var(--surface2); border:1px solid var(--border); color:var(--text); font-size:11px; padding:2px 4px; border-radius:4px;"></label>
-                <label>Level <input type="range" id="filter-slider" min="0" max="100" value="100"><span id="filter-val" style="min-width:32px;font-family:var(--font-mono);font-size:10px;color:var(--cyan);margin-left:4px;">100 <span style="color:var(--muted);font-size:9px;">/ —</span></span></label>
-            </div>
         </div>
       </div>
       <style>
@@ -2036,77 +2563,21 @@
             border-radius: 8px;
             padding: 8px;
             width: 100%;
-            max-width: 800px; /* Adjusted for wider layout */
+            max-width: 800px;
         }
         .sound-module-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
             font-size: 10px;
             color: var(--muted);
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 8px;
         }
         .sound-module-header .header-controls {
             display: flex;
             gap: 8px;
-        }
-        .sound-module-body {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            align-items: flex-start;
-        }
-        .sm-part {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-          background: var(--surface2);
-          padding: 8px 12px;
-          border-radius: 8px;
-          border: 1px solid var(--border2);
-        }
-        .sm-part h5 {
-          font-size: 10px;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-          color: var(--muted);
-          margin-bottom: 4px;
-        }
-        .sm-part label {
-          font-size: 11px;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          color: var(--muted);
-        }
-        /* ADSR specific styles */
-        .adsr-container {
-            padding: 8px;
-        }
-        .adsr-controls {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        #adsr-canvas {
-          border: 1px solid var(--border);
-          border-radius: 4px;
-          background: var(--bg);
-        }
-        .adsr-sliders {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-        .adsr-sliders label {
-          gap: 6px;
-        }
-        /* Global header volume styles */
-        .sound-module-header .header-volume-control {
-            display: flex;
-            align-items: center;
         }
         .header-volume-control label {
             font-size: 11px;
@@ -2115,24 +2586,13 @@
             gap: 6px;
             color: var(--muted);
         }
-
-        /* Fullscreen Modal Styling */
         body.fullscreen-mode #sound-module-container {
             display: none;
             z-index: 1001;
             animation: fadeIn 0.2s ease;
         }
-
         body.fullscreen-mode #sound-module-container.fs-open {
             display: block !important;
-        }
-
-        /* Override body flow when minimized/fullscreen */
-        #sound-module-container.minimized .sound-module-body {
-            display: none;
-        }
-        #sound-module-container.minimized .sound-module-header {
-            margin-bottom: 0;
         }
       </style>
 
@@ -2177,8 +2637,10 @@
         <div class="side-tab active" data-tab="docs" id="tab-docs">Docs</div>
         <div class="side-tab" data-tab="guide" id="tab-guide">Guide</div>
         <div class="side-tab" data-tab="state" id="tab-state">State</div>
+        <div class="side-tab" data-tab="source" id="tab-source">Source</div>
         <div class="side-tab" data-tab="console" id="tab-console">Console</div>
         <div class="side-tab" data-tab="midi" id="tab-midi">MIDI</div>
+        <div class="side-tab" data-tab="sound" id="tab-sound">Sound</div>
       </div>
       <div class="side-content">
 
@@ -2197,6 +2659,8 @@
             Select a script from the dropdown above, or open a <code>.lua</code> file from disk.
             <br><br>
             Documentation will be extracted automatically from<br>LDoc-style comments in the source.
+            <br><br>
+            Writing your own script? Pick <strong>Write your own → Script template</strong> in the dropdown.
           </div>
         </div>
 
@@ -2205,6 +2669,47 @@
           <div class="empty-state">
             <strong>No State Data</strong>
             Load a script to see extracted state variable defaults.
+          </div>
+        </div>
+
+        <!-- Source panel: the loaded Lua source, which can be edited and run -->
+        <div class="side-panel" id="panel-source">
+          <div class="src-toolbar">
+            <span class="src-info" id="src-info">No script loaded</span>
+            <span class="src-changes" id="src-changes" hidden></span>
+            <button type="button" class="src-err-btn" id="src-err" hidden></button>
+            <label title="Wrap long lines"><input type="checkbox" id="src-wrap"> Wrap</label>
+            <button class="btn sm" id="src-edit" title="Edit the script here and run it">✎ Edit</button>
+            <button class="btn sm primary" id="src-run" title="Run the edited script (Ctrl+Enter)" hidden>▶ Run</button>
+            <label id="src-auto-label" title="Run again 1 s after you stop typing" hidden><input type="checkbox" id="src-auto"> Auto-run</label>
+            <button class="btn sm" id="src-restore-all" title="Put back the script as it was loaded (Ctrl+Z undoes)" hidden>↺ Restore all</button>
+          </div>
+          <div class="src-code" id="src-view">
+            <div class="empty-state">
+              <strong>No Script Loaded</strong>
+              The Lua source of the loaded script shows here.
+            </div>
+          </div>
+          <div class="src-edit-wrap" id="src-edit-wrap" hidden>
+            <pre class="src-edit-layer src-edit-hl" id="src-edit-hl" aria-hidden="true"></pre>
+            <textarea class="src-edit-layer src-editor" id="src-editor" spellcheck="false" autocomplete="off" wrap="off"></textarea>
+            <div class="src-flags" id="src-flags"><div class="src-flags-inner" id="src-flags-inner"></div></div>
+          </div>
+        </div>
+
+        <!-- Sound panel: drum kit and synth; ⧉ moves the controls into a floating window -->
+        <div class="side-panel" id="panel-sound">
+          <div class="snd-head">
+            <span class="doc-section-title" style="border: 0; margin: 0; padding: 0;">Sound</span>
+            <button class="btn sm" id="sound-popout" title="Open in its own window, to move and resize">⧉ Pop out</button>
+          </div>
+          <div class="empty-state" id="sound-docked-note" hidden>
+            The sound controls are in their own window.<br><br>
+            <button class="btn sm" id="sound-dock-here">Bring them back here</button>
+          </div>
+          <div id="sound-ui">
+            <div class="snd-tabs" id="snd-tabs"></div>
+            <div id="snd-pane"></div>
           </div>
         </div>
 
@@ -2272,7 +2777,7 @@
     <div id="hot-indicator" style="display:none;align-items:center;gap:6px;font-size:11px;color:#06b6d4">
       <span class="status-dot hot"></span> Hot-reload active
     </div>
-    <span style="color:#1c2535">Monome Grid Emulator · Fengari Lua 5.3</span>
+    <span style="color:var(--border)">Monome Grid Emulator · Fengari Lua 5.3</span>
   </footer>
 
   <script type="module">
@@ -2280,12 +2785,18 @@
     import { LuaLoader } from './engine/lua-loader.js';
     import { LuaMinifier } from './engine/lua-minifier.js';
     import { ScriptImporter } from './engine/script-importer.js';
+    import { SYNTH_MODELS } from './engine/synth.js';
+    import { SYNTH_PRESETS } from './engine/sound.js';
 
     // ─── STATE ─────────────────────────────────────────────────────────────────
     let _pendingReadme = null;      // set before _execute so onScriptLoad can pick it up
+    let _pendingReadmeBase = null;  // URL that relative links and images in _pendingReadme resolve against
+    let _readmeFor = null;          // script whose Guide is showing; a re-run of it keeps the Guide
     let _pendingImportedOrientation = null; // inferred from external repo source/README before _execute
     let _customScriptActive = false; // true when loaded from disk or external repo (not bundled)
     const _manifestMap = new Map(); // file → manifest entry (for readme lookup)
+    let _externalScripts = [];      // scripts/external.json: scripts loaded from their own repos
+    let _externalContact = null;    // where authors can ask to be removed from that list
 
     // ─── EXTERNAL SCRIPTS — tehn (monome) ──────────────────────────────────────
     const TEHN_RAW_BASE = 'https://codeberg.org/tehn/iii-scripts/raw/branch/main/';
@@ -2411,6 +2922,16 @@
     // emulator matches real hardware appearance (20% → ~70, 100% → 255).
     function ledG(v) { return v === 0 ? 0 : Math.round(Math.pow(v / 255, 0.55) * 255); }
 
+    // Light theme: an LED behind a light key tints it rather than darkening it. The LED's
+    // hue at full strength is mixed into the key's colour by how bright the LED is.
+    function ledOnLightKey(r, g, b) {
+      // the unlit pad (--pad-empty), or the unlit LED dot on a Mechatrellis key (--led-off)
+      const keyOff = document.documentElement.dataset.keys === 'mech' ? 160 : 180;
+      const m = Math.max(r, g, b);
+      const a = m / 255;
+      return [r, g, b].map(c => Math.round(keyOff + ((c * 255) / m - keyOff) * a));
+    }
+
     // All map-overlay state declared before MonomeAPI/LuaLoader to avoid TDZ
     let _ghostPadEls       = [];
     let _minimapCtxs       = {};
@@ -2427,6 +2948,7 @@
       onOutOfBounds: () => { showOutOfBoundsWarning(); },
       onMidiMonitor: (dir, bytes, ts) => { midiMonitorPush(dir, bytes, ts); },
       onLedUpdate: (frame, cols, rows, screenName = 'live') => {
+        const lightKeys = document.documentElement.dataset.theme === 'light';
         // Route to the appropriate pad array based on which screen just refreshed.
         // Dual-view: live → main pads, alt → ghost pads.
         // Single-view: whichever screen is active (_singleViewScreen) → main pads; others → minimap only.
@@ -2445,18 +2967,17 @@
           const visualIdx = _logicalToVisualIdx[i] ?? i;
           const pad = padEls[visualIdx];
           if (!pad) continue;
+          // The look (whole pad lit, or an LED on a key) is up to the CSS for the chosen keys
           if (r === 0 && g === 0 && b === 0) {
-            pad.style.background = 'var(--pad-empty)';
-            pad.style.boxShadow = 'none';
-            pad.style.borderColor = 'var(--pad-border)';
+            delete pad.dataset.lit;
           } else {
             r = ledG(r); g = ledG(g); b = ledG(b);
-            pad.style.background = `rgb(${r},${g},${b})`;
+            if (lightKeys) [r, g, b] = ledOnLightKey(r, g, b);
             const lum = r * 0.21 + g * 0.72 + b * 0.07;
-            pad.style.boxShadow = lum > 15
-              ? `0 0 ${Math.min(12, lum / 8)}px rgba(${r},${g},${b},0.6)`
-              : 'none';
-            pad.style.borderColor = `rgba(${r},${g},${b},0.35)`;
+            pad.dataset.lit = '';
+            pad.style.setProperty('--led', `rgb(${r},${g},${b})`);
+            pad.style.setProperty('--led-glow', lum > 15 ? `0 0 ${Math.min(12, lum / 8)}px rgba(${r},${g},${b},0.6)` : 'none');
+            pad.style.setProperty('--led-edge', `rgba(${r},${g},${b},0.35)`);
           }
         }
 
@@ -2499,97 +3020,29 @@
       },
     });
 
-    // Audio slider bindings
+    // ─── SOUND QUICK BAR: volume, mute, ⚙ Sound ──────────────────────────────
     const minVolSlider = document.getElementById('min-vol-slider');
+    minVolSlider.addEventListener('input', e => api.sound.setVolume(e.target.value / 100));
 
-    function syncVolume(value) {
-        const volume = value / 100;
-        api.volume = volume;
-        if (api._masterGain && !isMuted) {
-            api._masterGain.gain.value = volume;
-        }
-        if (minVolSlider) minVolSlider.value = value;
-    }
-
-    if (minVolSlider) minVolSlider.addEventListener('input', e => syncVolume(e.target.value));
-
-
-    const adsrCanvas = document.getElementById('adsr-canvas');
-    const adsrCtx = adsrCanvas.getContext('2d');
-    const attackSlider = document.getElementById('attack-slider');
-    const decaySlider = document.getElementById('decay-slider');
-    const sustainSlider = document.getElementById('sustain-slider');
-    const releaseSlider = document.getElementById('release-slider');
-
-    function drawAdsrCanvas() {
-        const w = adsrCanvas.width;
-        const h = adsrCanvas.height;
-        const a = (attackSlider.value / 100) * 0.25; // 0-25% of width
-        const d = (decaySlider.value / 100) * 0.25; // 0-25% of width
-        const s = sustainSlider.value / 100;
-        const r = (releaseSlider.value / 100) * 0.5; // 0-50% of width
-
-        const totalTime = a + d + r;
-        const scaleX = w / totalTime;
-
-        adsrCtx.clearRect(0, 0, w, h);
-        const sliderColor = getComputedStyle(document.documentElement).getPropertyValue('--slider-tint');
-        adsrCtx.strokeStyle = sliderColor ? sliderColor.trim() : '#968971';
-        adsrCtx.lineWidth = 2;
-        adsrCtx.beginPath();
-        adsrCtx.moveTo(0, h);
-
-        // Attack
-        const ax = a * scaleX;
-        const ay = 0;
-        adsrCtx.lineTo(ax, ay);
-
-        // Decay
-        const dx = (a + d) * scaleX;
-        const dy = h * (1 - s);
-        adsrCtx.lineTo(dx, dy);
-
-        // Sustain
-        const sx = dx + 2; // a small line for sustain
-        adsrCtx.lineTo(sx, dy);
-        
-        // Release
-        const rx = sx + (r * scaleX);
-        const ry = h;
-        adsrCtx.lineTo(rx, ry);
-
-        adsrCtx.stroke();
-    }
-
-    attackSlider.addEventListener('input', e => {
-      api.adsr.attack = e.target.value / 100 * 2; // 0-2s
-      drawAdsrCanvas();
-    });
-    decaySlider.addEventListener('input', e => {
-      api.adsr.decay = e.target.value / 100 * 2; // 0-2s
-      drawAdsrCanvas();
-    });
-    sustainSlider.addEventListener('input', e => {
-      api.adsr.sustain = e.target.value / 100;
-      drawAdsrCanvas();
-    });
-    releaseSlider.addEventListener('input', e => {
-      api.adsr.release = e.target.value / 100 * 4; // 0-4s
-      drawAdsrCanvas();
-    });
-
-    drawAdsrCanvas();
-
-    // Sound module controls
     const soundModuleContainer = document.getElementById('sound-module-container');
-    const minimizeBtn = document.getElementById('minimize-sound-btn');
     const soundFsBtn = document.getElementById('btn-sound-fs');
     const zoomFsBtn = document.getElementById('btn-zoom-fs');
     const zoomFsModal = document.getElementById('fs-zoom-modal');
 
-    minimizeBtn.addEventListener('click', () => {
-        soundModuleContainer.classList.toggle('minimized');
-        minimizeBtn.textContent = soundModuleContainer.classList.contains('minimized') ? '+' : '--';
+    document.getElementById('sound-stop-btn').addEventListener('click', () => {
+      api.stopAllMidi();
+      setStatus('All notes stopped (All Notes Off sent on every MIDI channel)', 'info');
+    });
+
+    // ⚙ Sound: the Sound tab, or the Sound window in Full View (the side panel is hidden there)
+    document.getElementById('sound-open-btn').addEventListener('click', () => {
+      if (document.body.classList.contains('fullscreen-mode') || !soundWin.hidden) {
+        soundModuleContainer.classList.remove('fs-open');  // the window takes over from the quick bar
+        soundFsBtn.classList.remove('active');
+        popOutSound(true);
+      } else {
+        document.getElementById('tab-sound').click();
+      }
     });
 
     soundFsBtn.addEventListener('click', e => {
@@ -2623,9 +3076,11 @@
         toggleFullscreen();
     });
 
+    // Sound starts muted, matching the speaker icon; clicking the grid or the speaker unmutes
     let isMuted = true;
+    api.sound.setMuted(isMuted);
     let hasGridInteracted = false;
-    
+
     const SPEAKER_ON = '<path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>';
     const SPEAKER_OFF = '<path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line>';
 
@@ -2638,9 +3093,7 @@
 
     document.getElementById('sound-toggle-btn').addEventListener('click', e => {
         isMuted = !isMuted;
-        if (api._masterGain) {
-            api._masterGain.gain.value = isMuted ? 0 : api.volume;
-        }
+        api.sound.setMuted(isMuted);
         updateSoundIcons(isMuted);
         hasGridInteracted = true;
     });
@@ -2651,65 +3104,6 @@
             document.getElementById('sound-toggle-btn').click();
         }
     });
-
-    // FX slider bindings
-    document.getElementById('reverb-slider').addEventListener('input', e => {
-      const amount = e.target.value / 100;
-      api.reverb.amount = amount;
-      if (api._reverbGain) api._reverbGain.gain.value = amount;
-    });
-    document.getElementById('delay-slider').addEventListener('input', e => {
-      const amount = e.target.value / 100;
-      api.delay.amount = amount;
-      if (api._delayGain) api._delayGain.gain.value = amount;
-    });
-
-    // FX detail sliders
-    document.getElementById('reverb-decay-slider').addEventListener('input', e => {
-        const decay = e.target.value / 100 * 4; // 0-4s range
-        api.reverb.decay = decay;
-        if (api._reverbNode) api._generateReverbImpulse();
-    });
-    document.getElementById('delay-time-slider').addEventListener('input', e => {
-        const time = e.target.value / 100; // 0-1s range
-        api.delay.time = time;
-        if (api._delayNode) api._delayNode.delayTime.value = time;
-    });
-    document.getElementById('delay-feedback-slider').addEventListener('input', e => {
-        const feedback = e.target.value / 100 * 0.9; // 0-0.9 range
-        api.delay.feedback = feedback;
-        if (api._delayFeedback) api._delayFeedback.gain.value = feedback;
-    });
-
-    // Filter controls
-    const filterEnableCheck = document.getElementById('filter-enable-check');
-    const filterCcNum = document.getElementById('filter-cc-num');
-    const filterSlider = document.getElementById('filter-slider');
-
-    filterEnableCheck.addEventListener('change', e => {
-      api.filter.enabled = e.target.checked;
-    });
-    filterCcNum.addEventListener('change', e => {
-      api.filter.cc = parseInt(e.target.value) || 74;
-    });
-    const filterVal = document.getElementById('filter-val');
-    function updateFilterReadout(cutoff, rawVal) {
-      const pct = Math.floor(cutoff * 100);
-      const rawStr = rawVal !== undefined ? rawVal : Math.floor(cutoff * 127);
-      filterVal.innerHTML = `${pct}% <span style="color:var(--muted);font-size:9px;">/ ${rawStr}</span>`;
-    }
-
-    filterSlider.addEventListener('input', e => {
-      const val = e.target.value / 100;
-      api.setFilterCutoff(val);
-      updateFilterReadout(val);
-    });
-
-    // Handle incoming MIDI CC updates for the UI
-    api.onFilterUpdate = (cutoff, rawVal) => {
-      filterSlider.value = Math.floor(cutoff * 100);
-      updateFilterReadout(cutoff, rawVal);
-    };
 
     // ─── LUA LOADER ────────────────────────────────────────────────────────────
     const loader = new LuaLoader({
@@ -2741,8 +3135,12 @@
         renderDocs(docs);
         renderState(docs);
         renderHints(docs);
-        renderReadme(_pendingReadme);
+        // ↻ Reload, hot reload and running edited source re-run the same script: keep its Guide
+        if (_pendingReadme !== null || name !== _readmeFor) renderReadme(_pendingReadme, _pendingReadmeBase);
+        _readmeFor = name;
         _pendingReadme = null;
+        _pendingReadmeBase = null;
+        renderSource(loader.currentSource, name);
         setStatus(`✓ ${name} running`, 'success');
         _buildMapGroups(docs);
         _singleViewScreen = 'live'; // reset to live whenever a new script loads
@@ -2772,6 +3170,7 @@
       },
       onScriptError: (msg) => {
         setStatus(`Error: ${msg}`, 'error');
+        renderSource(loader.currentSource, loader.currentScriptName, msg);
       }
     });
 
@@ -2807,6 +3206,31 @@
         setDownloadEnabled(true);
       }
 
+      // External scripts from scripts/external.json: only names and links, each script is
+      // fetched from its author's repo when loaded
+      try {
+        const res = await fetch(`${BASE_URL}/scripts/external.json`);
+        if (res.ok) {
+          const data = await res.json();
+          _externalScripts = data.scripts || [];
+          _externalContact = data.contact || null;
+        }
+      } catch { _externalScripts = []; }
+      if (_externalScripts.length) {
+        const extGroup = document.createElement('optgroup');
+        extGroup.label = 'External scripts — by their authors, loaded from their repos';
+        _externalScripts.forEach((entry, i) => {
+          const opt = document.createElement('option');
+          opt.value = `ext:${i}`;
+          opt.textContent = `${entry.name} — ${entry.author}${entry.loader ? ' · loader' : ''}`;
+          opt.title = `${entry.description || ''} (by ${entry.author})`;
+          extGroup.appendChild(opt);
+        });
+        scriptSelect.appendChild(extGroup);
+      }
+
+      renderRecentGroup();
+
       // External scripts — tehn (monome) — fetched live from Codeberg
       const group = document.createElement('optgroup');
       group.label = 'external scripts — tehn (monome)';
@@ -2833,10 +3257,12 @@
           setStatus(`Grid set to ${mCols}×${mRows}${rotStr} from script manifest`, 'info');
         }
       }
+      _pendingReadmeBase = null;
       if (entry?.readme) {
         try {
           const res = await fetch(`${BASE_URL}/scripts/${entry.readme}`);
           if (res.ok) _pendingReadme = await res.text();
+          _pendingReadmeBase = new URL(`${BASE_URL}/scripts/${entry.readme}`, location.href).href;
         } catch { _pendingReadme = null; }
       } else {
         _pendingReadme = null;
@@ -2861,7 +3287,7 @@
           `*From the official monome iii-scripts repository. All credit to tehn.*`;
         _pendingImportedOrientation = _inferImportedOrientation(source, _pendingReadme);
         loader._currentScriptName = scriptName;
-        await loader._execute(source, scriptName);
+        await loader._execute(source, scriptName, rawUrl.replace(/[^/]*$/, ''));
         document.querySelectorAll('.side-tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.side-panel').forEach(p => p.classList.remove('active'));
         document.getElementById('tab-guide').classList.add('active');
@@ -2893,6 +3319,8 @@
       const val = scriptSelect.value;
       if (!val) return;
       if (val.startsWith('https://')) loadExternalScript(val);
+      else if (val.startsWith('ext:')) loadRegistryScript(_externalScripts[+val.slice(4)]);
+      else if (val.startsWith('recent:')) loadRecentScript(+val.slice(7));
       else loadBundledScript(val);
     });
 
@@ -2908,6 +3336,13 @@
 
     scriptSelect.addEventListener('change', () => {
       const v = scriptSelect.value;
+      if (v === 'recent:clear') {
+        _writeRecent([]);
+        renderRecentGroup();
+        scriptSelect.value = '';
+        setStatus('Recent scripts cleared', 'info');
+        return;
+      }
       if (v !== '__custom__') {
         const customOpt = document.getElementById('__custom_opt__');
         if (customOpt) scriptSelect.removeChild(customOpt);
@@ -2915,7 +3350,7 @@
         _customScriptActive = false;
       }
       // External scripts: disable source download (no local file), device download works after load
-      const isExternal = v.startsWith('https://');
+      const isExternal = v.startsWith('https://') || v.startsWith('ext:') || v.startsWith('recent:');
       btnDownloadSrc.disabled = !v || v === '__custom__' || isExternal;
       btnDownloadDev.disabled = !v || v === '__custom__';
     });
@@ -2945,8 +3380,8 @@
       const { output, warnings } = minifier.minify(source);
 
       if (warnings.length > 0) {
-        setStatus(`⚠ Lua 5.1 issues in minified output: ${warnings[0]}${warnings.length > 1 ? ` (+${warnings.length - 1} more)` : ''}`, 'warn');
-        console.warn('[lua-minifier] Lua 5.1 compatibility warnings:\n' + warnings.join('\n'));
+        setStatus(`⚠ Won't load on the device: ${warnings[0]}${warnings.length > 1 ? ` (+${warnings.length - 1} more)` : ''}`, 'warn');
+        console.warn('[lua-minifier] code the device (Lua 5.5) won\'t load:\n' + warnings.join('\n'));
       } else {
         const origLines = source.split('\n').length;
         const newLines = output.split('\n').length;
@@ -2967,7 +3402,14 @@
     // File picker
     document.getElementById('file-input').addEventListener('change', e => {
       const file = e.target.files[0];
-      if (file) { _customScriptActive = true; loader.loadFromFile(file); }
+      if (file) {
+        _customScriptActive = true;
+        loader.loadFromFile(file).then(() => {
+          if (loader.currentScriptName === file.name && loader.currentSource) {
+            rememberScript({ kind: 'file', name: file.name, source: loader.currentSource });
+          }
+        });
+      }
       e.target.value = ''; // Reset so same file can be reloaded
     });
 
@@ -3322,13 +3764,22 @@
     // ─── KEYBOARD ──────────────────────────────────────────────────────────────
     let tabDown = false;
     document.addEventListener('keydown', e => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
       // Ensure audio is started on first keypress
-      if (api._audioCtx && api._audioCtx.state === 'suspended') api._audioCtx.resume();
+      if (api.sound.ctx && api.sound.ctx.state === 'suspended') api.sound.ctx.resume();
 
-      // Forward all keys to Lua's event_grid where applicable
-      // Also handle emulator-level shortcuts:
+      // R always reloads; keys with Ctrl/Cmd stay with the browser
       if (e.key === 'r' || e.key === 'R') { e.preventDefault(); loader.reload(BASE_URL); return; }
+      if (e.ctrlKey || e.metaKey) return;
+
+      // A script with event_key(key) gets every other key press by name (no repeats).
+      // Without it, the keys below press fixed pads.
+      const ARROWS = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
+      const keyName = ARROWS[e.key] || (e.key === ' ' ? 'space' : e.key.toLowerCase());
+      if (!['shift', 'control', 'alt', 'meta'].includes(keyName) && api.handleKeyEvent(keyName, e.repeat)) {
+        if (['tab', 'space', 'up', 'down', 'left', 'right'].includes(keyName)) e.preventDefault();
+        return;
+      }
 
       // Tab → column 1, row 8 press (ALT button)
       if (e.key === 'Tab') { e.preventDefault(); if (!tabDown) { tabDown = true; api.handlePadEvent(1, 8, 1); } return; }
@@ -3352,7 +3803,8 @@
     });
 
     document.addEventListener('keyup', e => {
-      if (e.key === 'Tab') { tabDown = false; api.handlePadEvent(1, 8, 0); }
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
+      if (e.key === 'Tab' && tabDown) { tabDown = false; api.handlePadEvent(1, 8, 0); }
     });
 
     // ─── SIDE TABS ────────────────────────────────────────────────────────────
@@ -3385,7 +3837,7 @@
       if (m.name || m.version || m.author) {
         html += `<div class="doc-script-meta">
       <h2>${m.name || 'Script'}</h2>
-      ${m.description ? `<div style="font-size:12px;color:#8aa0c0;margin:3px 0 6px">${m.description}</div>` : ''}
+      ${m.description ? `<div style="font-size:12px;color:var(--text-dim);margin:3px 0 6px">${m.description}</div>` : ''}
       <div class="meta-row">
         ${m.version ? `<span>${m.version}</span>` : ''}
         ${m.author ? `<span>by ${m.author}</span>` : ''}
@@ -3421,7 +3873,7 @@
               html += `<div class="fn-item">
             <div class="fn-sig">${fn.signature}</div>
             ${fn.description ? `<div class="fn-desc">${fn.description}</div>` : ''}
-            ${fn.params.map(p => `<div class="fn-param"><strong>${p.name}</strong> <em style="color:#4a6080">${p.ptype}</em> ${p.text}</div>`).join('')}
+            ${fn.params.map(p => `<div class="fn-param"><strong>${p.name}</strong> <em style="color:var(--muted)">${p.ptype}</em> ${p.text}</div>`).join('')}
           </div>`;
             }
           }
@@ -3497,14 +3949,30 @@
     // ─── README / GUIDE RENDERER ─────────────────────────────────────────────
 
     /** Post-process marked HTML: embed YouTube links as iframes inline */
-    function _processReadmeHtml(html) {
+    /** Point relative links and images at `base` (the README's own URL), not at the emulator page */
+    function _resolveReadmeUrls(html, base) {
+      if (!base) return html;
+      const tpl = document.createElement('template');
+      tpl.innerHTML = html;
+      for (const [sel, attr] of [['a[href]', 'href'], ['img[src]', 'src']]) {
+        tpl.content.querySelectorAll(sel).forEach(el => {
+          const v = el.getAttribute(attr);
+          if (/^([a-z][a-z0-9+.-]*:|#|\/)/i.test(v)) return; // absolute, anchor or site-root
+          try { el.setAttribute(attr, new URL(v, base).href); } catch { /* leave as is */ }
+        });
+      }
+      return tpl.innerHTML;
+    }
+
+    function _processReadmeHtml(html, base = null) {
+      html = _resolveReadmeUrls(html, base);
       return html.replace(
         /<a\s[^>]*href="https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?(?:[^"&]*&)?v=|youtu\.be\/)([\w-]+)[^"]*"[^>]*>[^<]*<\/a>/gi,
         (match, vid) => `${match}<div class="yt-embed"><iframe src="https://www.youtube-nocookie.com/embed/${vid}" allowfullscreen loading="lazy"></iframe></div>`
       );
     }
 
-    function renderReadme(markdown) {
+    function renderReadme(markdown, base = null) {
       const panel = document.getElementById('panel-guide');
       const tab   = document.getElementById('tab-guide');
       const mapBody  = document.getElementById('map-readme-body');
@@ -3521,7 +3989,7 @@
         return;
       }
       const rawHtml = window.marked ? window.marked.parse(markdown) : `<pre>${markdown}</pre>`;
-      const html = _processReadmeHtml(rawHtml);
+      const html = _processReadmeHtml(rawHtml, base);
       panel.innerHTML = `<div class="guide-content">${html}</div>`;
       tab.style.color = 'var(--cyan)';
 
@@ -3554,45 +4022,973 @@
       if (active) githubInput.focus();
     });
 
-    async function runGithubImport() {
-      const val = githubInput.value.trim();
-      if (!val) return;
-      btnGithubImport.disabled = true;
+    /**
+     * Import a script from a repo and run it.
+     * @param {string} input – repo URL or owner/repo
+     * @param {Object} entry – optional registry entry: file, gridSize, orientation, name, author, docs
+     * @returns {Promise<Object|null>} the import result, or null when the import failed
+     */
+    async function importAndRun(input, entry = null) {
       try {
-        const result = await importer.import(val, msg => setStatus(msg, 'info'));
-        _pendingReadme = result.readme;
-        _pendingImportedOrientation = _inferImportedOrientation(result.source, result.readme);
+        const result = await importer.import(input, msg => setStatus(msg, 'info'), { file: entry?.file });
+        _pendingReadme = result.readme || (entry ? _registryReadme(entry) : null);
+        if (entry && !entry.own) _pendingReadme = _registryNotice(entry) + _pendingReadme;
+        _pendingReadmeBase = result.readme ? result.rawDir : null;
+        _pendingImportedOrientation = null;
+        if (Array.isArray(entry?.gridSize)) {
+          // The registry knows the grid; no need to guess from the README
+          const [eCols, eRows] = entry.gridSize;
+          const eRot = _orientationToRotation(entry.orientation, eCols, eRows);
+          if (eCols !== COLS || eRows !== ROWS || eRot !== gridRotation) applyGridPreset(eCols, eRows, true, eRot);
+        } else {
+          _pendingImportedOrientation = _inferImportedOrientation(result.source, result.readme);
+        }
         _customScriptActive = true;
         // Load as if it came from a file (no server path — use source directly)
         loader._currentScriptName = result.name;
-        await loader._execute(result.source, result.name);
+        await loader._execute(result.source, result.name, result.rawDir);
         // If the script errored, onScriptLoad never fired so renderReadme was never called.
         // _pendingReadme is consumed (set to null) by onScriptLoad on success.
         if (_pendingReadme !== null) {
-          renderReadme(_pendingReadme);
+          renderReadme(_pendingReadme, _pendingReadmeBase);
           _pendingReadme = null;
+          _pendingReadmeBase = null;
         }
-        // Activate Guide tab automatically if README was found
-        if (result.readme) {
+        // Activate Guide tab automatically if there's a README
+        if (result.readme || entry) {
           document.querySelectorAll('.side-tab').forEach(t => t.classList.remove('active'));
           document.querySelectorAll('.side-panel').forEach(p => p.classList.remove('active'));
           document.getElementById('tab-guide').classList.add('active');
           document.getElementById('panel-guide').classList.add('active');
         }
-        importRow.classList.remove('active');
-        githubInput.value = '';
+        return result;
       } catch (e) {
         _pendingImportedOrientation = null;
         setStatus(`Import failed: ${e.message}`, 'error');
-      } finally {
-        btnGithubImport.disabled = false;
+        return null;
       }
     }
+
+    /** Credit line above the Guide of a script by someone else */
+    function _registryNotice(entry) {
+      const optOut = _externalContact ? ` Authors: if you'd rather not be listed, [open an issue](${_externalContact}).` : '';
+      return `> **Not part of this emulator.** *${entry.name}* is by **${entry.author}**. It's loaded straight from ` +
+        `[their repository](https://${entry.repo}) each time; this project only keeps its name and link.${optOut}\n\n`;
+    }
+
+    /** Guide text for a registry script whose repo has no README */
+    function _registryReadme(entry) {
+      const links = [`[Repository](https://${entry.repo})`];
+      if (entry.docs) links.push(`[Discussion / docs](${entry.docs})`);
+      return `# ${entry.name}\n\nBy **${entry.author}** · ${links.join(' · ')}\n\n${entry.description || ''}\n\n` +
+        `*Loaded live from the author's repository; this repo has no README.*`;
+    }
+
+    async function runGithubImport() {
+      const val = githubInput.value.trim();
+      if (!val) return;
+      btnGithubImport.disabled = true;
+      const result = await importAndRun(val);
+      if (result) {
+        rememberScript({ kind: 'repo', input: val, name: result.name });
+        importRow.classList.remove('active');
+        githubInput.value = '';
+      }
+      btnGithubImport.disabled = false;
+    }
+
+    /** A script from scripts/external.json */
+    async function loadRegistryScript(entry) {
+      if (!entry) return;
+      const result = await importAndRun(entry.repo, entry);
+      if (result && entry.loader) {
+        setStatus(`${entry.name} is a loader: it lists the bundled scripts, as if they were on the device`, 'info');
+      }
+    }
+
+    // ─── RECENT SCRIPTS (browser storage) ─────────────────────────────────────
+    // Repos imported with ⇱ and files opened from disk. Repos are stored by address and
+    // fetched fresh; files keep their source, since there's no way to reopen them.
+    const RECENT_KEY = 'diii.recentScripts';
+    const RECENT_MAX = 8;
+    const RECENT_MAX_SOURCE = 200000; // characters; bigger files aren't kept
+
+    function _readRecent() {
+      try { return JSON.parse(localStorage.getItem(RECENT_KEY)) || []; } catch { return []; }
+    }
+
+    function _writeRecent(list) {
+      try { localStorage.setItem(RECENT_KEY, JSON.stringify(list)); } catch (e) { console.warn('[recent scripts]', e); }
+    }
+
+    function rememberScript(item) {
+      if (item.kind === 'file' && item.source.length > RECENT_MAX_SOURCE) return;
+      const key = it => it.kind === 'repo' ? `repo:${it.input}` : `file:${it.name}`;
+      const list = _readRecent().filter(it => key(it) !== key(item));
+      list.unshift(item);
+      _writeRecent(list.slice(0, RECENT_MAX));
+      renderRecentGroup();
+    }
+
+    /** "Recent" optgroup right below the placeholder option */
+    function renderRecentGroup() {
+      document.getElementById('recent-group')?.remove();
+      const list = _readRecent();
+      if (!list.length) return;
+      const group = document.createElement('optgroup');
+      group.id = 'recent-group';
+      group.label = 'Recent';
+      list.forEach((it, i) => {
+        const opt = document.createElement('option');
+        opt.value = `recent:${i}`;
+        opt.textContent = it.kind === 'repo' ? `${it.name} — ${it.input}` : `${it.name} — ${it.edited ? 'edited' : 'opened file'}`;
+        group.appendChild(opt);
+      });
+      const clear = document.createElement('option');
+      clear.value = 'recent:clear';
+      clear.textContent = '✕ Clear recent';
+      group.appendChild(clear);
+      const placeholder = scriptSelect.querySelector('option[value=""]');
+      scriptSelect.insertBefore(group, placeholder ? placeholder.nextSibling : scriptSelect.firstChild);
+    }
+
+    async function loadRecentScript(i) {
+      const it = _readRecent()[i];
+      if (!it) return;
+      if (it.kind === 'repo') {
+        if (await importAndRun(it.input)) rememberScript(it);
+        return;
+      }
+      _customScriptActive = true;
+      _pendingReadme = null;
+      _pendingReadmeBase = null;
+      loader._currentScriptName = it.name;
+      await loader._execute(it.source, it.name);
+      rememberScript(it);
+    }
+
+    // ─── SOURCE VIEWER / EDITOR ───────────────────────────────────────────────
+    const LUA_KEYWORDS = new Set(['and', 'break', 'do', 'else', 'elseif', 'end', 'false', 'for', 'function', 'goto',
+      'if', 'in', 'local', 'nil', 'not', 'or', 'repeat', 'return', 'then', 'true', 'until', 'while']);
+    const LUA_API = /^(grid_\w+|midi_\w+|fs_\w+|pset_\w+|event_\w+|metro|slew|get_time|wrap|clamp|round|linlin|ps|pt|print|require)$/;
+    // comments (long and short), strings (long and quoted), numbers, names
+    const LUA_TOKEN = /--\[(=*)\[[\s\S]*?(?:\]\1\]|$)|--[^\n]*|\[(=*)\[[\s\S]*?(?:\]\2\]|$)|"(?:\\[\s\S]|[^"\\\n])*"?|'(?:\\[\s\S]|[^'\\\n])*'?|0[xX][\da-fA-F]+|\d+(?:\.\d*)?(?:[eE][+-]?\d+)?|[A-Za-z_]\w*/g;
+    const escHtml = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    /** Lua source → one HTML string per line, with spans for comments, strings, numbers, keywords and the iii API */
+    function highlightLua(source) {
+      const lines = [''];
+      const add = (text, cls) => {
+        text.split('\n').forEach((piece, i) => {
+          if (i > 0) lines.push('');
+          if (piece) lines[lines.length - 1] += cls ? `<span class="${cls}">${escHtml(piece)}</span>` : escHtml(piece);
+        });
+      };
+      let last = 0;
+      for (const m of source.matchAll(LUA_TOKEN)) {
+        add(source.slice(last, m.index), null);
+        const t = m[0];
+        const cls = t.startsWith('--') ? 'tok-c'
+          : (t[0] === '"' || t[0] === "'" || t[0] === '[') ? 'tok-s'
+          : /\d/.test(t[0]) ? 'tok-n'
+          : LUA_KEYWORDS.has(t) ? 'tok-k'
+          : LUA_API.test(t) ? 'tok-a' : null;
+        add(t, cls);
+        last = m.index + t.length;
+      }
+      add(source.slice(last), null);
+      return lines;
+    }
+
+    /**
+     * Line diff of a → b as hunks {aStart, aEnd, bStart, bEnd}. Lines shared at the start and
+     * end are skipped first, so typing only compares the few lines around the change.
+     */
+    function diffLines(a, b) {
+      let pre = 0;
+      while (pre < a.length && pre < b.length && a[pre] === b[pre]) pre++;
+      let suf = 0;
+      while (suf < a.length - pre && suf < b.length - pre && a[a.length - 1 - suf] === b[b.length - 1 - suf]) suf++;
+      const A = a.slice(pre, a.length - suf);
+      const B = b.slice(pre, b.length - suf);
+      const n = A.length, m = B.length;
+      if (!n && !m) return [];
+      // Too large to align line by line (e.g. a whole new file pasted): one hunk
+      if (n * m > 4e6) return [{ aStart: pre, aEnd: pre + n, bStart: pre, bEnd: pre + m }];
+      const L = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1)); // longest common subsequence
+      for (let i = n - 1; i >= 0; i--) {
+        for (let j = m - 1; j >= 0; j--) L[i][j] = A[i] === B[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+      }
+      const hunks = [];
+      let h = null;
+      for (let i = 0, j = 0; i < n || j < m;) {
+        if (i < n && j < m && A[i] === B[j]) { if (h) { hunks.push(h); h = null; } i++; j++; continue; }
+        if (!h) h = { aStart: pre + i, aEnd: pre + i, bStart: pre + j, bEnd: pre + j };
+        if (j < m && (i >= n || L[i][j + 1] >= L[i + 1][j])) { j++; h.bEnd++; } else { i++; h.aEnd++; }
+      }
+      if (h) hunks.push(h);
+      return hunks;
+    }
+
+    /** Per line of b: 'chg' (changed), 'add' (added) or 'del' (lines removed above it) */
+    function hunkLineClasses(hunks, count) {
+      const cls = new Array(count).fill('');
+      for (const h of hunks) {
+        if (h.bEnd > h.bStart) cls.fill(h.aEnd > h.aStart ? 'chg' : 'add', h.bStart, h.bEnd);
+        else cls[Math.min(h.bStart, count - 1)] ||= 'del';
+      }
+      return cls;
+    }
+
+    const srcView = document.getElementById('src-view');
+    const srcEditor = document.getElementById('src-editor');
+    const srcEditWrap = document.getElementById('src-edit-wrap');
+    const srcEditHl = document.getElementById('src-edit-hl');
+    const srcFlags = document.getElementById('src-flags-inner');
+    const srcInfo = document.getElementById('src-info');
+    const srcChanges = document.getElementById('src-changes');
+    const srcErr = document.getElementById('src-err');
+    const srcWrap = document.getElementById('src-wrap');
+    const srcEdit = document.getElementById('src-edit');
+    const srcRun = document.getElementById('src-run');
+    const srcAuto = document.getElementById('src-auto');
+    const srcAutoLabel = document.getElementById('src-auto-label');
+    const srcRestoreAll = document.getElementById('src-restore-all');
+    let _srcEditing = false;
+    let _srcDirty = false;     // editor holds changes that haven't been run
+    let _srcRanText = null;    // the text last run from the editor
+    let _srcBaseline = null;   // the script as it was loaded: what changes are flagged against
+    let _srcHunks = [];        // editor text vs _srcBaseline
+    let _srcErrLine = 0;
+    let _srcAutoTimer = null;
+    let _srcHlFrame = 0;
+
+    const lineDivs = (lines, classes) => `<div class="src-lines">` +
+      lines.map((h, i) => {
+        const cls = [classes[i], i + 1 === _srcErrLine ? 'err' : ''].filter(Boolean).join(' ');
+        return `<div class="src-line${cls ? ' ' + cls : ''}" data-n="${i + 1}">${h || ' '}</div>`;
+      }).join('') + `</div>`;
+
+    function showChangeCount(hunks) {
+      const n = hunks.reduce((sum, h) => sum + Math.max(h.bEnd - h.bStart, h.aEnd - h.aStart), 0);
+      srcChanges.hidden = !n;
+      srcChanges.textContent = `${n} line${n === 1 ? '' : 's'} changed`;
+      srcRestoreAll.hidden = !n || !_srcEditing;
+    }
+
+    /**
+     * Redraw the editor's layer: colours, line numbers, and a flag per change, placed
+     * at the lines the coloured layer laid out. At most once per frame.
+     */
+    function syncEditorHighlight() {
+      cancelAnimationFrame(_srcHlFrame);
+      _srcHlFrame = requestAnimationFrame(() => {
+        const text = srcEditor.value;
+        const lines = highlightLua(text);
+        _srcHunks = _srcBaseline === null ? [] : diffLines(_srcBaseline.split('\n'), text.split('\n'));
+        srcEditHl.innerHTML = lineDivs(lines, []);
+        const rows = srcEditHl.querySelectorAll('.src-line');
+        srcFlags.innerHTML = _srcHunks.map((h, i) => {
+          const first = rows[Math.min(h.bStart, rows.length - 1)];
+          const removed = h.aEnd - h.aStart, added = h.bEnd - h.bStart;
+          let top, height, kind, title;
+          if (added) {
+            const last = rows[h.bEnd - 1];
+            top = first.offsetTop;
+            height = last.offsetTop + last.offsetHeight - top;
+            kind = removed ? 'chg' : 'add';
+            title = removed
+              ? (removed === 1 && added === 1 ? `Restore line ${h.bStart + 1}` : `Restore lines ${h.bStart + 1}–${h.bEnd} (${removed} original)`)
+              : `Remove ${added} added line${added === 1 ? '' : 's'}`;
+          } else {
+            top = h.bStart < rows.length ? first.offsetTop - 2 : first.offsetTop + first.offsetHeight - 2;
+            height = 4;
+            kind = 'del';
+            title = `Restore ${removed} removed line${removed === 1 ? '' : 's'}`;
+          }
+          return `<button type="button" class="src-flag ${kind}" data-h="${i}" style="top:${top}px;height:${height}px" title="${title} (Ctrl+Z undoes)"></button>`;
+        }).join('');
+        showChangeCount(_srcHunks);
+        syncEditorScroll();
+      });
+    }
+
+    function syncEditorScroll() {
+      srcEditHl.scrollTop = srcEditor.scrollTop;
+      srcEditHl.scrollLeft = srcEditor.scrollLeft;
+      srcFlags.style.transform = `translateY(${-srcEditor.scrollTop}px)`;
+    }
+    srcEditor.addEventListener('scroll', syncEditorScroll);
+
+    /** Replace the editor's text through the browser's editing, so Ctrl+Z can undo it */
+    function setEditorText(next) {
+      const old = srcEditor.value;
+      let a = 0;
+      while (a < old.length && a < next.length && old[a] === next[a]) a++;
+      let b = 0;
+      while (b < old.length - a && b < next.length - a && old[old.length - 1 - b] === next[next.length - 1 - b]) b++;
+      const insert = next.slice(a, next.length - b);
+      const scroll = srcEditor.scrollTop;
+      srcEditor.focus();
+      srcEditor.setSelectionRange(a, old.length - b);
+      const done = insert ? document.execCommand('insertText', false, insert) : document.execCommand('delete');
+      if (!done) {
+        srcEditor.setRangeText(insert, a, old.length - b, 'end');
+        srcEditor.dispatchEvent(new Event('input'));
+      }
+      srcEditor.scrollTop = scroll;
+    }
+
+    srcFlags.addEventListener('click', e => {
+      const h = _srcHunks[+e.target.dataset.h];
+      if (!h || _srcBaseline === null) return;
+      const cur = srcEditor.value.split('\n');
+      const orig = _srcBaseline.split('\n');
+      cur.splice(h.bStart, h.bEnd - h.bStart, ...orig.slice(h.aStart, h.aEnd));
+      setEditorText(cur.join('\n'));
+    });
+
+    srcRestoreAll.addEventListener('click', () => {
+      if (_srcBaseline !== null) setEditorText(_srcBaseline);
+    });
+
+    /** Show the script's source; a Lua error "name.lua:12: …" marks line 12 */
+    function renderSource(source, name, error = null) {
+      const m = error && name ? error.match(new RegExp(`${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}:(\\d+):`)) : null;
+      _srcErrLine = m ? +m[1] : 0;
+      srcErr.hidden = !_srcErrLine;
+      srcErr.textContent = `error on line ${_srcErrLine}`;
+      if (!source) {
+        srcInfo.textContent = 'No script loaded';
+        srcView.innerHTML = `<div class="empty-state"><strong>No Script Loaded</strong>The Lua source of the loaded script shows here.</div>`;
+        _srcBaseline = null;
+        showChangeCount([]);
+        return;
+      }
+      const text = source.replace(/\r\n?/g, '\n');
+      // Text that didn't come from the editor is a new starting point: another script,
+      // a recent entry, or the file changed on disk (hot reload). It replaces the editor's text.
+      if (text !== _srcRanText && text !== _srcBaseline) {
+        _srcBaseline = text;
+        _srcRanText = null;
+        if (_srcEditing) {
+          srcEditor.value = text;
+          _srcDirty = false;
+        }
+      }
+      srcInfo.textContent = `${name || ''} · ${text.split('\n').length} lines`;
+      srcInfo.title = name || '';
+      const hunks = diffLines(_srcBaseline.split('\n'), text.split('\n'));
+      const lines = highlightLua(text);
+      srcView.innerHTML = lineDivs(lines, hunkLineClasses(hunks, lines.length));
+      if (_srcEditing) syncEditorHighlight();
+      else showChangeCount(hunks);
+    }
+
+    srcErr.addEventListener('click', () => {
+      const box = _srcEditing ? srcEditor : srcView;
+      const rows = (_srcEditing ? srcEditHl : srcView).querySelectorAll('.src-line');
+      const row = rows[Math.min(_srcErrLine, rows.length) - 1];
+      if (!row) return;
+      box.scrollTop = Math.max(0, row.offsetTop - box.clientHeight / 2);
+      if (_srcEditing) {
+        const lines = srcEditor.value.split('\n');
+        const n = Math.min(_srcErrLine, lines.length);
+        const start = lines.slice(0, n - 1).reduce((sum, l) => sum + l.length + 1, 0);
+        const scroll = srcEditor.scrollTop;
+        srcEditor.focus();
+        srcEditor.setSelectionRange(start, start + lines[n - 1].length);
+        srcEditor.scrollTop = scroll;
+      }
+    });
+
+    // Wrap and auto-run are remembered per browser
+    const _srcPref = (key, fallback) => { try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; } };
+    const _srcSetPref = (key, value) => { try { localStorage.setItem(key, value); } catch { /* not kept */ } };
+
+    function applySrcWrap() {
+      srcView.classList.toggle('wrap', srcWrap.checked);
+      srcEditWrap.classList.toggle('wrap', srcWrap.checked);
+      srcEditor.wrap = srcWrap.checked ? 'soft' : 'off';
+      if (_srcEditing) syncEditorHighlight(); // wrapping moves the flags
+    }
+    srcWrap.checked = _srcPref('diii.srcWrap', '0') === '1';
+    srcAuto.checked = _srcPref('diii.srcAutoRun', '0') === '1';
+    applySrcWrap();
+    srcWrap.addEventListener('change', () => { applySrcWrap(); _srcSetPref('diii.srcWrap', srcWrap.checked ? '1' : '0'); });
+    srcAuto.addEventListener('change', () => _srcSetPref('diii.srcAutoRun', srcAuto.checked ? '1' : '0'));
+    // A narrower or wider panel rewraps lines, which moves the flags
+    new ResizeObserver(() => { if (_srcEditing && srcWrap.checked) syncEditorHighlight(); }).observe(srcEditWrap);
+
+    srcEdit.addEventListener('click', () => {
+      _srcEditing = !_srcEditing;
+      if (_srcEditing && !_srcDirty) srcEditor.value = (loader.currentSource || '').replace(/\r\n?/g, '\n');
+      srcEditWrap.hidden = !_srcEditing;
+      srcView.hidden = _srcEditing;
+      srcRun.hidden = srcAutoLabel.hidden = !_srcEditing;
+      srcEdit.textContent = _srcEditing ? 'View' : '✎ Edit';
+      srcEdit.title = _srcEditing ? 'Back to the coloured view (edits that weren’t run are kept)' : 'Edit the script here and run it';
+      if (_srcEditing) {
+        syncEditorHighlight();
+        srcEditor.focus();
+      } else {
+        renderSource(loader.currentSource, loader.currentScriptName);
+      }
+    });
+
+    /** Run the editor's text as the current script, and keep it under Recent */
+    async function runEditedSource() {
+      clearTimeout(_srcAutoTimer);
+      const name = loader.currentScriptName || 'edited.lua';
+      _srcRanText = srcEditor.value;
+      _srcDirty = false;
+      await loader.runSource(_srcRanText);
+      rememberScript({ kind: 'file', name, source: _srcRanText, edited: true });
+    }
+
+    srcRun.addEventListener('click', runEditedSource);
+    srcEditor.addEventListener('input', () => {
+      _srcDirty = true;
+      syncEditorHighlight();
+      if (srcAuto.checked) {
+        clearTimeout(_srcAutoTimer);
+        _srcAutoTimer = setTimeout(runEditedSource, 1000);
+      }
+    });
+    srcEditor.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); runEditedSource(); return; }
+      if (e.key === 'Tab' && !e.shiftKey) {
+        e.preventDefault();
+        // through execCommand so Ctrl+Z can undo it
+        if (!document.execCommand('insertText', false, '  ')) {
+          srcEditor.setRangeText('  ', srcEditor.selectionStart, srcEditor.selectionEnd, 'end');
+          srcEditor.dispatchEvent(new Event('input'));
+        }
+      }
+    });
 
     btnGithubImport.addEventListener('click', runGithubImport);
     githubInput.addEventListener('keydown', e => { if (e.key === 'Enter') runGithubImport(); });
 
+    // ─── SOUND TAB: synth parts, drum kit, effects ───────────────────────────
+    const sound = api.sound;
+    const kit = sound.drums;
+
+    // Settings kept in the browser; the first time, take over the earlier synth and drum settings
+    try {
+      const saved = JSON.parse(localStorage.getItem('diii.sound'));
+      if (saved) sound.load(saved);
+      else {
+        const oldSynth = JSON.parse(localStorage.getItem('diii.synth'));
+        if (oldSynth) Object.assign(sound.parts[0], oldSynth);
+        kit.load(JSON.parse(localStorage.getItem('diii.drums')));
+      }
+    } catch (e) { /* defaults */ }
+    let _saveTimer = 0;
+    const saveSound = () => {
+      clearTimeout(_saveTimer);
+      _saveTimer = setTimeout(() => { try { localStorage.setItem('diii.sound', JSON.stringify(sound)); } catch (e) { /* not kept */ } }, 300);
+    };
+
+    // Quality: auto is light on phones
+    const isPhone = () => matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 800;
+    let quality = 'auto';
+    try { quality = localStorage.getItem('diii.quality') || 'auto'; } catch (e) { /* auto */ }
+    const applyQuality = () => sound.setLight(quality === 'light' || (quality === 'auto' && isPhone()));
+    applyQuality();
+
+    let userPresets = {};
+    try { userPresets = JSON.parse(localStorage.getItem('diii.synthPresets')) || {}; } catch (e) { /* none */ }
+    const PRESET_KEYS = ['model', 'drift', 'movement', 'adsr', 'cutoff', 'sends'];
+
+    const sndTabs = document.getElementById('snd-tabs');
+    const sndPane = document.getElementById('snd-pane');
+    let sndView = 'part:0';  // 'part:<i>' | 'drums' | 'fx'
+
+    const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    const channelOptions = (any) => (any ? '<option value="0">any</option>' : '') +
+      Array.from({ length: 16 }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join('');
+    const pct = v => `${Math.round(v * 100)}%`;
+    const ms = v => v < 1 ? `${Math.round(v * 1000)} ms` : `${v.toFixed(2)} s`;
+    // A slider row: label, range, value. `data-k` names the setting.
+    const slider = (label, key, value, show, title = '') =>
+      `<label title="${title}">${label}</label><input type="range" min="0" max="1000" value="${Math.round(value * 1000)}" data-k="${key}"><span class="snd-val" data-v="${key}">${show}</span>`;
+
+    function audition() {
+      sound.ensure();
+      if (sound.ctx.state === 'suspended') sound.ctx.resume();
+      if (sound.muted) setStatus('Sound is muted: click the speaker to hear it', 'warn');
+    }
+
+    function renderSoundTabs() {
+      const btn = (view, label, title = '') => `<button class="btn sm${sndView === view ? ' active' : ''}" data-view="${view}" title="${esc(title)}">${esc(label)}</button>`;
+      sndTabs.innerHTML =
+        sound.parts.map((p, i) => btn(`part:${i}`, p.name, `Channel ${p.channel || 'any'}`)).join('') +
+        btn('drums', 'Drums', kit.mode === 'notes' ? `Channel ${kit.channel || 'any'}` : 'A channel per drum') +
+        `<button class="btn sm" data-view="add" title="Add a synth on its own channel">+</button>` +
+        btn('fx', 'Effects');
+    }
+
+    function renderSoundPane() {
+      renderSoundTabs();
+      if (sndView === 'drums') return renderDrumPane();
+      if (sndView === 'fx') return renderFxPane();
+      const i = +sndView.split(':')[1];
+      if (!sound.parts[i]) { sndView = 'part:0'; return renderSoundPane(); }
+      renderPartPane(i);
+    }
+
+    sndTabs.addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      if (b.dataset.view === 'add') {
+        sndView = `part:${sound.addPart()}`;
+        saveSound();
+      } else {
+        sndView = b.dataset.view;
+      }
+      renderSoundPane();
+    });
+
+    // ── Synth part ──
+    function renderPartPane(i) {
+      const p = sound.parts[i];
+      const presetOptions = Object.keys(SYNTH_PRESETS).map(n => `<option>${esc(n)}</option>`).join('');
+      const userOptions = Object.keys(userPresets).map(n => `<option value="user:${esc(n)}">${esc(n)}</option>`).join('');
+      sndPane.innerHTML = `
+        <div class="snd-group">
+          <div class="snd-controls">
+            <input class="snd-name" data-k="name" value="${esc(p.name)}" title="Name">
+            <label>on channel <select data-k="channel">${channelOptions(true)}</select></label>
+            <button class="btn sm" data-act="try" title="Play a few notes">▶ Try</button>
+            ${sound.parts.length > 1 ? '<button class="btn sm" data-act="remove" title="Remove this synth">✕</button>' : ''}
+          </div>
+          <div class="snd-controls">
+            <label>Preset <select data-k="preset">
+              <option value="">— your settings —</option>
+              <optgroup label="Presets">${presetOptions}</optgroup>
+              ${userOptions ? `<optgroup label="Saved">${userOptions}</optgroup>` : ''}
+            </select></label>
+            <button class="btn sm" data-act="save-preset" title="Keep these settings as a preset">Save as…</button>
+          </div>
+          <div class="snd-controls">
+            <label>Sound <select data-k="model">${Object.entries(SYNTH_MODELS).map(([k, m]) => `<option value="${k}">${m.label}</option>`).join('')}</select></label>
+          </div>
+        </div>
+        <div class="snd-group">
+          <div class="doc-section-title">Envelope</div>
+          <canvas class="adsr-edit" id="adsr-edit" title="Drag the points"></canvas>
+          <div class="adsr-readout" id="adsr-readout"></div>
+        </div>
+        <div class="snd-group">
+          <div class="doc-section-title">Tone</div>
+          <div class="snd-sliders">
+            ${slider('Drift', 'drift', p.drift, pct(p.drift), 'Each note a little out of tune, wandering slowly')}
+            ${slider('Movement', 'movement', p.movement, pct(p.movement), 'Each note’s filter sweeps slowly up and down')}
+            ${slider('Filter', 'cutoff', p.cutoff, pct(p.cutoff), 'Low-pass filter; follows the CC below on this synth’s channel')}
+            <label>Filter CC</label><input type="number" min="0" max="127" value="${p.cc}" data-k="cc" class="snd-name" style="width: 56px;"><span></span>
+            ${slider('Level', 'level', p.level, pct(p.level))}
+          </div>
+        </div>
+        <div class="snd-group">
+          <div class="doc-section-title">Effects send</div>
+          <div class="snd-sliders">
+            ${slider('Reverb', 'send:reverb', p.sends.reverb, pct(p.sends.reverb))}
+            ${slider('Delay', 'send:delay', p.sends.delay, pct(p.sends.delay))}
+            ${slider('Chorus', 'send:chorus', p.sends.chorus, pct(p.sends.chorus), sound.light ? 'Off in light quality' : '')}
+          </div>
+        </div>
+        <p class="snd-help">Plays notes on ${p.channel ? `channel ${p.channel}` : 'any channel'} that the drum kit doesn’t take${sound.parts.length > 1 ? ', together with the other synths on that channel' : ''}.</p>`;
+      sndPane.querySelector('[data-k=channel]').value = String(p.channel);
+      sndPane.querySelector('[data-k=model]').value = p.model;
+      sndPane.querySelector('[data-k=preset]').value = p.preset && SYNTH_PRESETS[p.preset] ? p.preset : '';
+      createAdsrEditor(sndPane.querySelector('#adsr-edit'), sndPane.querySelector('#adsr-readout'), () => p.adsr, adsr => {
+        sound.setPart(i, { adsr, preset: '' });
+        sndPane.querySelector('[data-k=preset]').value = '';
+        saveSound();
+      });
+    }
+
+    function onPartInput(e) {
+      const i = +sndView.split(':')[1];
+      const p = sound.parts[i];
+      const k = e.target.dataset.k;
+      if (!p || !k) return;
+      const v = e.target.type === 'range' ? e.target.value / 1000 : e.target.value;
+      if (k === 'name') { sound.setPart(i, { name: v || p.name }); renderSoundTabs(); }
+      else if (k === 'channel') { sound.setPart(i, { channel: +v }); renderSoundPane(); }
+      else if (k === 'cc') sound.setPart(i, { cc: +v || 74 });
+      else if (k === 'level') sound.setPart(i, { level: v });
+      else if (k === 'preset') {
+        if (v.startsWith('user:')) sound.setPart(i, { ...JSON.parse(JSON.stringify(userPresets[v.slice(5)])), preset: '' });
+        else if (v) sound.applyPreset(i, v);
+        renderSoundPane();
+      }
+      else if (k.startsWith('send:')) sound.setPart(i, { sends: { [k.slice(5)]: v } });
+      else { sound.setPart(i, { [k]: v, preset: '' }); const ps = sndPane.querySelector('[data-k=preset]'); if (ps) ps.value = ''; }
+      const show = sndPane.querySelector(`[data-v="${k}"]`);
+      if (show) show.textContent = pct(v);
+      saveSound();
+    }
+
+    // ── Drum kit ──
+    function renderDrumPane() {
+      sndPane.innerHTML = `
+        <div class="snd-group">
+          <div class="snd-controls">
+            <label title="Notes the kit takes play drums instead of a synth"><input type="checkbox" data-d="enabled"${kit.enabled ? ' checked' : ''}> On</label>
+            <label>Plays <select data-d="mode"><option value="notes">drum notes</option><option value="channels">a channel per drum</option></select></label>
+            ${kit.mode === 'notes' ? `<label title="The channel the kit listens on">on channel <select data-d="channel">${channelOptions(true)}</select></label>` : ''}
+            <button class="btn sm" data-d="reroll-all" title="New takes of all drums">⚄ All</button>
+          </div>
+          <div id="drum-voices">${kit.voices.map((v, i) => `
+            <div class="snd-row" data-voice="${i}">
+              <button class="btn sm snd-voice" data-act="play" title="Play ${v.name}">▶ ${v.name}</button>
+              ${kit.mode === 'notes'
+                ? `<span class="snd-notes" title="MIDI notes: ${v.notes.join(', ')}">${v.notes.slice(0, 3).join(' ')}${v.notes.length > 3 ? ' …' : ''}</span>`
+                : `<label class="snd-notes">ch <select data-act="channel">${channelOptions(false)}</select></label>`}
+              <input type="range" min="0" max="100" value="${Math.round(v.level * 100)}" data-act="level" title="Level">
+              <button class="btn sm" data-act="reroll" title="A new take of this drum">⚄</button>
+            </div>`).join('')}</div>
+        </div>
+        <div class="snd-group">
+          <div class="snd-sliders">
+            ${slider('Level', 'drum:level', kit.level, pct(kit.level))}
+          </div>
+        </div>
+        <div class="snd-group">
+          <div class="doc-section-title">Effects send</div>
+          <div class="snd-sliders">
+            ${slider('Reverb', 'drumsend:reverb', sound.drumSends.reverb, pct(sound.drumSends.reverb))}
+            ${slider('Delay', 'drumsend:delay', sound.drumSends.delay, pct(sound.drumSends.delay))}
+            ${slider('Chorus', 'drumsend:chorus', sound.drumSends.chorus, pct(sound.drumSends.chorus))}
+          </div>
+        </div>
+        <p class="snd-help">${kit.mode === 'notes'
+          ? `Notes on ${kit.channel ? `channel ${kit.channel}` : 'any channel'} play drums by General MIDI number (36 kick, 38 snare, 42 closed hat, …: the usual 4×4 pad layout), not a synth.`
+          : 'Each drum plays on any note on its own channel; those channels don’t reach the synths.'}</p>`;
+      sndPane.querySelector('[data-d=mode]').value = kit.mode;
+      const chSel = sndPane.querySelector('[data-d=channel]');
+      if (chSel) chSel.value = String(kit.channel);
+      if (kit.mode === 'channels') sndPane.querySelectorAll('[data-act=channel]').forEach((sel, i) => { sel.value = String(kit.voices[i].channel); });
+    }
+
+    // The ▶ button flashes when its drum plays, from the script or here
+    kit.onTrigger = (i) => {
+      const b = sndPane.querySelector(`[data-voice="${i}"] .snd-voice`);
+      if (!b) return;
+      b.classList.add('flash');
+      clearTimeout(b._flash);
+      b._flash = setTimeout(() => b.classList.remove('flash'), 120);
+    };
+
+    function onDrumInput(e) {
+      const t = e.target;
+      const row = t.closest('[data-voice]');
+      if (row && t.dataset.act === 'level') kit.voices[+row.dataset.voice].level = t.value / 100;
+      else if (row && t.dataset.act === 'channel') kit.voices[+row.dataset.voice].channel = +t.value;
+      else if (t.dataset.d === 'enabled') kit.enabled = t.checked;
+      else if (t.dataset.d === 'mode') { kit.mode = t.value; renderSoundPane(); }
+      else if (t.dataset.d === 'channel') { kit.channel = +t.value; renderSoundPane(); }
+      else if (t.dataset.k === 'drum:level') kit.setLevel(t.value / 1000);
+      else if (t.dataset.k && t.dataset.k.startsWith('drumsend:')) sound.setDrumSends({ [t.dataset.k.slice(9)]: t.value / 1000 });
+      else return;
+      const show = t.dataset.k && sndPane.querySelector(`[data-v="${t.dataset.k}"]`);
+      if (show) show.textContent = pct(t.value / 1000);
+      saveSound();
+    }
+
+    // ── Effects and quality ──
+    function renderFxPane() {
+      const { reverb, delay, chorus } = sound.fx;
+      sndPane.innerHTML = `
+        <div class="snd-group">
+          <div class="doc-section-title">Reverb</div>
+          <div class="snd-controls">
+            <label>Type <select data-f="reverb:type"><option value="hall">Large room / hall</option><option value="plate">Plate / spring</option></select></label>
+          </div>
+          <div class="snd-sliders">
+            ${slider('Decay', 'reverb:decay', reverb.decay / 4, ms(reverb.decay), 'Applies when you let go')}
+            ${slider('Level', 'reverb:level', reverb.level, pct(reverb.level))}
+          </div>
+        </div>
+        <div class="snd-group">
+          <div class="doc-section-title">Delay</div>
+          <div class="snd-sliders">
+            ${slider('Time', 'delay:time', delay.time, ms(delay.time))}
+            ${slider('Feedback', 'delay:feedback', delay.feedback / 0.9, pct(delay.feedback))}
+            ${slider('Level', 'delay:level', delay.level, pct(delay.level))}
+          </div>
+        </div>
+        <div class="snd-group">
+          <div class="doc-section-title">Chorus</div>
+          <div class="snd-sliders">
+            ${slider('Rate', 'chorus:rate', chorus.rate / 4, `${chorus.rate.toFixed(2)} Hz`)}
+            ${slider('Depth', 'chorus:depth', chorus.depth, pct(chorus.depth))}
+            ${slider('Level', 'chorus:level', chorus.level, pct(chorus.level))}
+          </div>
+        </div>
+        <div class="snd-group">
+          <div class="doc-section-title">Quality</div>
+          <div class="snd-controls">
+            <select data-q="quality">
+              <option value="auto">Auto${isPhone() ? ' (light on this device)' : ' (full on this device)'}</option>
+              <option value="full">Full</option>
+              <option value="light">Light</option>
+            </select>
+          </div>
+          <p class="snd-help">Light is for phones: fewer notes at once, a shorter reverb, no chorus, no drift or movement.</p>
+        </div>
+        <div class="snd-group">
+          <div class="doc-section-title">Stuck notes</div>
+          <div class="snd-controls">
+            <label>A note without a note off stops after
+              <select data-g="guard">
+                <option value="3">3 s</option><option value="10">10 s</option><option value="30">30 s</option>
+                <option value="60">1 min</option><option value="0">never</option>
+              </select>
+            </label>
+          </div>
+          <p class="snd-help">■ next to the volume stops every note at once, here and on your MIDI devices.</p>
+        </div>
+        <p class="snd-help">Each synth and the drum kit choose how much they send to these effects.</p>`;
+      sndPane.querySelector('[data-f="reverb:type"]').value = reverb.type;
+      sndPane.querySelector('[data-q=quality]').value = quality;
+      sndPane.querySelector('[data-g=guard]').value = String(sound.noteGuard);
+    }
+
+    const FX_SCALE = { 'reverb:decay': [4, ms], 'delay:time': [1, ms], 'delay:feedback': [0.9, pct], 'chorus:rate': [4, v => `${v.toFixed(2)} Hz`] };
+    function onFxInput(e) {
+      const t = e.target;
+      if (t.dataset.g) { sound.noteGuard = +t.value; saveSound(); return; }
+      if (t.dataset.q) { quality = t.value; try { localStorage.setItem('diii.quality', quality); } catch (err) { /* not kept */ } applyQuality(); return; }
+      if (t.dataset.f === 'reverb:type') { sound.setFx('reverb', { type: t.value }); saveSound(); return; }
+      const k = t.dataset.k;
+      if (!k) return;
+      const [fx, prop] = k.split(':');
+      const [scale, show] = FX_SCALE[k] || [1, pct];
+      const v = Math.max(fx === 'reverb' && prop === 'decay' ? 0.1 : 0, (t.value / 1000) * scale);
+      // A new decay builds a new reverb, so it waits for the slider to be let go
+      if (k === 'reverb:decay' && e.type === 'input') { sndPane.querySelector(`[data-v="${k}"]`).textContent = show(v); return; }
+      sound.setFx(fx, { [prop]: v });
+      sndPane.querySelector(`[data-v="${k}"]`).textContent = show(v);
+      saveSound();
+    }
+
+    for (const type of ['input', 'change']) {
+      sndPane.addEventListener(type, e => {
+        if (sndView === 'drums') { if (type === 'input' || e.target.tagName === 'SELECT' || e.target.type === 'checkbox') onDrumInput(e); }
+        else if (sndView === 'fx') onFxInput(e);
+        else if (type === 'input' ? e.target.type === 'range' || e.target.type === 'text' : true) onPartInput(e);
+      });
+    }
+
+    sndPane.addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      if (sndView === 'drums') {
+        if (b.dataset.d === 'reroll-all') { kit.rerollAll(); saveSound(); audition(); kit.play(0, 110); return; }
+        const row = b.closest('[data-voice]');
+        if (!row) return;
+        const i = +row.dataset.voice;
+        if (b.dataset.act === 'reroll') { kit.reroll(i); saveSound(); }
+        audition();
+        kit.play(i, 110);
+        return;
+      }
+      const i = +sndView.split(':')[1];
+      if (b.dataset.act === 'try') {
+        audition();
+        [60, 64, 67, 72].forEach((n, k) => setTimeout(() => sound.playOn(i, n, 100, 500), k * 220));
+      } else if (b.dataset.act === 'remove') {
+        sound.removePart(i);
+        sndView = 'part:0';
+        saveSound();
+        renderSoundPane();
+      } else if (b.dataset.act === 'save-preset') {
+        const name = (prompt('Name for this preset:', sound.parts[i].name) || '').trim();
+        if (!name) return;
+        userPresets[name] = Object.fromEntries(PRESET_KEYS.map(k => [k, JSON.parse(JSON.stringify(sound.parts[i][k]))]));
+        try { localStorage.setItem('diii.synthPresets', JSON.stringify(userPresets)); } catch (err) { /* not kept */ }
+        renderSoundPane();
+        setStatus(`Preset "${name}" saved in this browser`, 'success');
+      }
+    });
+
+    // A CC moved a synth's filter: show it
+    sound.onPartChange = (i) => {
+      if (sndView !== `part:${i}`) return;
+      const p = sound.parts[i];
+      const input = sndPane.querySelector('[data-k=cutoff]');
+      if (input) { input.value = Math.round(p.cutoff * 1000); sndPane.querySelector('[data-v=cutoff]').textContent = pct(p.cutoff); }
+    };
+
+    /**
+     * Envelope editor: drag the points. The width is split into attack (up to 2 s), decay
+     * (up to 2 s), a short sustain stretch and release (up to 4 s); each stage's time grows
+     * with the square of the distance, so short times get room. The sustain line drags up/down.
+     */
+    function createAdsrEditor(canvas, readout, get, onChange) {
+      const SEG = { a: 0.24, d: 0.24, hold: 0.14, r: 0.38 };
+      const MAX = { a: 2, d: 2, r: 4 };
+      const PAD = 8;
+      let drag = null;
+      const geom = () => {
+        const w = canvas.clientWidth, h = canvas.clientHeight;
+        const W = w - PAD * 2, H = h - PAD * 2;
+        return { w, h, W, H, a0: PAD, d0: PAD + W * SEG.a, s0: PAD + W * (SEG.a + SEG.d), r0: PAD + W * (SEG.a + SEG.d + SEG.hold) };
+      };
+      const points = () => {
+        const { attack, decay, sustain, release } = get();
+        const g = geom();
+        const top = PAD, bottom = PAD + g.H, sy = bottom - sustain * g.H;
+        return {
+          g, top, bottom, sy,
+          a: { x: g.a0 + Math.sqrt(attack / MAX.a) * g.W * SEG.a, y: top },
+          d: { x: g.d0 + Math.sqrt(decay / MAX.d) * g.W * SEG.d, y: sy },
+          s: { x: g.r0, y: sy },
+          r: { x: g.r0 + Math.sqrt(release / MAX.r) * g.W * SEG.r, y: bottom },
+        };
+      };
+      function draw() {
+        const dpr = window.devicePixelRatio || 1;
+        const { w, h } = geom();
+        if (canvas.width !== Math.round(w * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
+        const c = canvas.getContext('2d');
+        c.setTransform(dpr, 0, 0, dpr, 0, 0);
+        c.clearRect(0, 0, w, h);
+        const css = getComputedStyle(document.documentElement);
+        const P = points();
+        // stage boundaries
+        c.strokeStyle = css.getPropertyValue('--border').trim();
+        c.lineWidth = 1;
+        for (const x of [P.g.d0, P.g.s0, P.g.r0]) { c.beginPath(); c.moveTo(x, PAD); c.lineTo(x, P.bottom); c.stroke(); }
+        // the envelope
+        c.strokeStyle = css.getPropertyValue('--slider-tint').trim() || '#968971';
+        c.lineWidth = 2;
+        c.beginPath();
+        c.moveTo(PAD, P.bottom);
+        c.lineTo(P.a.x, P.a.y);
+        c.lineTo(P.d.x, P.d.y);
+        c.lineTo(P.s.x, P.s.y);
+        c.lineTo(P.r.x, P.r.y);
+        c.stroke();
+        // handles
+        c.fillStyle = css.getPropertyValue('--accent').trim();
+        for (const k of ['a', 'd', 's', 'r']) {
+          c.beginPath();
+          c.arc(P[k].x, P[k].y, drag === k ? 6 : 4.5, 0, Math.PI * 2);
+          c.fill();
+        }
+        const { attack, decay, sustain, release } = get();
+        readout.textContent = `A ${ms(attack)} · D ${ms(decay)} · S ${pct(sustain)} · R ${ms(release)}`;
+      }
+      function nearest(x, y) {
+        const P = points();
+        let best = null, bestD = 18;
+        for (const k of ['a', 'd', 's', 'r']) {
+          const dd = Math.hypot(P[k].x - x, P[k].y - y);
+          if (dd < bestD) { best = k; bestD = dd; }
+        }
+        // Anywhere on the sustain stretch drags the sustain level
+        if (!best && x >= P.g.s0 && x <= P.g.r0 && Math.abs(y - P.sy) < 14) best = 's';
+        return best;
+      }
+      function move(x, y) {
+        const P = points();
+        const g = P.g;
+        const frac = (v) => Math.max(0, Math.min(1, v));
+        const level = frac((P.bottom - y) / g.H);
+        const out = {};
+        if (drag === 'a') out.attack = Math.max(0.001, MAX.a * frac((x - g.a0) / (g.W * SEG.a)) ** 2);
+        if (drag === 'd') { out.decay = Math.max(0.005, MAX.d * frac((x - g.d0) / (g.W * SEG.d)) ** 2); out.sustain = level; }
+        if (drag === 's') out.sustain = level;
+        if (drag === 'r') out.release = Math.max(0.01, MAX.r * frac((x - g.r0) / (g.W * SEG.r)) ** 2);
+        onChange(out);
+        draw();
+      }
+      const local = e => { const r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+      canvas.addEventListener('pointerdown', e => {
+        drag = nearest(...local(e));
+        if (!drag) return;
+        canvas.setPointerCapture(e.pointerId);
+        move(...local(e));
+      });
+      canvas.addEventListener('pointermove', e => {
+        if (drag) move(...local(e));
+        else canvas.style.cursor = nearest(...local(e)) ? 'grab' : 'default';
+      });
+      canvas.addEventListener('pointerup', () => { drag = null; draw(); });
+      new ResizeObserver(draw).observe(canvas);
+      draw();
+    }
+
+    renderSoundPane();
+
+    // ─── SOUND WINDOW: the Sound tab's controls, popped out ──────────────────
+    const soundUI = document.getElementById('sound-ui');
+    const soundWin = document.getElementById('sound-window');
+    const soundWinHead = document.getElementById('sound-window-head');
+    const soundDockedNote = document.getElementById('sound-docked-note');
+    const soundPopoutBtn = document.getElementById('sound-popout');
+
+    function popOutSound(out) {
+      if (out) document.getElementById('sound-window-body').appendChild(soundUI);
+      else document.getElementById('panel-sound').appendChild(soundUI);
+      soundWin.hidden = !out;
+      soundDockedNote.hidden = !out;
+      soundPopoutBtn.hidden = out;
+      try { localStorage.setItem('diii.soundWindow', out ? '1' : '0'); } catch (e) { /* not kept */ }
+    }
+    soundPopoutBtn.addEventListener('click', () => popOutSound(true));
+    document.getElementById('sound-dock').addEventListener('click', () => popOutSound(false));
+    document.getElementById('sound-dock-here').addEventListener('click', () => popOutSound(false));
+
+    // Position and size are kept; the window always stays on screen
+    function placeSoundWindow(r) {
+      const w = Math.min(r.width, innerWidth - 16), h = Math.min(r.height, innerHeight - 16);
+      soundWin.style.width = `${w}px`;
+      soundWin.style.height = `${h}px`;
+      soundWin.style.left = `${Math.max(8, Math.min(r.left, innerWidth - w - 8))}px`;
+      soundWin.style.top = `${Math.max(8, Math.min(r.top, innerHeight - 40))}px`;
+      soundWin.style.right = 'auto';
+    }
+    const saveSoundRect = () => {
+      if (soundWin.hidden) return;
+      const r = soundWin.getBoundingClientRect();
+      try { localStorage.setItem('diii.soundWindowRect', JSON.stringify({ left: r.left, top: r.top, width: r.width, height: r.height })); } catch (e) { /* not kept */ }
+    };
+    try {
+      const r = JSON.parse(localStorage.getItem('diii.soundWindowRect'));
+      if (r) placeSoundWindow(r);
+    } catch (e) { /* default place */ }
+    new ResizeObserver(saveSoundRect).observe(soundWin);
+
+    soundWinHead.addEventListener('pointerdown', e => {
+      if (e.target.closest('button')) return;
+      const r = soundWin.getBoundingClientRect();
+      const dx = e.clientX - r.left, dy = e.clientY - r.top;
+      soundWinHead.setPointerCapture(e.pointerId);
+      const move = ev => placeSoundWindow({ left: ev.clientX - dx, top: ev.clientY - dy, width: r.width, height: r.height });
+      const up = () => {
+        soundWinHead.removeEventListener('pointermove', move);
+        soundWinHead.removeEventListener('pointerup', up);
+        saveSoundRect();
+      };
+      soundWinHead.addEventListener('pointermove', move);
+      soundWinHead.addEventListener('pointerup', up);
+    });
+    try { if (localStorage.getItem('diii.soundWindow') === '1' && innerWidth > 900) popOutSound(true); } catch (e) { /* docked */ }
+
     // ─── INIT ────────────────────────────────────────────────────────────────
+    // Grid mode from ◐ View: monochrome hides the colour functions from scripts
+    function setGridMode(mode) {
+      loader.monochrome = mode === 'mono';
+      document.documentElement.dataset.gridMode = mode;
+      updateGridLabel(loader.currentScriptName || null);
+    }
+    try { setGridMode(localStorage.getItem('diii.gridMode') || 'colour'); } catch (e) { setGridMode('colour'); }
+
     populateScriptSelect().then(() => {
       if (scriptSelect.value) loadBundledScript(scriptSelect.value);
     });
@@ -3678,10 +5074,11 @@
       const availW = isFS ? (winW - deadW) : Math.min(pane.clientWidth - 4, winW);
       const availH = (isFS ? winH : Math.min(pane.clientHeight - 4, winH));
 
-      // Geometric factors: gap is 0.4 * padSize
-      // contentSize = N * padSize + (N-1) * 0.4 * padSize = padSize * (1.4*N - 0.4)
-      const gridUnitsW = 1.4 * vc - 0.4;
-      const gridUnitsH = 1.4 * vr - 0.4;
+      // Geometric factors: gap is 0.4 * padSize (Mechatrellis keys: 0.35 of that)
+      // contentSize = N * padSize + (N-1) * gap = padSize * ((1 + g) * N - g)
+      const g = 0.4 * (document.documentElement.dataset.keys === 'mech' ? 0.35 : 1);
+      const gridUnitsW = (1 + g) * vc - g;
+      const gridUnitsH = (1 + g) * vr - g;
 
       // Padding on mobile is 12px fixed per side (total 24px + 2px border = 26px)
       // On fullscreen we can be tighter to maximize the grid (e.g. 4px per side = 10px total)
@@ -3757,7 +5154,7 @@
 
     function updateGridLabel(scriptName) {
       const vc = vCOLS(), vr = vROWS();
-      const rotSuffix = gridRotation > 0 ? ` · ${gridRotation * 90}°` : '';
+      const rotSuffix = (gridRotation > 0 ? ` · ${gridRotation * 90}°` : '') + (loader?.monochrome ? ' · mono' : '');
       const el = document.getElementById('grid-label');
       if (scriptName) {
         el.textContent = `1 · ${vc} × ${vr}${rotSuffix} · ${scriptName}`;
@@ -4105,8 +5502,10 @@
           };
 
           const button = screenButtonMap[screenName];
-          // Only apply this interactive fix for the script it's designed for.
-          if (loader.currentScriptName === 'multiplescreen-test.lua' && button) {
+          // Only apply this interactive fix for the script it's designed for
+          // (bundled scripts load as 'folder/name.lua', so match the file name).
+          const isMultiScreenTest = (loader.currentScriptName || '').split('/').pop() === 'multiplescreen-test.lua';
+          if (isMultiScreenTest && button) {
             // For this script, simulate a press-and-release to trigger its internal screen-switching logic.
             // This ensures the script's state stays in sync with the emulator view.
             loader.api.handlePadEvent(button.x, button.y, 1);
@@ -4114,7 +5513,7 @@
           } else {
             // Fallback for other scripts: just switch the view, no state change.
             // This may lead to the desync issue, but it's the previous behavior.
-            if (loader.currentScriptName !== 'multiplescreen-test.lua') {
+            if (!isMultiScreenTest) {
               console.warn(`Minimap: No screen switch button mapping for '${screenName}' in script '${loader.currentScriptName}'. Switching view only.`);
             }
             api.onDisplayScreen(screenName);
@@ -4652,7 +6051,7 @@
             const midY = (lCy + gCy) / 2;
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             path.setAttribute('class', 'map-connection map-connection-cross');
-            path.setAttribute('stroke', groupInfo.color || '#7090b0');
+            path.setAttribute('stroke', groupInfo.color || getComputedStyle(document.documentElement).getPropertyValue('--map-line').trim());
             path.setAttribute('d', `M${lCx},${lCy} C${lCx},${midY} ${gCx},${midY} ${gCx},${gCy}`);
             svg.appendChild(path);
           });
@@ -4711,6 +6110,49 @@
         }
       });
     }
+
+    // ── View menu: theme and pad corners, remembered in this browser ──
+    const viewMenu = document.getElementById('view-menu');
+    function syncViewMenu() {
+      const root = document.documentElement;
+      viewMenu.querySelectorAll('[data-theme-option]').forEach(b => b.classList.toggle('active', b.dataset.themeOption === root.dataset.theme));
+      viewMenu.querySelectorAll('[data-corners-option]').forEach(b => b.classList.toggle('active', b.dataset.cornersOption === root.dataset.corners));
+      viewMenu.querySelectorAll('[data-keys-option]').forEach(b => b.classList.toggle('active', b.dataset.keysOption === root.dataset.keys));
+      viewMenu.querySelectorAll('[data-grid-option]').forEach(b => b.classList.toggle('active', (b.dataset.gridOption === 'mono') === loader.monochrome));
+    }
+    document.getElementById('btn-view-menu').addEventListener('click', e => {
+      e.stopPropagation();
+      viewMenu.classList.toggle('open');
+      syncViewMenu();
+    });
+    viewMenu.addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      const root = document.documentElement;
+      if (b.dataset.themeOption) {
+        root.dataset.theme = b.dataset.themeOption;
+        try { localStorage.setItem('diii.theme', root.dataset.theme); } catch (err) { /* not kept */ }
+      }
+      if (b.dataset.cornersOption) {
+        root.dataset.corners = b.dataset.cornersOption;
+        try { localStorage.setItem('diii.corners', root.dataset.corners); } catch (err) { /* not kept */ }
+      }
+      if (b.dataset.keysOption) {
+        root.dataset.keys = b.dataset.keysOption;
+        try { localStorage.setItem('diii.keys', root.dataset.keys); } catch (err) { /* not kept */ }
+        fitToWindow(); // the gap changed, so the keys can be bigger or must be smaller
+      }
+      if (b.dataset.gridOption && (b.dataset.gridOption === 'mono') !== loader.monochrome) {
+        setGridMode(b.dataset.gridOption);
+        try { localStorage.setItem('diii.gridMode', b.dataset.gridOption); } catch (err) { /* not kept */ }
+        if (loader.currentScriptName) loader.reload(BASE_URL);
+      }
+      syncViewMenu();
+      if (b.dataset.themeOption || b.dataset.keysOption) api.grid_refresh(); // redraw the LEDs for the new look
+    });
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#view-menu-wrap')) viewMenu.classList.remove('open');
+    });
 
     btnGridPreset.addEventListener('click', e => {
       e.stopPropagation();
@@ -4886,6 +6328,15 @@
         <p style="margin-top:10px; color:var(--muted);">Those pads are silently ignored. Use the <strong>Grid</strong> selector in the toolbar to switch to a larger preset, or check if the script declares a <code>gridSize</code> in its manifest.</p>
       </div>
     </div>
+  </div>
+
+  <!-- The sound controls, popped out of the side panel -->
+  <div id="sound-window" class="float-window" hidden>
+    <div class="float-head" id="sound-window-head">
+      <span>Sound</span>
+      <button class="btn sm" id="sound-dock" title="Back into the side panel">Dock</button>
+    </div>
+    <div class="float-body" id="sound-window-body"></div>
   </div>
 
   <div id="about-modal" class="modal-overlay">

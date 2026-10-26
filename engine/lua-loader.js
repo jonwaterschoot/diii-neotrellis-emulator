@@ -9,11 +9,25 @@
  *   - Execute Lua source inside Fengari with MonomeAPI globals injected
  *   - Connect to WebSocket hot-reload signal from serve.js
  *   - Extract and call event_grid from the Lua global scope
+ *   - Serve iii's fs_list_files / fs_run_file / fs_read_file from a virtual filesystem:
+ *     the bundled scripts by file name, plus files next to the running script
  */
 
 import { DocExtractor } from './doc-extractor.js';
+import { III_LIB } from './iii-lib.js';
 
 const extractor = new DocExtractor();
+
+/** iii has 12 metros; metro.init returns nil for a 13th */
+const III_METRO_COUNT = 12;
+
+/** fs_run_file is synchronous on the device, so files are fetched with a synchronous request */
+function readUrlSync(url) {
+  const xhr = new XMLHttpRequest();
+  xhr.open('GET', url, false);
+  try { xhr.send(); } catch (e) { return null; }
+  return xhr.status === 200 ? xhr.responseText : null;
+}
 
 export class LuaLoader {
   /**
@@ -23,6 +37,7 @@ export class LuaLoader {
    * @param {Function} opts.onScriptError  – called on runtime error: (errorMessage)
    * @param {Function} opts.onStatusChange – called with status text updates: (msg, level)
    * @param {string}   opts.wsUrl          – WebSocket URL for hot-reload (default: auto)
+   * @param {Function} opts.readFileSync   – (url) → text | null, for the virtual filesystem (default: sync XHR)
    */
   constructor(opts = {}) {
     this.api = opts.api;
@@ -36,6 +51,15 @@ export class LuaLoader {
     this._ws = null;
     this._wsUrl = opts.wsUrl || null;  // auto-detected from serve.js
     this._wsAutoReconnectTimer = null;
+
+    // Virtual filesystem for fs_* and require: file name → URL, plus the running script's folder
+    this.readFileSync = opts.readFileSync || readUrlSync;
+
+    // Monochrome: the script doesn't get the NeoTrellis colour functions, as on a monome
+    // grid, so it runs its own fallback. Takes effect on the next load.
+    this.monochrome = false;
+    this._fsFiles = new Map();
+    this._scriptDir = null;
 
     // Fengari module refs (populated after init)
     this._fengari = null;
@@ -53,10 +77,20 @@ export class LuaLoader {
     try {
       const res = await fetch(`${baseUrl}/scripts/manifest.json`);
       if (!res.ok) throw new Error(`manifest fetch failed: ${res.status}`);
-      return await res.json();
+      const manifest = await res.json();
+      this.setBundledFiles(manifest, baseUrl);
+      return manifest;
     } catch (e) {
       this.onStatusChange('Manifest unavailable — use File Picker to load scripts', 'warn');
       return [];
+    }
+  }
+
+  /** Bundled scripts become the files that fs_list_files() lists, by file name as on the device */
+  setBundledFiles(manifest, baseUrl = '') {
+    this._fsFiles.clear();
+    for (const entry of manifest) {
+      this._fsFiles.set(entry.file.split('/').pop(), `${baseUrl}/scripts/${entry.file}`);
     }
   }
 
@@ -68,7 +102,7 @@ export class LuaLoader {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const source = await res.text();
       this._currentScriptName = filename;
-      await this._execute(source, filename);
+      await this._execute(source, filename, `${baseUrl}/scripts/${filename.replace(/[^/]*$/, '')}`);
     } catch (e) {
       this.onStatusChange(`Load failed: ${e.message}`, 'error');
       this.onScriptError(e.message);
@@ -94,10 +128,16 @@ export class LuaLoader {
     // If it was loaded from file picker, we don't have the source again
     // so we try the server path; if unavailable, re-execute cached source
     if (this._currentSource) {
-      await this._execute(this._currentSource, this._currentScriptName);
+      await this._execute(this._currentSource, this._currentScriptName, this._scriptDir);
     } else {
       await this.loadFromServer(this._currentScriptName, baseUrl);
     }
+  }
+
+  /** Run edited source in place of the current script, under the same name and folder */
+  async runSource(source) {
+    this._currentScriptName = this._currentScriptName || 'edited.lua';
+    await this._execute(source, this._currentScriptName, this._scriptDir);
   }
 
   // ─── WEBSOCKET HOT-RELOAD ─────────────────────────────────────────────────
@@ -160,8 +200,15 @@ export class LuaLoader {
 
   // ─── FENGARI EXECUTION ────────────────────────────────────────────────────
 
-  async _execute(source, name) {
+  /**
+   * @param {string} source
+   * @param {string} name
+   * @param {string|null} dir – URL of the script's folder (ends in /), where fs_run_file looks
+   *                            for files that aren't bundled scripts; null for picked files
+   */
+  async _execute(source, name, dir = null) {
     this._currentSource = source;
+    this._scriptDir = dir;
 
     // Cleanup any previous script run
     this.api.reset();
@@ -219,20 +266,24 @@ export class LuaLoader {
       lua.lua_setglobal(L, luaStr(name));
     };
 
-    const getNum = (L2, idx) => lua.lua_tonumber(L2, idx);
     const getInt = (L2, idx) => Math.round(lua.lua_tonumber(L2, idx));
 
-    // grid_size_x() → number, grid_size_y() → number
+    // grid_size_x() → integer, grid_size_y() → integer (as on the device)
     setGlobal('grid_size_x', (L2) => {
-      lua.lua_pushnumber(L2, api.cols); return 1;
+      lua.lua_pushinteger(L2, api.cols); return 1;
     });
     setGlobal('grid_size_y', (L2) => {
-      lua.lua_pushnumber(L2, api.rows); return 1;
+      lua.lua_pushinteger(L2, api.rows); return 1;
     });
 
-    // grid_led(x, y, lum)
+    // grid_led(x, y, lum, rel) — rel adds lum to the current level
     setGlobal('grid_led', (L2) => {
-      api.grid_led(getInt(L2, 1), getInt(L2, 2), getInt(L2, 3)); return 0;
+      api.grid_led(getInt(L2, 1), getInt(L2, 2), getInt(L2, 3), lua.lua_toboolean(L2, 4)); return 0;
+    });
+
+    // grid_led_get(x, y) → 0–15 level
+    setGlobal('grid_led_get', (L2) => {
+      lua.lua_pushinteger(L2, api.grid_led_get(getInt(L2, 1), getInt(L2, 2))); return 1;
     });
 
     // grid_led_rgb(x, y, r, g, b)
@@ -240,9 +291,9 @@ export class LuaLoader {
       api.grid_led_rgb(getInt(L2, 1), getInt(L2, 2), getInt(L2, 3), getInt(L2, 4), getInt(L2, 5)); return 0;
     });
 
-    // grid_led_all(lum)
+    // grid_led_all(lum, rel)
     setGlobal('grid_led_all', (L2) => {
-      api.grid_led_all(getInt(L2, 1)); return 0;
+      api.grid_led_all(getInt(L2, 1), lua.lua_toboolean(L2, 2)); return 0;
     });
 
     // grid_refresh()
@@ -320,19 +371,14 @@ export class LuaLoader {
       lua.lua_pushnumber(L2, api.get_time()); return 1;
     });
 
-    // wrap(v, lo, hi) → number
-    setGlobal('wrap', (L2) => {
-      lua.lua_pushnumber(L2, api.wrap(getInt(L2, 1), getInt(L2, 2), getInt(L2, 3))); return 1;
-    });
+    if (this.monochrome) {
+      for (const fn of ['grid_led_rgb', 'grid_color', 'grid_color_intensity']) {
+        lua.lua_pushnil(L);
+        lua.lua_setglobal(L, luaStr(fn));
+      }
+    }
 
-    // clamp(v, lo, hi) → number  (iii firmware built-in)
-    setGlobal('clamp', (L2) => {
-      const v = getNum(L2, 1), lo = getNum(L2, 2), hi = getNum(L2, 3);
-      lua.lua_pushnumber(L2, Math.max(lo, Math.min(hi, v))); return 1;
-    });
-
-    // ps(fmt, ...) — iii firmware status-bar printf, silently ignored in emulator
-    setGlobal('ps', (_L2) => 0);
+    // wrap, clamp, ps and the other lib.lua helpers come from III_LIB below
 
     // collectgarbage(opt) — Fengari has no lua_gc and throws "lua_gc not implemented",
     // so answer like an idle collector: "count" → 0 KB, "step" → false, others → 0
@@ -361,10 +407,28 @@ export class LuaLoader {
 
     // math.random / math.randomseed  (already in lualib, but ensure it's active)
     // metro table: metro.init(fn, time, count)
-    this._injectMetro(L, lua, lauxlib, api, reportPcall);
+    // The metro warning waits until the script has loaded, so "✓ loaded" doesn't hide it.
+    let loaded = false;
+    let metroWarned = false;
+    const checkMetroLimit = () => {
+      const inUse = api._metros.filter(m => !m.freed).length;
+      if (!loaded || metroWarned || inUse <= III_METRO_COUNT) return;
+      metroWarned = true;
+      this.onStatusChange(`${name}: ${inUse} metros in use, counting the one slew takes at boot. iii has ${III_METRO_COUNT}, so on the device metro.init returns nil past that`, 'warn');
+    };
+    this._injectMetro(L, lua, lauxlib, api, reportPcall, checkMetroLimit);
+
+    // fs_list_files / fs_run_file / fs_read_file, and require = fs_run_file as in iii's lib.lua
+    this._injectFs(L, lua, lauxlib, reportPcall);
 
     // pset_init / pset_write / pset_read  (iii preset persistence, backed by localStorage)
     this._injectPset(L, lua, lauxlib);
+
+    // midi_out, slew, wrap, ps and the rest of iii's lib.lua (see iii-lib.js)
+    const lib = luaStr(III_LIB);
+    let libStatus = lauxlib.luaL_loadbuffer(L, lib, lib.length, luaStr('@lib.lua'));
+    if (libStatus === lua.LUA_OK) libStatus = lua.lua_pcall(L, 0, 0, 0);
+    reportPcall(L, libStatus, 'lib.lua');
 
     // ── Execute the Lua source ──────────────────────────────────────────
 
@@ -388,25 +452,52 @@ export class LuaLoader {
     }
 
     // ── Wire up event_grid from Lua globals ────────────────────────────
-    lua.lua_getglobal(L, luaStr('event_grid'));
-    const hasEventGrid = lua.lua_isfunction(L, -1);
-    lua.lua_pop(L, 1);
+    // Looked up on every press, as on the device: a script may define or replace
+    // event_grid later (selector clears it, then fs_run_file loads one that sets it).
+    // Integers as on the device, so `x .. ""` gives "1", not "1.0".
+    api.setEventGridHandler((x, y, z) => {
+      lua.lua_getglobal(L, luaStr('event_grid'));
+      if (!lua.lua_isfunction(L, -1)) { lua.lua_pop(L, 1); return; }
+      lua.lua_pushinteger(L, x);
+      lua.lua_pushinteger(L, y);
+      lua.lua_pushinteger(L, z);
+      reportPcall(L, lua.lua_pcall(L, 3, 0, 0), 'event_grid');
+    });
 
-    if (hasEventGrid) {
-      api.setEventGridHandler((x, y, z) => {
-        lua.lua_getglobal(L, luaStr('event_grid'));
-        lua.lua_pushnumber(L, x);
-        lua.lua_pushnumber(L, y);
-        lua.lua_pushnumber(L, z);
-        reportPcall(L, lua.lua_pcall(L, 3, 0, 0), 'event_grid');
-      });
-    }
+    // ── event_midi, the same way: when the script defines it, it gets all incoming MIDI
+    let echoWarned = false;
+    api.setEventMidiHandler((d1, d2, d3, echo) => {
+      lua.lua_getglobal(L, luaStr('event_midi'));
+      if (!lua.lua_isfunction(L, -1)) { lua.lua_pop(L, 1); return false; }
+      if (echo && !echoWarned) {
+        echoWarned = true;
+        this.onStatusChange(`${name} is receiving its own MIDI output (MIDI in and out may be the same device, or two devices both send clock). Pick another MIDI input to avoid a feedback loop.`, 'warn');
+      }
+      lua.lua_pushinteger(L, d1);
+      lua.lua_pushinteger(L, d2);
+      lua.lua_pushinteger(L, d3);
+      reportPcall(L, lua.lua_pcall(L, 3, 0, 0), 'event_midi');
+      return true;
+    });
+
+    // ── event_key(key): emulator only. A script that defines it gets key presses by name
+    // instead of the emulator's fixed pad presses.
+    api.setEventKeyHandler((key, repeat) => {
+      lua.lua_getglobal(L, luaStr('event_key'));
+      if (!lua.lua_isfunction(L, -1)) { lua.lua_pop(L, 1); return false; }
+      if (repeat) { lua.lua_pop(L, 1); return true; }
+      lua.lua_pushstring(L, luaStr(key));
+      reportPcall(L, lua.lua_pcall(L, 1, 0, 0), 'event_key');
+      return true;
+    });
 
     this.onStatusChange(`✓ ${name} loaded`, 'success');
     this.onScriptLoad(name, docs);
+    loaded = true;
+    checkMetroLimit();
   }
 
-  _injectMetro(L, lua, lauxlib, api, reportPcall) {
+  _injectMetro(L, lua, lauxlib, api, reportPcall, checkMetroLimit) {
     const { to_luastring } = window.fengari;
     const luaStr = (s) => to_luastring(s);
 
@@ -414,7 +505,9 @@ export class LuaLoader {
     //   m = metro.init(fn, time, count)  or  metro.init{event=fn, time=t, count=n}
     //   m:start([time], [count])  m:stop()
     //   m.time / m.count / m.event can be read and assigned; m.is_running, m.id are read-only
+    //   metro.free(id), metro.free_all() stop metros and give their slots back
     // The callback gets the stage (1..count, or -1 for an endless metro).
+    // iii has 12 metro slots. There is no limit here, but checkMetroLimit warns past 12.
 
     const optNum = (L2, idx) => lua.lua_isnumber(L2, idx) ? lua.lua_tonumber(L2, idx) : undefined;
     const fieldNum = (L2, idx, key) => {
@@ -451,6 +544,7 @@ export class LuaLoader {
 
       const metro = api.createMetro(wrappedFn, interval || 1, count === undefined ? -1 : Math.trunc(count));
       const id = api._metros.length;
+      checkMetroLimit();
 
       lua.lua_newtable(L2);
 
@@ -509,7 +603,106 @@ export class LuaLoader {
     });
     lua.lua_settable(L, -3); // metro.init = <cfn>
 
+    // metro.free(id) — stop the metro and stop counting it toward the 12.
+    // Anything but a metro id (e.g. the metro itself) errors, as it does on the device.
+    lua.lua_pushstring(L, luaStr('free'));
+    lua.lua_pushcfunction(L, (L2) => {
+      const m = lua.lua_isinteger(L2, 1) ? api._metros[lua.lua_tointeger(L2, 1) - 1] : undefined;
+      if (!m) {
+        lua.lua_pushstring(L2, luaStr(`metro.free: no metro with id ${lauxlib.luaL_tolstring(L2, 1) && lua.lua_tojsstring(L2, -1)} (pass m.id, not the metro)`));
+        return lua.lua_error(L2);
+      }
+      m.stop();
+      m.freed = true;
+      return 0;
+    });
+    lua.lua_settable(L, -3);
+
+    // metro.free_all()
+    lua.lua_pushstring(L, luaStr('free_all'));
+    lua.lua_pushcfunction(L, (_L2) => {
+      for (const m of api._metros) { m.stop(); m.freed = true; }
+      return 0;
+    });
+    lua.lua_settable(L, -3);
+
     lua.lua_setglobal(L, luaStr('metro'));
+  }
+
+  // ─── FILESYSTEM (fs_list_files, fs_run_file, fs_read_file) ───────────────
+
+  /**
+   * The device's flat filesystem, read-only: fs_list_files() lists the bundled scripts by
+   * file name, and fs_run_file(name) runs one in the current Lua state, which is how loader
+   * scripts such as selector and many-roads start another script. Names that aren't bundled
+   * scripts are looked up next to the running script (many-roads keeps its data file there).
+   */
+  _injectFs(L, lua, lauxlib, reportPcall) {
+    const { to_luastring } = window.fengari;
+    const luaStr = (s) => to_luastring(s);
+    const cache = new Map();
+
+    const readFile = (name) => {
+      if (cache.has(name)) return cache.get(name);
+      const url = this._fsFiles.get(name) ?? (this._scriptDir && !name.includes('/') ? this._scriptDir + name : null);
+      const text = url ? this.readFileSync(url) : null;
+      cache.set(name, text);
+      return text;
+    };
+
+    const listFiles = () => {
+      const files = [...this._fsFiles.keys()];
+      const own = (this._currentScriptName || '').split('/').pop();
+      if (own && !files.includes(own)) files.push(own);
+      return files;
+    };
+
+    // fs_list_files() → { "name.lua", ... }
+    lua.lua_pushcfunction(L, (L2) => {
+      const files = listFiles();
+      lua.lua_createtable(L2, files.length, 0);
+      files.forEach((f, i) => {
+        lua.lua_pushstring(L2, luaStr(f));
+        lua.lua_rawseti(L2, -2, i + 1);
+      });
+      return 1;
+    });
+    lua.lua_setglobal(L, luaStr('fs_list_files'));
+
+    // fs_read_file(name) → string | false
+    lua.lua_pushcfunction(L, (L2) => {
+      const text = readFile(lua.lua_tojsstring(L2, 1));
+      if (text === null) lua.lua_pushboolean(L2, 0);
+      else lua.lua_pushstring(L2, luaStr(text));
+      return 1;
+    });
+    lua.lua_setglobal(L, luaStr('fs_read_file'));
+
+    // fs_run_file(name) → first result of the chunk, or nil when it is missing or fails
+    lua.lua_pushcfunction(L, (L2) => {
+      const name = lua.lua_tojsstring(L2, 1);
+      const text = readFile(name);
+      if (text === null) {
+        this.onStatusChange(`fs_run_file: ${name} not found`, 'warn');
+        lua.lua_pushnil(L2);
+        return 1;
+      }
+      const code = luaStr(text);
+      const base = lua.lua_gettop(L2);
+      let status = lauxlib.luaL_loadbuffer(L2, code, code.length, luaStr(`@${name}`));
+      if (status === lua.LUA_OK) status = lua.lua_pcall(L2, 0, 1, 0);
+      if (status !== lua.LUA_OK) {
+        reportPcall(L2, status, name);
+        lua.lua_settop(L2, base);
+        lua.lua_pushnil(L2);
+      } else {
+        this.onStatusChange(`▶ ${name} (run by fs_run_file)`, 'info');
+      }
+      return 1;
+    });
+    lua.lua_pushvalue(L, -1);
+    lua.lua_setglobal(L, luaStr('fs_run_file'));
+    lua.lua_setglobal(L, luaStr('require'));
   }
 
   // ─── PSET (preset persistence, backed by localStorage) ──────────────────
@@ -635,6 +828,13 @@ export class LuaLoader {
         lua.lua_pushnil(L2);
         return 1;
       }
+    });
+
+    // ── pset_delete(slot) ────────────────────────────────────────────────
+    setGlobal('pset_delete', (L2) => {
+      const slot = Math.round(lua.lua_tonumber(L2, 1));
+      try { localStorage.removeItem(`${_psetNs}_slot_${slot}`); } catch (e) {}
+      return 0;
     });
   }
 }

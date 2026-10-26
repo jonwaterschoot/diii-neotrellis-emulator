@@ -12,24 +12,24 @@
         <meta name="author" content="jonwaterschoot">
       
       
-        <link rel="canonical" href="https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/firmware-installation/">
+        <link rel="canonical" href="https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/leaveseqr/">
       
       
-        <link rel="prev" href="../script-standards/">
+        <link rel="prev" href="../developer-guide/">
       
       
-        <link rel="next" href="../building-firmware/">
+        <link rel="next" href="../sandman/">
       
       
         
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+      <link rel="icon" href="../img/favicon.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
-        <title>Firmware Installation - diii-neotrellis-emulator Documentation</title>
+        <title>LeaveSeqr - diii-neotrellis-emulator Documentation</title>
       
     
     
@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#neotrellis-rp2040-firmware" class="md-skip">
+        <a href="#leaveseqr" class="md-skip">
           Skip to content
         </a>
       
@@ -116,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Firmware Installation
+              LeaveSeqr
             
           </span>
         </div>
@@ -233,18 +233,17 @@
   
   
   
-    
-    
-      <li class="md-tabs__item">
-        <a href="../main-readme/" class="md-tabs__link">
-          
+    <li class="md-tabs__item">
+      <a href="../getting-started/" class="md-tabs__link">
+        
   
   
-  Project Overview
+    
+  
+  Getting Started
 
-        </a>
-      </li>
-    
+      </a>
+    </li>
   
 
       
@@ -260,7 +259,27 @@
           
   
   
-  Emulator Usage
+  Using the Emulator
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../start-a-script/" class="md-tabs__link">
+          
+  
+  
+  Writing Scripts
 
         </a>
       </li>
@@ -282,7 +301,7 @@
           
   
   
-  Hardware & Firmware
+  Scripts
 
         </a>
       </li>
@@ -298,11 +317,11 @@
     
     
       <li class="md-tabs__item">
-        <a href="../serpentine-sequencer/" class="md-tabs__link">
+        <a href="../main-readme/" class="md-tabs__link">
           
   
   
-  Scripts
+  Project
 
         </a>
       </li>
@@ -390,6 +409,33 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -404,17 +450,17 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   
   <span class="md-ellipsis">
     
   
-    Project Overview
+    Using the Emulator
   
 
     
@@ -425,12 +471,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Project Overview
+    Using the Emulator
   
 
           </label>
@@ -443,14 +489,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../main-readme/" class="md-nav__link">
+      <a href="../walkthrough/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Main README
+    Walkthrough
   
 
     
@@ -471,14 +517,623 @@
   
   
     <li class="md-nav__item">
-      <a href="../roadmap/" class="md-nav__link">
+      <a href="../hardware-vs-emulator/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Roadmap
+    Hardware vs. Emulator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Writing Scripts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Writing Scripts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../start-a-script/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Start a Script
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../script-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Script Standard
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../colour/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Colour and Monochrome
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developer-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scripts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Scripts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LeaveSeqr
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LeaveSeqr
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Controls
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Controls">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#main-controls-present-on-all-screens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Main Controls (Present on all screens)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#screen-1-live-simulation-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Screen 1: Live Simulation (Default)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#screen-2-sequencer-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Screen 2: Sequencer Settings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#screen-3-scale-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Screen 3: Scale &amp; Environment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Screen 3: Scale &amp; Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#seasons" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Seasons
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changelog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changelog
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sandman/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sandman
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../serpentine-sequencer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Serpentine Sequencer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Serpentine Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multi-screen-test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Screen Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Project
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../main-readme/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    README
   
 
     
@@ -527,486 +1182,6 @@
   
 
     
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Emulator Usage
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Emulator Usage
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../walkthrough/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Walkthrough
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../script-standards/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Script Standards
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-    
-  
-  
-  
-    
-    
-    
-    
-      
-        
-        
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Hardware & Firmware
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Hardware & Firmware
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Firmware Installation
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Firmware Installation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#installing-the-firmware" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Installing the firmware
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#selecting-a-mode-at-startup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Selecting a mode at startup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#choosing-the-default-color" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Choosing the default color
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#loading-a-script" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Loading a script
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#recovery-bricked-pico" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Recovery (bricked Pico)
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building-firmware/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Building Firmware
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Scripts
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Scripts
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../serpentine-sequencer/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Serpentine Sequencer
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../multi-screen-test/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Multi-Screen Test
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../changelog/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Changelog
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
   </ul>
 </nav>
                   </div>
@@ -1024,50 +1199,165 @@
 
 
 
-<h1 id="neotrellis-rp2040-firmware">NeoTrellis RP2040 Firmware<a class="headerlink" href="#neotrellis-rp2040-firmware" title="Permanent link">&para;</a></h1>
-<p>This UF2 was built from a fork of <a href="https://github.com/okyeron/neotrellis-monome">okyeron's neotrellis repo</a>.</p>
-<hr />
-<h2 id="installing-the-firmware">Installing the firmware<a class="headerlink" href="#installing-the-firmware" title="Permanent link">&para;</a></h2>
-<ol>
-<li>Hold the <strong>boot button</strong> on the Pico while powering it on — it will mount as a drive in your file explorer / Finder.</li>
-<li>Drag <a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/raw/main/uf2s/neotrellis-iii-128-20261024-jonwtr-colorpicker.uf2">neotrellis-iii-128-20261024-jonwtr-colorpicker.uf2</a> into that drive. This is for a 16x8 grid.</li>
-<li>The Pico will reboot automatically with the new firmware.</li>
-</ol>
-<p>The previous build, <a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/raw/main/uf2s/neotrellis-iii-128-20260419-jonwtr-color-memory.uf2">neotrellis-iii-128-20260419-jonwtr-color-memory.uf2</a>, is kept as a fallback. The 20261024 build adds the default color picker below.</p>
-<hr />
-<h2 id="selecting-a-mode-at-startup">Selecting a mode at startup<a class="headerlink" href="#selecting-a-mode-at-startup" title="Permanent link">&para;</a></h2>
-<p>Hold the <strong>top-left (1.1) button</strong> while powering on to cycle between modes:</p>
+<h1 id="leaveseqr">LeaveSeqr<a class="headerlink" href="#leaveseqr" title="Permanent link">&para;</a></h1>
+<p>Ambient leaf physics sequencer for Neotrellis grids: leaves drift through the air, float on the water surface, and sink slowly to the mud. Three independent generative water tracks play notes as leaves pass over the playheads. Triops leap into the water to eat the sinking leaves, causing a bouncing bass echo delay.</p>
 <ul>
-<li><strong>1 pixel lit</strong> — regular serial / monome (norns) mode</li>
-<li><strong>3 pixels lit across the top row</strong> — diii mode</li>
+<li><strong>Author:</strong> jonwaterschoot</li>
+<li><strong>Version:</strong> v0.3.1</li>
 </ul>
-<p>Power off and repeat to toggle to the next mode.</p>
 <hr />
-<h2 id="choosing-the-default-color">Choosing the default color<a class="headerlink" href="#choosing-the-default-color" title="Permanent link">&para;</a></h2>
-<p>Hold the <strong>top-right button</strong> while powering on to open the color picker (20261024 build and later):</p>
+<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
+<p>Navigate the grid using three screens. Hold <strong>ALT</strong> (<code>x=1, y=3</code>) to cycle between the screens: <strong>Live</strong> (physics simulation), <strong>Seq</strong> (sequencer settings), and <strong>Scale</strong> (musical settings). By default, the sequencer runs at full 16 steps and runs at different relative speeds from top to bottom (surface is fastest, mid is slower, deep is the slowest).</p>
+<hr />
+<h2 id="controls">Controls<a class="headerlink" href="#controls" title="Permanent link">&para;</a></h2>
+<h3 id="main-controls-present-on-all-screens">Main Controls (Present on all screens)<a class="headerlink" href="#main-controls-present-on-all-screens" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Label</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x=1, y=8</td>
+<td>ALT</td>
+<td>Cycle screens: Live → Seq → Scale</td>
+</tr>
+<tr>
+<td>x=1, y=3</td>
+<td>Play/Stop</td>
+<td>Play/stop sequencer &amp; physics (Live only)</td>
+</tr>
+<tr>
+<td>x=16, y=3</td>
+<td>Freeze</td>
+<td>Pause leaves in water zones (Live only)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="screen-1-live-simulation-default">Screen 1: Live Simulation (Default)<a class="headerlink" href="#screen-1-live-simulation-default" title="Permanent link">&para;</a></h2>
+<p>The primary view where the ambient ecosystem lives.</p>
 <ul>
-<li>column 1 is white, the other columns are hues, and rows fade from full color (top) to pastel</li>
-<li>the bottom row previews brightness levels 1–15 in the chosen color</li>
-<li>press a color to choose it (it blinks), then press the top-right button to save and continue booting</li>
+<li><strong>Row 1 (Canopy):</strong> Leaves grow here. Tap a leaf to knock it loose, or tap an empty spot to plant.</li>
+<li><strong>Row 2 (Wind):</strong></li>
+<li><strong>x=1..3</strong>: Left wind — gusts push leaves horizontally to the right, and blows canopy loose.</li>
+<li><strong>x=14..16</strong>: Right wind — gusts push leaves horizontally to the left, and blows canopy loose.</li>
+<li><strong>Row 2..4 (Air Zone):</strong> Leaves drift slowly down. Wind pushes horizontally and sometimes upward.</li>
+<li><strong>Row 5 (Water Surface):</strong> Track 1, plays at base octave limit.</li>
+<li><strong>Row 6 (Underwater Mid):</strong> Track 2, plays one octave down.</li>
+<li><strong>Row 7 (Underwater Deep):</strong> Track 3, plays two octaves down.</li>
+<li><strong>Row 8 (Mud):</strong> Leaves collect and decay at the bottom. Triops emerge occasionally.</li>
 </ul>
-<p>The color is remembered and tints monochrome output in both modes: norns apps in serial mode, and diii scripts written for standard monochrome grids. Scripts that set their own colors with <code>grid_color()</code> or <code>grid_led_rgb()</code> are not affected. Hold top-left and top-right together to switch mode and pick a color in one go.</p>
 <hr />
-<h2 id="loading-a-script">Loading a script<a class="headerlink" href="#loading-a-script" title="Permanent link">&para;</a></h2>
-<p>Open the <strong>diii web app</strong> and upload a <code>.lua</code> script. You can set a script to auto-run at boot, or use a launcher script that presents a selector on startup.</p>
-<p>My launcher is <a href="https://github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii/doc/scripts/selector">selector.lua</a>. Every script on the device gets a colored slot. Press a slot once to show the script's name on the grid, then press it again to load it. Make it the boot script with <code>first("selector.lua")</code> in the diii REPL, and reboot to pick another script.</p>
-<blockquote>
-<p>[!NOTE]
-When uploading a script I have found it best to reboot the device and not to perform that action while a script is playing, non heavy scripts probably wont be an issue. 
-Either cycle power, or use the <code>reboot</code> button in the diii app.</p>
-</blockquote>
+<h2 id="screen-2-sequencer-settings">Screen 2: Sequencer Settings<a class="headerlink" href="#screen-2-sequencer-settings" title="Permanent link">&para;</a></h2>
+<p>Customize how the leaves trigger notes when they reach the water tracks.</p>
+<p><strong>Top Row (y=1) Track Options:</strong>
+1. <code>x=1</code> LEN — tap a track row twice to set loop start and end bounds (left-to-right is forward, right-to-left is reverse).
+2. <code>x=2</code> DIV — tap <code>x=1..6</code> on a track row to set track division (playback speed).
+3. <code>x=3</code> CH — tap <code>x=1..16</code> on a track row to set MIDI channel.
+4. <code>x=4</code> OCT — tap <code>x=1..8</code> on a track row to set octave offset bounds (-4 to +3).</p>
+<p><strong>Row 2-4 Controls:</strong>
+- <strong>BPM</strong>: <code>x=1..4, y=2</code> (-10, -1, +1, +10)
+- <strong>Wind Str</strong>: <code>x=1..3, y=3</code> (lo, mid, hi)
+- <strong>Density</strong>: <code>x=5..8, y=3</code> (off, lo, mid, hi)
+- <strong>Humanize</strong>: <code>x=1..3, y=4</code> (off, soft, heavy)
+- <strong>Triops</strong>: <code>x=5, y=4</code> (off, soft, strong)</p>
+<p><strong>Tracks:</strong>
+Modify the tracks by tapping at their live <code>y</code> positions (Rows 5, 6, 7).</p>
 <hr />
-<h2 id="recovery-bricked-pico">Recovery (bricked Pico)<a class="headerlink" href="#recovery-bricked-pico" title="Permanent link">&para;</a></h2>
-<p>If a bad script is set to run at boot and crashes the device:</p>
+<h2 id="screen-3-scale-environment">Screen 3: Scale &amp; Environment<a class="headerlink" href="#screen-3-scale-environment" title="Permanent link">&para;</a></h2>
+<p>Tune the harmony, environment, and physical appearance.</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Location</th>
+<th>Controls Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Scale Modes</strong></td>
+<td><code>x=1..7, y=1</code></td>
+<td>Labeled: MAJ, MIN, PMA, PMI, DOR, LYD, CUS</td>
+</tr>
+<tr>
+<td><strong>Black Keys</strong></td>
+<td><code>x=1,2,4,5,6, y=3</code></td>
+<td>Labeled: C#, D#, F#, G#, A# (aligned to grid)</td>
+</tr>
+<tr>
+<td><strong>White Keys</strong></td>
+<td><code>x=1..7, y=4</code></td>
+<td>Labeled: C, D, E, F, G, A, B</td>
+</tr>
+<tr>
+<td><strong>Octave Base</strong></td>
+<td><code>x=1..4, y=6</code></td>
+<td>Labeled: OC2, OC3, OC4, OC5</td>
+</tr>
+<tr>
+<td><strong>Season</strong></td>
+<td><code>x=1..4, y=7</code></td>
+<td>Labeled: SPR, SUM, AUT, WIN</td>
+</tr>
+<tr>
+<td><strong>Monochrome</strong></td>
+<td><code>x=6, y=7</code></td>
+<td>Toggle monochrome mode on/off</td>
+</tr>
+</tbody>
+</table>
+<h3 id="seasons">Seasons<a class="headerlink" href="#seasons" title="Permanent link">&para;</a></h3>
+<p>Seasons change leaf colors, note character, and MIDI CC filter automation simultaneously.</p>
+<table>
+<thead>
+<tr>
+<th>Season</th>
+<th>Colors</th>
+<th>Notes</th>
+<th>MIDI CC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SP</strong> Spring</td>
+<td>Bright greens</td>
+<td>Short, energetic · high velocity</td>
+<td>Neutral (CC 100)</td>
+</tr>
+<tr>
+<td><strong>SU</strong> Summer</td>
+<td>Warm yellow-greens</td>
+<td>Long, sustained · high velocity</td>
+<td>Neutral (CC 100)</td>
+</tr>
+<tr>
+<td><strong>AU</strong> Autumn</td>
+<td>Warm oranges &amp; reds</td>
+<td>Short–medium · velocity variance · 25% chord chance (third or fifth)</td>
+<td>Slow, wide filter sweeps</td>
+</tr>
+<tr>
+<td><strong>WI</strong> Winter</td>
+<td>Cool blues &amp; greys</td>
+<td>Long and short mixed · lower velocity · 15% echo chance</td>
+<td>Fast, jittery filter drift</td>
+</tr>
+</tbody>
+</table>
+<p>Spring and Summer leave the MIDI CC filter at 100 (fully open, no movement). Autumn and Winter drive a slow-moving CC ramp on CC 74 — Autumn sweeps broadly and slowly, Winter drifts fast and erratically. If your synth or DAW responds to CC 74 (filter cutoff), these seasons will animate the filter automatically.
+| <strong>Grid Dimming</strong> | <code>x=3..5, y=8</code>        | Grid brightness levels: lo, mid, max                         |
+| <strong>ALT</strong>          | <code>x=1, y=8</code>           | Momentary: exit settings; Double-tap: sticky mode            |</p>
+<hr />
+<h2 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Option 1:</strong> Boot into serial mode, then use the <strong>viii webapp</strong> — it has options to reformat storage and enter the bootloader.</li>
-<li><strong>Option 2:</strong> Flash a <a href="https://datasheets.raspberrypi.com/soft/flash_nuke.uf2">RPI Pico "nuke" UF2</a> to fully erase the flash and start fresh.</li>
+<li><strong>v0.3.1</strong> — Standardized Documentation Overlay: implemented full-word prefixes, coordinate alignment rules, and improved LDoc parser support.</li>
+<li><strong>v0.3.0</strong> — Initial stable release: ambient leaf physics, 3-screen UI, and generative sequencer.</li>
 </ul>
-<p>See the other <code>.md</code> files in this folder for guidance on writing scripts with a crash-fallback methodology.</p>
 
 
 

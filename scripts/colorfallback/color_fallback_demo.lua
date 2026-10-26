@@ -1,7 +1,7 @@
 -- scriptname: Color Fallback Demo
 -- v1.0.0
 -- @author: jonwaterschoot aka jonwtr
--- https://github.com/jonwaterschoot/diii-neotrellis-emulator/tree/de3f14acc5c8c2c969d4a53d6fa87458d3be568f/uf2s
+-- https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/colour/
 --
 -- Demonstrates the cross-device color/monochrome fallback pattern.
 -- 4 color zones of 4 columns each, split into top/bottom tiles at alternating brightness.
