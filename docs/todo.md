@@ -77,6 +77,7 @@ Target nav: Home · Getting started · Using the emulator (Walkthrough, Hardware
 - [x] ◐ View menu: light theme (the grid stays dark; darker accents for contrast) and pad corners (square / slightly round / round). Dark and slightly round stay the default; both are kept in the browser.
 - [x] Six side tabs fit again (they size by their label).
 - [x] Monochrome: ◐ View → Grid → Monochrome hides `grid_led_rgb`, `grid_color` and `grid_color_intensity` from the script, so it runs its own fallback as on a monome grid (switching reloads the script). Invert dropped: the light theme covers it.
+- [x] Mechatrellis keys (◐ View → Keys): dark keycaps close together with a glowing LED at the top middle; Fit uses the tighter gap. The light theme's grid panel is light grey.
 
 ## Tasks
 Moved into Step 4 above (2026-10-26); all done.

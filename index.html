@@ -16,6 +16,7 @@
     try {
       document.documentElement.dataset.theme = localStorage.getItem('diii.theme') || 'dark';
       document.documentElement.dataset.corners = localStorage.getItem('diii.corners') || 'slight';
+      document.documentElement.dataset.keys = localStorage.getItem('diii.keys') || 'neotrellis';
     } catch (e) { /* storage blocked: defaults */ }
   </script>
 
@@ -61,6 +62,9 @@
       --grid-panel: #111111;
       --grid-panel-border: #242424;
       --pad-radius: 3px;
+      --keycap: #1d1d1d;          /* Mechatrellis keys */
+      --keycap-edge: #2c2c2c;
+      --led-off: #2e2e2e;
       --font-mono: 'JetBrains Mono', monospace;
       --font-ui: 'Inter', sans-serif;
 
@@ -107,14 +111,14 @@
       --amber: #b45309;
       --red: #dc2626;
       --cyan: #0e7490;
-      --grid-panel: #161616;
-      --grid-panel-border: #2a2a2a;
+      --grid-panel: #cfcfcf;
+      --grid-panel-border: #bcbcbc;
     }
     :root[data-theme="light"] .tok-s { color: #3d7a37; }
-    /* The second grid is dimmed with opacity, which turns pale on a light page: darken it instead */
-    :root[data-theme="light"] .map-ghost-wrap { opacity: 1; filter: brightness(0.5); transition: filter 0.2s; }
-    :root[data-theme="light"] body.map-mode .map-ghost-wrap { filter: brightness(0.8); }
-    :root[data-theme="light"] .map-ghost-wrap:hover { filter: none; }
+    /* The second grid dims with opacity; on light grey, less of it keeps it readable */
+    :root[data-theme="light"] .map-ghost-wrap { opacity: 0.7; }
+    :root[data-theme="light"] body.map-mode .map-ghost-wrap { opacity: 0.85; }
+    :root[data-theme="light"] .map-ghost-wrap:hover { opacity: 1; }
     :root[data-theme="light"] .tok-k { color: #7c3aed; }
 
     *,
@@ -1079,9 +1083,42 @@
       transform: scale(0.94);
     }
 
-    .pad.lit {
-      /* Dynamic brightness set via JS */
-      filter: brightness(1.5);
+    /* A lit pad: the renderer sets --led (its colour), --led-glow and --led-edge */
+    .pad[data-lit] {
+      background: var(--led);
+      box-shadow: var(--led-glow);
+      border-color: var(--led-edge);
+    }
+
+    /* Mechatrellis keys (View menu): dark keycaps close together, with a small LED at the top */
+    :root[data-keys="mech"] #grid-container,
+    :root[data-keys="mech"] .map-ghost-grid {
+      gap: calc(var(--pad-gap) * 0.35);
+    }
+    :root[data-keys="mech"] .pad,
+    :root[data-keys="mech"] .pad[data-lit] {
+      background: var(--keycap);
+      border-color: var(--keycap-edge);
+      box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+    :root[data-keys="mech"] .pad[data-lit] {
+      border-color: var(--led-edge);  /* light from the LED under the key */
+    }
+    :root[data-keys="mech"] .pad::before {
+      content: '';
+      position: absolute;
+      top: 13%;
+      left: 50%;
+      width: 26%;
+      aspect-ratio: 1;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: var(--led-off);
+      pointer-events: none;
+    }
+    :root[data-keys="mech"] .pad[data-lit]::before {
+      background: var(--led);
+      box-shadow: 0 0 calc(var(--pad-size) * 0.08) var(--led), 0 0 calc(var(--pad-size) * 0.3) var(--led);
     }
 
     .pad.locked::after {
@@ -2265,6 +2302,9 @@
             <div class="menu-heading">Grid</div>
             <button data-grid-option="colour" title="NeoTrellis: the script can use colour">Colour</button>
             <button data-grid-option="mono" title="Like a monome grid: grid_led_rgb, grid_color and grid_color_intensity don't exist, so the script runs its monochrome fallback">Monochrome</button>
+            <div class="menu-heading">Keys</div>
+            <button data-keys-option="neotrellis" title="The whole pad lights up">NeoTrellis</button>
+            <button data-keys-option="mech" title="Dark keys close together, with an LED at the top">Mechatrellis</button>
             <div class="menu-heading">Pad corners</div>
             <button data-corners-option="square">Square</button>
             <button data-corners-option="slight">Slightly round</button>
@@ -2788,18 +2828,16 @@
           const visualIdx = _logicalToVisualIdx[i] ?? i;
           const pad = padEls[visualIdx];
           if (!pad) continue;
+          // The look (whole pad lit, or an LED on a key) is up to the CSS for the chosen keys
           if (r === 0 && g === 0 && b === 0) {
-            pad.style.background = 'var(--pad-empty)';
-            pad.style.boxShadow = 'none';
-            pad.style.borderColor = 'var(--pad-border)';
+            delete pad.dataset.lit;
           } else {
             r = ledG(r); g = ledG(g); b = ledG(b);
-            pad.style.background = `rgb(${r},${g},${b})`;
             const lum = r * 0.21 + g * 0.72 + b * 0.07;
-            pad.style.boxShadow = lum > 15
-              ? `0 0 ${Math.min(12, lum / 8)}px rgba(${r},${g},${b},0.6)`
-              : 'none';
-            pad.style.borderColor = `rgba(${r},${g},${b},0.35)`;
+            pad.dataset.lit = '';
+            pad.style.setProperty('--led', `rgb(${r},${g},${b})`);
+            pad.style.setProperty('--led-glow', lum > 15 ? `0 0 ${Math.min(12, lum / 8)}px rgba(${r},${g},${b},0.6)` : 'none');
+            pad.style.setProperty('--led-edge', `rgba(${r},${g},${b},0.35)`);
           }
         }
 
@@ -4500,10 +4538,11 @@
       const availW = isFS ? (winW - deadW) : Math.min(pane.clientWidth - 4, winW);
       const availH = (isFS ? winH : Math.min(pane.clientHeight - 4, winH));
 
-      // Geometric factors: gap is 0.4 * padSize
-      // contentSize = N * padSize + (N-1) * 0.4 * padSize = padSize * (1.4*N - 0.4)
-      const gridUnitsW = 1.4 * vc - 0.4;
-      const gridUnitsH = 1.4 * vr - 0.4;
+      // Geometric factors: gap is 0.4 * padSize (Mechatrellis keys: 0.35 of that)
+      // contentSize = N * padSize + (N-1) * gap = padSize * ((1 + g) * N - g)
+      const g = 0.4 * (document.documentElement.dataset.keys === 'mech' ? 0.35 : 1);
+      const gridUnitsW = (1 + g) * vc - g;
+      const gridUnitsH = (1 + g) * vr - g;
 
       // Padding on mobile is 12px fixed per side (total 24px + 2px border = 26px)
       // On fullscreen we can be tighter to maximize the grid (e.g. 4px per side = 10px total)
@@ -5542,6 +5581,7 @@
       const root = document.documentElement;
       viewMenu.querySelectorAll('[data-theme-option]').forEach(b => b.classList.toggle('active', b.dataset.themeOption === root.dataset.theme));
       viewMenu.querySelectorAll('[data-corners-option]').forEach(b => b.classList.toggle('active', b.dataset.cornersOption === root.dataset.corners));
+      viewMenu.querySelectorAll('[data-keys-option]').forEach(b => b.classList.toggle('active', b.dataset.keysOption === root.dataset.keys));
       viewMenu.querySelectorAll('[data-grid-option]').forEach(b => b.classList.toggle('active', (b.dataset.gridOption === 'mono') === loader.monochrome));
     }
     document.getElementById('btn-view-menu').addEventListener('click', e => {
@@ -5560,6 +5600,11 @@
       if (b.dataset.cornersOption) {
         root.dataset.corners = b.dataset.cornersOption;
         try { localStorage.setItem('diii.corners', root.dataset.corners); } catch (err) { /* not kept */ }
+      }
+      if (b.dataset.keysOption) {
+        root.dataset.keys = b.dataset.keysOption;
+        try { localStorage.setItem('diii.keys', root.dataset.keys); } catch (err) { /* not kept */ }
+        fitToWindow(); // the gap changed, so the keys can be bigger or must be smaller
       }
       if (b.dataset.gridOption && (b.dataset.gridOption === 'mono') !== loader.monochrome) {
         setGridMode(b.dataset.gridOption);
