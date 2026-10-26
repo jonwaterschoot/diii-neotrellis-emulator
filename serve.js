@@ -1,5 +1,5 @@
 /**
- * serve.js – Monome Grid Emulator Dev Server
+ * serve.js – diii NeoTrellis Emulator Dev Server
  *
  * Features:
  *   - Serves all static files from this directory
@@ -119,7 +119,7 @@ function watchScripts() {
 server.listen(PORT, () => {
   console.log('');
   console.log('  ┌─────────────────────────────────────────────┐');
-  console.log('  │  Monome Grid Emulator — Dev Server          │');
+  console.log('  │  diii NeoTrellis Emulator — Dev Server      │');
   console.log('  ├─────────────────────────────────────────────┤');
   console.log(`  │  http://localhost:${PORT}/                     │`);
   console.log(`  │  ws://localhost:${PORT}/ws  (hot-reload)       │`);
