@@ -10,6 +10,15 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet">
 
+  <link rel="icon" type="image/svg+xml" href="docs/img/favicon.svg">
+  <script>
+    // View settings (theme, pad corners) before the first paint, so a light page doesn't flash dark
+    try {
+      document.documentElement.dataset.theme = localStorage.getItem('diii.theme') || 'dark';
+      document.documentElement.dataset.corners = localStorage.getItem('diii.corners') || 'slight';
+    } catch (e) { /* storage blocked: defaults */ }
+  </script>
+
   <!-- Fengari Lua 5.3 runtime -->
   <script src="https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js"></script>
   <!-- Markdown renderer (for README guide panel) -->
@@ -18,13 +27,27 @@
   <style>
     /* ── DESIGN TOKENS ───────────────────────────────────────────────── */
     :root {
-      --bg: #080a0f;
-      --surface: #0e1117;
-      --surface2: #151b24;
-      --border: #1c2535;
-      --border2: #253045;
-      --text: #d6e0f0;
-      --muted: #4a6080;
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --surface2: #181818;
+      --surface-deep: #0c0c0c;   /* console, code */
+      --card: #141414;           /* cards, status pill */
+      --hover: #202020;          /* button hover */
+      --chip: #1b1b1b;           /* key hints */
+      --border: #242424;
+      --border2: #2e2e2e;
+      --text: #e0e0e0;
+      --text-dim: #9e9e9e;       /* descriptions */
+      --muted: #636363;
+      --faint: #424242;
+      --code-comment: #7d7d7d;
+      --map-line: #8c8c8c;
+      /* r, g, b of translucent overlays, used as rgba(var(--overlay), alpha) */
+      --overlay: 20, 20, 20;
+      --overlay-deep: 12, 12, 12;
+      --overlay-label: 27, 27, 27;
+      --divider: rgba(36, 36, 36, 0.6);
+      --slider-track: rgba(255, 255, 255, 0.1);
       --slider-tint: #968971;
       --slider-tint-active: #b0a48e;
       --accent: #dda43c;
@@ -33,8 +56,11 @@
       --amber: #f59e0b;
       --red: #ef4444;
       --cyan: #06b6d4;
-      --pad-empty: #111620;
-      --pad-border: #1c2535;
+      --pad-empty: #151515;
+      --pad-border: #242424;
+      --grid-panel: #111111;
+      --grid-panel-border: #242424;
+      --pad-radius: 3px;
       --font-mono: 'JetBrains Mono', monospace;
       --font-ui: 'Inter', sans-serif;
 
@@ -47,6 +73,49 @@
       /* Sidebar tokens */
       --sidebar-width: 320px;
     }
+
+    /* Pad corners (View menu) */
+    :root[data-corners="square"] { --pad-radius: 0; }
+    :root[data-corners="round"]  { --pad-radius: calc(var(--pad-size) * 0.3); }
+
+    /* Light theme (View menu). The grid keeps its dark panel and pads, like the hardware:
+       lit pads glow against dark. Accent colours get darker shades to read on white. */
+    :root[data-theme="light"] {
+      --bg: #f2f2f2;
+      --surface: #ffffff;
+      --surface2: #ebebeb;
+      --surface-deep: #fafafa;
+      --card: #f7f7f7;
+      --hover: #e6e6e6;
+      --chip: #ececec;
+      --border: #d9d9d9;
+      --border2: #c7c7c7;
+      --text: #1c1c1c;
+      --text-dim: #555555;
+      --muted: #767676;
+      --faint: #b0b0b0;
+      --code-comment: #8a8a8a;
+      --map-line: #8c8c8c;
+      --overlay: 250, 250, 250;
+      --overlay-deep: 255, 255, 255;
+      --overlay-label: 240, 240, 240;
+      --divider: rgba(0, 0, 0, 0.08);
+      --slider-track: rgba(0, 0, 0, 0.15);
+      --accent: #b8800f;
+      --accent-glow: #8a5f0b;
+      --green: #15803d;
+      --amber: #b45309;
+      --red: #dc2626;
+      --cyan: #0e7490;
+      --grid-panel: #161616;
+      --grid-panel-border: #2a2a2a;
+    }
+    :root[data-theme="light"] .tok-s { color: #3d7a37; }
+    /* The second grid is dimmed with opacity, which turns pale on a light page: darken it instead */
+    :root[data-theme="light"] .map-ghost-wrap { opacity: 1; filter: brightness(0.5); transition: filter 0.2s; }
+    :root[data-theme="light"] body.map-mode .map-ghost-wrap { filter: brightness(0.8); }
+    :root[data-theme="light"] .map-ghost-wrap:hover { filter: none; }
+    :root[data-theme="light"] .tok-k { color: #7c3aed; }
 
     *,
     *::before,
@@ -159,7 +228,7 @@
 
     .btn:hover {
       border-color: var(--accent);
-      background: #1a2030;
+      background: var(--hover);
     }
 
     .btn.primary {
@@ -214,6 +283,14 @@
     }
     .grid-preset-menu button:hover { background: var(--surface); }
     .grid-preset-menu button.active { color: var(--accent); }
+    .view-menu { min-width: 130px; }
+    .view-menu .menu-heading {
+      padding: 6px 10px 2px;
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
 
     /* Nav Links */
     .topbar-links {
@@ -262,7 +339,7 @@
 
     .file-pick-label:hover {
       border-color: var(--accent);
-      background: #1a2030;
+      background: var(--hover);
     }
 
     input[type=file] {
@@ -278,7 +355,7 @@
       border-radius: 20px;
       font-size: 11px;
       font-weight: 500;
-      background: #0c1520;
+      background: var(--card);
       border: 1px solid var(--border);
       font-family: var(--font-mono);
       min-width: 180px;
@@ -422,7 +499,7 @@
     }
     .map-frame.hl { opacity: 1; border-style: solid; }
     .map-label {
-      background: rgba(8, 12, 20, 0.92);
+      background: rgba(var(--overlay-deep), 0.92);
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 7px;
       padding: 8px 10px;
@@ -478,7 +555,7 @@
       white-space: nowrap;
       z-index: 62;
       line-height: 1;
-      background: rgba(20, 28, 40, 0.5);
+      background: rgba(var(--overlay-label), 0.5);
       border: 1px solid var(--border2);
       border-radius: 4px;
       padding: 2px 5px;
@@ -964,10 +1041,10 @@
     }
 
     .grid-panel {
-      background: var(--surface);
+      background: var(--grid-panel);
       padding: var(--pad-size);
       border-radius: 14px;
-      border: 1px solid var(--border);
+      border: 1px solid var(--grid-panel-border);
       box-shadow: 0 20px 60px #000a, inset 0 1px 0 rgba(255, 255, 255, 0.03);
       max-width: 95vw;
       max-height: 85vh;
@@ -987,7 +1064,7 @@
     .pad {
       background: var(--pad-empty);
       border: 1px solid var(--pad-border);
-      border-radius: 3px;
+      border-radius: var(--pad-radius);
       cursor: pointer;
       transition: background 50ms linear, box-shadow 50ms linear, border-color 50ms linear;
       user-select: none;
@@ -1072,13 +1149,13 @@
     }
 
     .hint-key {
-      background: #141c28;
+      background: var(--chip);
       border: 1px solid var(--border2);
       border-radius: 4px;
       padding: 1px 6px;
       font-family: var(--font-mono);
       font-size: 10px;
-      color: #8aa0c0;
+      color: var(--text-dim);
     }
 
     /* ── SIDE PANEL ─────────────────────────────────────────────────── */
@@ -1088,7 +1165,7 @@
     }
 
     .side-tab {
-      flex: 1;
+      flex: 1 1 auto;
       min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1135,7 +1212,7 @@
 
     /* Docs panel */
     .doc-script-meta {
-      background: #0c1520;
+      background: var(--card);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 10px 12px;
@@ -1204,7 +1281,7 @@
     }
 
     .fn-item {
-      background: #0c1520;
+      background: var(--card);
       border: 1px solid var(--border);
       border-radius: 6px;
       padding: 8px 10px;
@@ -1220,7 +1297,7 @@
 
     .fn-desc {
       font-size: 11px;
-      color: #8aa0c0;
+      color: var(--text-dim);
     }
 
     .fn-param {
@@ -1275,7 +1352,7 @@
       font-family: var(--font-mono);
       font-size: 11px;
       color: var(--text);
-      background: #060d14;
+      background: var(--surface-deep);
       border: 1px solid var(--border);
       border-radius: 6px;
       padding: 12px;
@@ -1358,7 +1435,7 @@
     .src-edit-wrap {
       flex: 1;
       min-height: 0;
-      background: #060d14;
+      background: var(--surface-deep);
       border: 1px solid var(--border);
       border-radius: 6px;
     }
@@ -1512,7 +1589,7 @@
 
     #panel-source [hidden] { display: none !important; }
 
-    .tok-c { color: #6b7f99; font-style: italic; }
+    .tok-c { color: var(--code-comment); font-style: italic; }
     .tok-s { color: #8fc98a; }
     .tok-n { color: var(--amber); }
     .tok-k { color: #c49cf0; }
@@ -1634,7 +1711,7 @@
       align-items: center;
       gap: 12px;
       z-index: 1000;
-      background: rgba(14, 20, 30, 0.4);
+      background: rgba(var(--overlay), 0.4);
       backdrop-filter: blur(10px);
       padding: 8px 12px;
       border-radius: 60px;
@@ -1682,7 +1759,7 @@
         position: fixed;
         right: 30px; 
         top: calc(95px + env(safe-area-inset-top, 0px)); /* Flow below the icon bar */
-        background: rgba(14, 20, 30, 0.96);
+        background: rgba(var(--overlay), 0.96);
         backdrop-filter: blur(15px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 14px;
@@ -1710,7 +1787,7 @@
         max-height: calc(100vh - 100px);
         overflow-y: auto;
         z-index: 1001;
-        background: rgba(14, 20, 30, 0.98);
+        background: rgba(var(--overlay), 0.98);
         backdrop-filter: blur(15px);
         border: 1px solid rgba(255, 255, 255, 0.12);
         box-shadow: 0 15px 50px rgba(0,0,0,0.8);
@@ -1753,7 +1830,7 @@
       width: 100%;
       height: 4px;
       cursor: pointer;
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--slider-track);
       border-radius: 2px;
     }
 
@@ -1761,7 +1838,7 @@
       width: 100%;
       height: 4px;
       cursor: pointer;
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--slider-track);
       border-radius: 2px;
     }
 
@@ -1837,7 +1914,7 @@
         right: 30px;
         transform: translateY(-50%);
         flex-direction: column-reverse; /* Swap icons order for natural thumb reach */
-        background: rgba(14, 20, 30, 0.6);
+        background: rgba(var(--overlay), 0.6);
         gap: 16px;
         padding: 16px 10px;
       }
@@ -1972,7 +2049,7 @@
       gap: 4px 8px;
       align-items: baseline;
       padding: 3px 10px 3px 10px;
-      border-bottom: 1px solid rgba(28,37,53,0.6);
+      border-bottom: 1px solid var(--divider);
       /* No animation/transition — too expensive at MIDI event rates */
     }
     .mm-entry:hover { background: rgba(255,255,255,0.03); }
@@ -1993,9 +2070,9 @@
     .mm-dir.out { color: var(--green); }
     .mm-type { font-size: 11px; }
     .mm-type.note-on  { color: var(--green); }
-    .mm-type.note-off { color: #4a6080; }
+    .mm-type.note-off { color: var(--muted); }
     .mm-type.cc       { color: var(--amber); }
-    .mm-type.clock    { color: #33445a; }
+    .mm-type.clock    { color: var(--faint); }
     .mm-type.other    { color: var(--muted); }
     .mm-bytes {
       font-size: 9px;
@@ -2015,7 +2092,7 @@
     }
     .mm-counter-note  { color: var(--green); }
     .mm-counter-cc    { color: var(--amber); }
-    .mm-counter-clock { color: #33445a; }
+    .mm-counter-clock { color: var(--faint); }
     .mm-counter-in    { color: var(--cyan); }
     .mm-counter-out   { color: var(--green); }
     #panel-midi {
@@ -2179,6 +2256,18 @@
           </svg>
           Full View
         </button>
+        <div class="grid-preset-wrap" id="view-menu-wrap">
+          <button class="btn" id="btn-view-menu" title="Theme and pad shape">◐ View ▾</button>
+          <div class="grid-preset-menu view-menu" id="view-menu">
+            <div class="menu-heading">Theme</div>
+            <button data-theme-option="dark">Dark</button>
+            <button data-theme-option="light">Light</button>
+            <div class="menu-heading">Pad corners</div>
+            <button data-corners-option="square">Square</button>
+            <button data-corners-option="slight">Slightly round</button>
+            <button data-corners-option="round">Round</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2519,7 +2608,7 @@
     <div id="hot-indicator" style="display:none;align-items:center;gap:6px;font-size:11px;color:#06b6d4">
       <span class="status-dot hot"></span> Hot-reload active
     </div>
-    <span style="color:#1c2535">Monome Grid Emulator · Fengari Lua 5.3</span>
+    <span style="color:var(--border)">Monome Grid Emulator · Fengari Lua 5.3</span>
   </footer>
 
   <script type="module">
@@ -3681,7 +3770,7 @@
       if (m.name || m.version || m.author) {
         html += `<div class="doc-script-meta">
       <h2>${m.name || 'Script'}</h2>
-      ${m.description ? `<div style="font-size:12px;color:#8aa0c0;margin:3px 0 6px">${m.description}</div>` : ''}
+      ${m.description ? `<div style="font-size:12px;color:var(--text-dim);margin:3px 0 6px">${m.description}</div>` : ''}
       <div class="meta-row">
         ${m.version ? `<span>${m.version}</span>` : ''}
         ${m.author ? `<span>by ${m.author}</span>` : ''}
@@ -3717,7 +3806,7 @@
               html += `<div class="fn-item">
             <div class="fn-sig">${fn.signature}</div>
             ${fn.description ? `<div class="fn-desc">${fn.description}</div>` : ''}
-            ${fn.params.map(p => `<div class="fn-param"><strong>${p.name}</strong> <em style="color:#4a6080">${p.ptype}</em> ${p.text}</div>`).join('')}
+            ${fn.params.map(p => `<div class="fn-param"><strong>${p.name}</strong> <em style="color:var(--muted)">${p.ptype}</em> ${p.text}</div>`).join('')}
           </div>`;
             }
           }
@@ -5376,7 +5465,7 @@
             const midY = (lCy + gCy) / 2;
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             path.setAttribute('class', 'map-connection map-connection-cross');
-            path.setAttribute('stroke', groupInfo.color || '#7090b0');
+            path.setAttribute('stroke', groupInfo.color || getComputedStyle(document.documentElement).getPropertyValue('--map-line').trim());
             path.setAttribute('d', `M${lCx},${lCy} C${lCx},${midY} ${gCx},${midY} ${gCx},${gCy}`);
             svg.appendChild(path);
           });
@@ -5435,6 +5524,36 @@
         }
       });
     }
+
+    // ── View menu: theme and pad corners, remembered in this browser ──
+    const viewMenu = document.getElementById('view-menu');
+    function syncViewMenu() {
+      const root = document.documentElement;
+      viewMenu.querySelectorAll('[data-theme-option]').forEach(b => b.classList.toggle('active', b.dataset.themeOption === root.dataset.theme));
+      viewMenu.querySelectorAll('[data-corners-option]').forEach(b => b.classList.toggle('active', b.dataset.cornersOption === root.dataset.corners));
+    }
+    document.getElementById('btn-view-menu').addEventListener('click', e => {
+      e.stopPropagation();
+      viewMenu.classList.toggle('open');
+      syncViewMenu();
+    });
+    viewMenu.addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      const root = document.documentElement;
+      if (b.dataset.themeOption) {
+        root.dataset.theme = b.dataset.themeOption;
+        try { localStorage.setItem('diii.theme', root.dataset.theme); } catch (err) { /* not kept */ }
+      }
+      if (b.dataset.cornersOption) {
+        root.dataset.corners = b.dataset.cornersOption;
+        try { localStorage.setItem('diii.corners', root.dataset.corners); } catch (err) { /* not kept */ }
+      }
+      syncViewMenu();
+    });
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#view-menu-wrap')) viewMenu.classList.remove('open');
+    });
 
     btnGridPreset.addEventListener('click', e => {
       e.stopPropagation();
