@@ -77,11 +77,12 @@ The REPL helpers from iii's `lib.lua` (`first`, `ls`, `rm`, `cat`, `mem`, `gc`) 
 | Functions | Where |
 |---|---|
 | `grid_led` (with `rel`), `grid_led_all` (with `rel`), `grid_led_get`, `grid_refresh`, `grid_size_x`, `grid_size_y`, `grid_intensity` | Device and emulator |
-| `grid_led_rgb`, `grid_color`, `grid_color_intensity` | NeoTrellis firmware and emulator. Not on a monochrome monome grid: check `if grid_led_rgb then` ([monochrome fallback](main-readme.md#monochrome-fallback-implementation)) |
+| `grid_led_rgb`, `grid_color`, `grid_color_intensity` | NeoTrellis firmware and emulator. Not on a monochrome monome grid: check `if grid_led_rgb then` ([monochrome fallback](colour.md)) |
 | `grid_set_screen`, `display_screen`, `get_focused_screen`, `grid_brightness` | Emulator only ([multiple screens](multi-screen-test.md)) |
+| `event_key(key)` | Emulator only: the device has no keyboard, so it never calls it |
 
 - **Size and rotation.** A device's grid size is fixed. In the emulator you pick it in the toolbar, or a script's manifest sets it. `grid_size_x()` and `grid_size_y()` report the chosen size.
-- **Colours.** The emulator brightens dim LEDs to look like real ones, but it doesn't copy the NeoTrellis colour shifts at low brightness. See [colour accuracy](main-readme.md#hardware-limitations-color-accuracy).
+- **Colours.** The emulator brightens dim LEDs to look like real ones, but it doesn't copy the NeoTrellis colour shifts at low brightness. See [Colour and monochrome](colour.md#dim-colours-on-neotrellis).
 
 ## Errors, printing and time
 
@@ -95,5 +96,5 @@ Use `get_time()` to measure time between events, not as a clock.
 
 ## Only in the emulator
 
-- Keyboard shortcuts: R reloads the script, and the other shortcuts press fixed pads, whatever the script. See [keyboard shortcuts](walkthrough.md#keyboard-shortcuts).
+- The keyboard: R reloads the script. A script with `event_key` gets the other keys; for other scripts, some keys press fixed pads. See [keyboard shortcuts](walkthrough.md#keyboard-shortcuts).
 - The built-in synth, the effects and the filter play what the script sends as MIDI. The device only sends MIDI.

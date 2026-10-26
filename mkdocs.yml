@@ -10,21 +10,24 @@ docs_dir: docs
 
 nav:
   - Home: index.md
-  - Project Overview:
-    - Main README: main-readme.md
-    - Roadmap: roadmap.md
-    - To Do: todo.md
-  - Emulator Usage:
+  - Getting Started: getting-started.md
+  - Using the Emulator:
     - Walkthrough: walkthrough.md
     - Hardware vs. Emulator: hardware-vs-emulator.md
-    - Script Standards: script-standards.md
-  - Hardware & Firmware:
-    - Firmware Installation: firmware-installation.md
-    - Building Firmware: building-firmware.md
+  - Writing Scripts:
+    - Start a Script: start-a-script.md
+    - Script Standard: script-standards.md
+    - Colour and Monochrome: colour.md
+    - Developer Guide: developer-guide.md
   - Scripts:
+    - LeaveSeqr: leaveseqr.md
+    - Sandman: sandman.md
     - Serpentine Sequencer: serpentine-sequencer.md
+    - Serpentine Changelog: changelog.md
     - Multi-Screen Test: multi-screen-test.md
-    - Changelog: changelog.md
+  - Project:
+    - README: main-readme.md
+    - To Do: todo.md
 
 theme:
   name: material

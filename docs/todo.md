@@ -37,13 +37,36 @@ Done 2026-10-26; the UI part is not yet tried in a browser.
 - [x] Clear link to the (llm) example: "Write your own → Script template" in the dropdown loads `template/myscript.lua` with `GUIDE.md` in the Guide tab, which now links `LLM_INSTRUCTIONS.md`. The Docs tab's empty state points there too.
 - [x] README links and images now resolve against the script's own folder instead of the emulator page.
 
-### Step 4 — Docs (the four tasks below)
+### Step 4 — Docs
 - [x] Hardware vs. Emulation Differences: `docs/hardware-vs-emulator.md` (in the docs nav under Emulator Usage), 2026-10-26.
 - [x] Found while writing it: **↓ Device** checked for Lua 5.1, but the device runs Lua 5.5, so it flagged valid code (`//`, bit operators). It now flags what the device really refuses: assigning to a `for` loop variable (read-only in 5.5). `LLM_INSTRUCTIONS.md` said Lua 5.4; now 5.5.
-- [ ] Consolidate Getting Started: firmware now comes from the release; `building-firmware.md` (a copy of the firmware README) can become a link to the firmware repo.
-- [ ] README script list: list all bundled scripts by group (Music / Color demos / Tests, from `scripts/manifest.json`) and point to the template (`scripts/template/`, "Write your own" in the dropdown). "Available Scripts" and "My scripts" are out of date (e.g. the `serpentineseqr_dev.lua` link is broken).
-- [ ] Restructure the Walkthrough: UI only, developer content to a developer guide.
+- [x] Consolidate Getting Started: `docs/getting-started.md` (browser, local, NeoTrellis grid). Building the firmware links to the firmware README.
+- [x] README script list: by group, with the template; the README is now the short pillar page.
+- [x] Restructure the Walkthrough: UI only, current. Internals → `docs/developer-guide.md`.
+- [x] Docs audit below, done 2026-10-26: new `colour.md`, `start-a-script.md` (the template guide), LeaveSeqr page; `uf2s/` and `roadmap.md` merged and removed; script standard and guide corrected. The site builds without warnings and all links resolve.
+- [x] Found during the audit: live reload didn't work for scripts in subfolders (`fs.watch` wasn't recursive), and the multi-screen test's thumbnail clicks no longer matched its name. Both fixed.
+- [x] New screenshots (2026-10-26): `emulator_screenshot2.png` (Live Manual, README and walkthrough) and `emulator_screenshot_editor.png` (Source editor, walkthrough).
+- [x] **`event_key` was never called** (Sandman, LeaveSeqr and the template defined it). Now the emulator calls `event_key(key)` on each key press when a script defines it, instead of its fixed pad presses (2026-10-26). LeaveSeqr's handles Tab now (it relied on the Tab → x1, y8 pad), and Sandman's hints match its handler. Documented in the walkthrough, script standard, guide, template and LLM instructions.
 - [ ] MIDI Documentation: last, needs my screenshots once the UI is stable.
+
+#### Docs audit (2026-10-26)
+
+The README is the pillar: what this is, what it can do, and links into the docs. The docs go deeper without repeating it. Firmware details live in the firmware repo and its releases; here we only link.
+
+| File | Now | Plan |
+|---|---|---|
+| `README.md` | Story, colour details, outdated script list, generic setup | ✓ Condense: what it is, links, scripts (mine by group + others + template), credits, license. Colour details → colour page |
+| `docs/index.md` | Overview that repeats the README; also the emulator's About dialog | ✓ Short docs home: one paragraph + map of the docs |
+| `docs/walkthrough.md` | Outdated (old file names, `emulator.html`), mixes UI and internals | ✓ UI only, current. Internals → developer guide |
+| `SCRIPT_STANDARD.md` | Reference; some stale parts (import "planned", missing reference file, README "special formatting" that doesn't exist) | ✓ Keep as the reference, fix stale parts |
+| `scripts/template/GUIDE.md` | Tutorial; repeats colour advice | ✓ Keep; colour → link to the colour page; add to the docs site |
+| `scripts/template/LLM_INSTRUCTIONS.md` | Self-contained for LLMs | Keep self-contained (repetition is the point) |
+| `uf2s/readme.md` | Firmware install notes | ✓ → `docs/getting-started.md` |
+| `uf2s/copy-readme-…md` | Copy of the firmware README, with dead links | ✓ Deleted; links the firmware repo |
+| `roadmap.md` | Old list; much done | ✓ Merged into "Ideas" below; deleted |
+| Script READMEs | Manuals | ✓ Keep; LeaveSeqr added to the docs site |
+
+Target nav: Home · Getting started · Using the emulator (Walkthrough, Hardware vs. emulator) · Writing scripts (Start a script, Script standard, Colour & monochrome, Developer guide) · Scripts · Project (README, To do).
 
 ### Step 5 — New sound features
 - [ ] Drum sounds (up to seven, channel per sound, randomizer; helps iiinvert).
@@ -54,10 +77,7 @@ Done 2026-10-26; the UI part is not yet tried in a browser.
 - [ ] Rounded-corner toggle, other UI options (monochrome, invert, light mode; dark stays default).
 
 ## Tasks
-- [ ] **Consolidate 'Getting Started'**: Combine firmware flashing (`firmware-installation.md`), building (`building-firmware.md`), and general setup into a single, cohesive setup guide.
-- [ ] **Restructure the Walkthrough**: Extract the detailed Lua execution logic and LDoc API reference out of `walkthrough.md` and move it to a dedicated developer-focused `script-standards.md` or `developer-guide.md`. Keep `walkthrough.md` solely for navigating the emulator UI.
-- [ ] **Hardware vs. Emulation Differences**: Create a specific page clearly outlining the differences between running scripts natively in the browser emulator versus exporting and running them natively on the hardware.
-- [ ] **MIDI Documentation**: Add screenshots and clearer diagrams explaining MIDI connectivity and the challenges with multiple timers/clock syncing logic so script developers understand the physical constraints.
+Moved into Step 4 above (2026-10-26). Left: **MIDI Documentation**: screenshots and diagrams of MIDI connections, and of the timing and clock-sync limits, so script writers understand them.
 
 --
 
@@ -154,6 +174,25 @@ Settled in Step 1; what's left for script writers is on the [Hardware vs. Emulat
 
 - **Firmware bug** (for the firmware fork): lib.lua's `slew.deinit()` calls `metro.free(slew.id)`, but `slew.id` is the metro, not its number, so it throws on the device and in the emulator. Fix: `metro.free(slew.id.id)`, or store the number.
 - **sluiiice** calls `metro.free(strumclock)` with the metro; worth reporting to its author (see its note above).
+
+## Ideas (from the old roadmap.md, 2026-10-26)
+
+**Serpentine**
+- Make the death animation faster, or speed it up over the last 2–3 bars.
+- The panic button doesn't (fully) work.
+- BPM sync in or out (earlier attempts failed; `event_midi` now gets clock, see stepiii for an example).
+- Docs: the spawn quantity control needs a title.
+
+**Emulator**
+- Show which pads are held (right-click hold); the yellow border is hard to see on Serpentine's yellow.
+- Search or filter in the script list.
+- A changelog for the emulator itself.
+- How can someone add their script to the list? Answer in the docs: open an issue or a pull request adding it to `scripts/external.json`.
+- Script standard: a `@type hold|toggle` annotation for momentary vs. toggle pads.
+
+**Ports**
+- Serpentine on norns (shield XL): can it keep its colours?
+- An Anbernic version, with a synth driven by the NeoTrellis, or a bigger grid on its screen.
 
 ## Synth / sound
 

@@ -1,241 +1,122 @@
-# Universal Monome Grid Lua Emulator — Walkthrough
+# Walkthrough
 
-A browser-based emulator that runs **real `.lua` scripts natively** using the
-[Fengari](https://fengari.io) Lua 5.3 runtime, with a Node.js hot-reload dev
-server. Designed as a universal development tool for any Monome-compatible grid
-script.
+The emulator's screen, part by part. To get it running, see [Getting started](getting-started.md).
 
----
+![Sandman in the emulator: the grid turned 270°, its second screen next to it, and its code open in the Source tab](img/emulator_screenshot_editor.png)
 
-## Screenshot
+## Loading a script
 
-![Emulator screenshot](img/emulator_v1-1_screenshot.png)
+The script list at the top has these groups:
 
-*The emulator running `serpentine_dev.lua` — snake in motion, docs panel populated
-from LDoc comments
+- **Recent:** scripts you imported or opened, and scripts you edited, kept in this browser. **✕ Clear recent** empties it.
+- **Music, Colour demos, Tests, Write your own:** the scripts that come with the emulator.
+- **External scripts:** scripts by other people, loaded from their own repositories each time.
+- **tehn:** scripts from monome's iii-scripts.
 
----
+Pick one and press **▶ Load**. Other ways to load a script:
 
-## Project Structure
+- **Open File:** a `.lua` file from your computer.
+- **⇱ Import script repo:** paste a GitHub or Codeberg address, such as `github.com/owner/repo` or `owner/repo`. The emulator finds the `.lua` file and the README.
 
-```
-emulator/
-├── emulator.html           ← Main UI (grid, script browser, docs/state/console panel)
-├── serve.js                ← Node.js dev server + WebSocket hot-reload broadcaster
-├── package.json            ← Single dependency: ws
-├── docs/
-│   └── walkthrough.md      ← This file
-├── scripts/
-│   ├── manifest.json       ← Script registry (name, file, version, description)
-│   ├── serpentine_dev.lua  ← Live dev copy (synced from parent folder)
-│   └── serpentine.lua      ← Stable reference copy
-└── engine/
-    ├── grid-api.js       ← Hardware shim layer
-    ├── lua-loader.js       ← Fengari execution bridge + hot-reload WS client
-    └── doc-extractor.js    ← LDoc-style comment parser
-```
+The other buttons:
 
----
+- **↻ Reload** (or R) starts the script again.
+- **↓ Source** downloads a bundled script as it is.
+- **↓ Device** downloads a copy without comments, ready to upload, and warns about code the device won't load (see [Hardware vs. emulator](hardware-vs-emulator.md)).
 
-## Quick Start
+The status bar next to them shows what's happening, including errors and warnings. Scripts can set their grid size and rotation; the emulator switches to it when they load.
 
-```powershell
-# From inside the emulator/ directory:
-node serve.js
-```
+## The grid
 
-Open **http://localhost:3141/** in any browser.
+- **Click** a pad to press it.
+- **Right-click** holds a pad down; right-click again to let go. Use it for chords, or for a button you'd otherwise hold.
+- **Grid** sets the size (8×8, 16×8, 8×16, 16×16), **↻ 0°** rotates it, and the zoom slider and **⤢ Fit** set how big it is on screen.
+- **Full View** shows only the grid. Its buttons open the sound and zoom controls; Esc leaves.
 
-> The File Picker button works even without the server — you can drag any `.lua`
-> file from disk directly.
+The line under the grid shows the script's own keyboard shortcuts, if it lists any.
 
----
+### Scripts with more than one screen
 
-## Architecture
+Some scripts draw more than one screen, such as a main screen and a settings page.
 
-### 1. Script Loading
+- Small thumbnails of each screen sit under the grid. Click one to show that screen.
+- **⊞ Dual View** shows a second screen next to the main grid.
 
-`emulator.html` fetches `scripts/manifest.json` on startup and populates the
-dropdown selector. Clicking **▶ Load** fetches the `.lua` source over HTTP and
-passes it to the Lua runtime. The **Open File** button accepts any local `.lua`
-without requiring the server.
+See [multiple screens](multi-screen-test.md) for how a script does this.
 
-### 2. Fengari Execution (`engine/lua-loader.js`)
+### Live Manual
 
-```
-Source (.lua)
-     │
-     ▼
-luaL_newstate()         ← fresh Lua VM per script load
-luaL_openlibs()         ← math, string, table, etc.
-     │
-     ├─ Inject globals  ← grid_led, midi_note_on, metro.init, wrap, get_time…
-     │
-luaL_loadbuffer()       ← compile Lua source
-lua_pcall()             ← execute
-     │
-     └─ Capture event_grid global → wired to pad clicks
-```
+The **Live Manual** switch draws the script's controls over the grid: labels with lines to the pads they belong to. The labels come from comments in the script (see the [script standard](script-standards.md)). A panel with the script's guide opens next to it.
 
-All MonomeAPI functions are injected as C-closures that delegate to the JS
-`MonomeAPI` class.
+![LeaveSeqr with the Live Manual on, in Dual View](img/emulator_screenshot2.png)
 
-> **Fengari API note:** In `fengari-web@0.1.4`, `to_luastring` is a **top-level
-> export** on `window.fengari`, not nested inside `fengari.lua`. Always
-> destructure it as:
-> ```js
-> const { lua, lualib, lauxlib, to_luastring } = window.fengari;
-> ```
+## The side panel
 
-### 3. Grid Rendering (`engine/grid-api.js`)
-
-| Lua call | JS result |
+| Tab | Shows |
 |---|---|
-| `grid_led(x, y, lum, rel)` | writes mono `{r,g,b}` to frame buffer, using current global tint; `rel` adds `lum` to the current level |
-| `grid_led_get(x, y)` | returns the pad's 0–15 level (`grid_led_rgb` doesn't change it) |
-| `grid_led_rgb(x, y, r, g, b)` | writes RGB to frame buffer |
-| `grid_color(r, g, b)` | sets a global tint for subsequent `grid_led()` / `grid_led_all()` output |
-| `grid_led_all(lum, rel)` | fills entire frame buffer, respecting current global tint |
-| `grid_refresh()` | flushes buffer → updates `.pad` DOM elements |
-| `grid_color_intensity(val)` | sets master brightness multiplier |
+| **Docs** | The script's name, version and author, and its controls, read from the comments in the script |
+| **Guide** | The script's README |
+| **State** | The starting values of simple variables in the script |
+| **Source** | The script's code, coloured, with line numbers; see below |
+| **Console** | Everything the status bar showed. The script's own `print` output goes to the browser's developer console (F12) |
+| **MIDI** | Every MIDI message going in and out; see below |
 
-Every `grid_refresh()` call applies the master brightness and sets
-`background` + `box-shadow` CSS on each pad for the glow effect.
+Drag the edge of the panel to make it wider.
 
-`grid_color()` is a global tint helper; it does not set per-pixel color. For true
-per-pixel RGB output, use `grid_led_rgb()`. `grid_color_intensity()` adjusts the
-final brightness of rendered output.
+### Source
 
-### 4. Hot-Reload (`serve.js` + `lua-loader.js`)
+- **Wrap** wraps long lines. When a Lua error names a line, that line is marked, and the link at the top jumps to it.
+- **✎ Edit** opens the code in an editor. **▶ Run** (or Ctrl+Enter) runs your version. **Auto-run** runs it again a second after you stop typing.
+- Lines you changed are flagged: amber for changed, green for added, a red tick where lines were removed. Click a flag to put that part back, or **↺ Restore all**. Ctrl+Z undoes a restore.
+- Your edited version is kept under Recent. It isn't saved to a file: use **↓ Device** or copy it out.
 
-```
-Edit .lua file on disk
-        │
-    fs.watch()                 ← serve.js watches scripts/
-        │
-    WebSocket broadcast        ← { type: "file_changed", name: "..." }
-        │
-    browser receives message   ← lua-loader.js
-        │
-    re-fetch + re-execute      ← ~150ms turnaround
-```
+### MIDI monitor
 
-The WebSocket reconnects automatically if the server restarts.
+The buttons at the top filter what's shown: notes, CC, clock, other messages, incoming, outgoing. **⏸ Pause** stops capturing (the list and the counters at the bottom) and **⌫ Clear** empties it.
 
-### 5. Documentation Extraction (`engine/doc-extractor.js`)
+## Sound
 
-The doc extractor scans Lua source for LDoc-style comments and populates the
-**Docs** and **State** sidepanel tabs automatically after each script load.
+The sound module under the grid plays every note the script sends:
 
-**Recognised patterns:**
+- **Vol** and the speaker button. Sound starts muted; the first click on the grid turns it on.
+- **ADSR:** attack, decay, sustain and release of each note.
+- **Delay:** amount, time and feedback.
+- **Reverb:** amount and decay. A new decay applies when you let go of the slider.
+- **Filter:** a low-pass filter, which also follows a MIDI CC (74 by default) from the script or from MIDI in.
 
-```lua
--- scriptname: My Script      ← populates script meta card
--- v1.2.3
--- @author: yourname
--- llllllll.co/t/thread-link
+The synth also plays when a MIDI output is selected. Mute it to hear only your own synth.
 
--- @section Grid Layout        ← creates a named section in the Docs tab
+## MIDI
 
--- x=1..8, y=1: Some control  ← control map entry (location + description)
--- x=1, y=8: ALT toggle
+Pick a **MIDI In** and **MIDI Out** at the top (Chrome or Edge); **↻** looks for new devices.
 
---- Short description.         ← function doc (triple-dash)
--- @tparam number x  Column (1-based)
--- @treturn boolean  Success flag
-local function my_fn(x) ... end
+- **Out** sends the script's notes, CCs and clock.
+- **In** goes to the script's `event_midi`, for scripts that follow an external clock or a keyboard. For a script without `event_midi`, incoming notes press pads instead.
 
-local bpm = 120                ← captured in the State tab (simple scalars)
-```
+If the same device is both input and output, a script can hear its own messages; the status bar warns when that happens. More in [Hardware vs. emulator](hardware-vs-emulator.md#midi).
 
----
+## Keyboard shortcuts
 
-## Keyboard Shortcuts
+**R** always reloads the script. The line under the grid shows what the other keys do in the loaded script.
 
-| Key | Grid equivalent | Action |
-|-----|----------------|--------|
-| `↑ ↓ ← →` | D-PAD (x15-16, y7-8) | Steer snake |
-| `Tab` | ALT (x1, y8) | Open settings (hold) |
-| `Space` | ALT (x1, y8) | Sticky settings toggle |
-| `1` / `2` | x10-11, y3 | BPM −10 / −1 |
-| `3` / `4` | x12-13, y3 | BPM +1 / +10 |
-| `A` | x1, y3 | Cycle autopilot: NON → SEM → AUT |
-| `R` | — | Reload current script |
+A script can handle keys itself, with `event_key` (see the [script standard](script-standards.md#6-keyboard-shortcuts)). Sandman and LeaveSeqr do: Tab moves to their next screen. For a script without `event_key`, these keys press fixed pads:
 
----
+| Key | Presses |
+|---|---|
+| Tab | x1, y8, while the key is down |
+| Space | x1, y8 |
+| ↑ ← ↓ → | x15 y7, x14 y8, x15 y8, x16 y8 |
+| 1, 2, 3, 4 | x10–x13, y3 |
+| A | x1, y3 |
 
-## Adding a New Script
+These match Serpentine's layout (ALT, the D-pad, tempo, autopilot). Keys don't reach the grid while you type in a text field, or with Ctrl or Cmd held.
 
-1. Copy your `.lua` file into `emulator/scripts/`
-2. Add an entry to `emulator/scripts/manifest.json`:
+## Kept in your browser
 
-```json
-{
-  "name": "My Script",
-  "file": "my_script.lua",
-  "version": "1.0.0",
-  "description": "What it does"
-}
-```
+The emulator remembers, in this browser only:
 
-3. The dropdown will include it on next page load (or reload).
+- the Recent list, including edited scripts
+- presets that scripts save with `pset_write`
+- the Source tab's Wrap and Auto-run settings
 
----
-
-## LDoc Annotation Cheatsheet
-
-Paste this header at the top of any script to enable full doc extraction:
-
-```lua
--- scriptname: Script Name
--- v1.0.0
--- @author: yourname
--- llllllll.co/t/thread
-
--- A one-line description shown under the title.
-
--- @section Controls
--- x=1..8, y=1: Main slider — does X
--- x=1, y=8: ALT toggle — opens settings
-
--- @section Internal
---- Initialise the game state.
--- @tparam number seed  Random seed
-local function init(seed) ... end
-```
-
----
-
-## MIDI Output
-
-Connect a MIDI output via the bottom bar dropdown. The emulator sends:
-- `0x90` Note On (from `midi_note_on`)
-- `0x80` Note Off (from `midi_note_off`)
-
-Web Audio synthesis runs as a fallback whenever no MIDI output is selected,
-using a triangle-wave oscillator with configurable volume, attack, and release
-(sliders below the grid).
-
----
-
-## Extending the Hardware Shim
-
-To add a new API function for a Lua script to call, edit `engine/grid-api.js`
-to add the JS-side implementation, then register it in `engine/lua-loader.js`
-using `setGlobal`:
-
-```js
-// In lua-loader.js _execute(), after other setGlobal calls:
-setGlobal('my_new_fn', (L2) => {
-  const val = getInt(L2, 1);   // first Lua argument
-  api.my_new_fn(val);
-  return 0;                    // number of return values pushed
-});
-```
-
-```js
-// In grid-api.js:
-my_new_fn(val) {
-  // JS implementation
-}
-```
+Clearing the site's data in your browser removes them.

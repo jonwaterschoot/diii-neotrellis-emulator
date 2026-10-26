@@ -34,63 +34,23 @@ Fill in every field:
 
 ---
 
-## Step 3 — Declare your keyboard shortcuts (optional)
+## Step 3 — Keyboard shortcuts (optional, emulator only)
 
-Add `@key` lines in the header block:
+Handle keys in `event_key`, and list them with `@key` lines in the header so they show under the grid:
 
 ```lua
--- @key ↑↓←→: Steer
+-- @key Tab: Next screen
 -- @key Space: Play/Stop
--- @key Tab: Settings
-```
 
-These appear automatically in the hint bar below the grid.
-
-<details>
-<summary><strong>▸ How key-to-pad wiring works (with examples)</strong></summary>
-
-The emulator translates certain keyboard keys into **pad press events** — it calls `event_grid(x, y, z)` exactly as if the user had clicked that pad. **Your script decides what that coordinate means.** The wiring below is just how the serpentine reference script uses those pads; you are free to wire any pad to anything.
-
-The only truly fixed key is `R` (reload) — that is handled by the emulator itself and cannot be overridden.
-
-**Example wiring (serpentine reference):**
-
-| Key | Pad fired | What serpentine does with it |
-|-----|-----------|------------------------------|
-| `↑` `↓` `←` `→` | x=15 y=7 / x=14 y=8 / x=15 y=8 / x=16 y=8 | D-PAD steering |
-| `Tab` | x=1, y=8 (press + key-up release) | ALT — momentary hold |
-| `Space` | x=1, y=8 (press only) | ALT — sticky toggle |
-| `1` `2` `3` `4` | x=10–13, y=3 | BPM −10 / −1 / +1 / +10 |
-| `A` / `a` | x=1, y=3 | Autopilot toggle |
-| Right-click | any pad | Hold pad (z=1 until release) |
-
-**Concrete example — how this lands in your script:**
-
-When the user presses `↑`, the emulator fires:
-```lua
-event_grid(15, 7, 1)   -- z=1 = pressed
-```
-In serpentine that coordinate is the UP button of the D-PAD. In your script it could be anything — a note trigger, a page flip, a tempo nudge. The key just picks the coordinates; `event_grid` decides the meaning:
-
-```lua
-function event_grid(x, y, z)
-  if z == 0 then return end  -- ignore releases
-
-  if x == 15 and y == 7 then
-    -- Arrow-Up (or a physical pad tap at that spot) lands here.
-    -- Do whatever makes sense for your script:
-    my_page = math.max(1, my_page - 1)
-    redraw()
-  end
+function event_key(key)
+  if key == "tab" then next_screen()
+  elseif key == "space" then toggle_play() end
 end
 ```
 
-To declare whichever keys you use for the hint bar:
-```lua
--- @key ↑↓: Page up/down   ← just a label — you choose what it means
-```
+`key` is the key's name: `"space"`, `"tab"`, `"enter"`, `"up"`, `"down"`, `"left"`, `"right"`, or the character in lower case (`"a"`, `"1"`). It's called on each press, not on release. R always reloads the script.
 
-</details>
+The device has no keyboard, so make every action reachable from the grid too. Scripts without `event_key` get fixed pad presses instead (Tab and Space press x1, y8, the arrows press x14–16, y7–8); the [script standard](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/script-standards/#6-keyboard-shortcuts) has the details.
 
 ---
 
@@ -165,129 +125,32 @@ The template shows the minimal structure. Expand from there.
 
 ## Step 6b — Colour
 
-The emulator supports both **RGB (NeoTrellis)** and **monochrome (Monome)** grids. Your script can target either or both.
+A NeoTrellis grid shows colour; a monome grid shows brightness levels 0–15. The colour functions only exist on the NeoTrellis firmware (and in the emulator), so check before calling them.
 
-| Call | When to use |
-|------|-------------|
-| `grid_led_rgb(x, y, r, g, b)` | RGB grids — r/g/b each 0–255 |
-| `grid_led(x, y, lum)` | Monochrome grids — lum 0–15 |
-| `grid_led_all(lum)` | Fill entire grid (0 = off) |
-| `grid_color_intensity(val)` | Master brightness multiplier |
-
-**The cross-device pattern** — write once, run on both:
+**One colour for the whole grid:** set a tint once, then draw with `grid_led` as usual.
 
 ```lua
--- Put this helper at the top of your script.
--- On NeoTrellis: uses full RGB. On monochrome: converts to luminance.
+if grid_color then grid_color(255, 120, 20) end -- amber on NeoTrellis, white elsewhere
+grid_led(1, 1, 15)
+```
+
+**Several colours:** draw every pad through one helper that falls back to brightness levels.
+
+```lua
 local function spx(x, y, r, g, b)
   if grid_led_rgb then
     grid_led_rgb(x, y, r, g, b)
   else
-    local lv = math.floor(math.max(r, g, b) / 17)
-    if lv < 4 and (r > 0 or g > 0 or b > 0) then lv = 4 end
-    grid_led(x, y, lv)
+    local level = math.floor(math.max(r, g, b) / 17)
+    if level < 4 and (r > 0 or g > 0 or b > 0) then level = 4 end -- 1–3 are too dim to see
+    grid_led(x, y, level)
   end
 end
 
--- Then just call spx() everywhere instead of grid_led / grid_led_rgb:
-spx(1, 1, 255, 80, 20)   -- orange on RGB, maps to ~lv15 on monochrome
-spx(2, 1, 20, 100, 255)  -- blue on RGB, maps to ~lv6 on monochrome
+spx(1, 1, 255, 80, 20) -- orange, or level 15 on a monome grid
 ```
 
-The threshold `lv < 4` ensures dimly-coloured pads are still visibly lit on monochrome hardware — pure black deliberately falls through to 0.
-
-**Full working example:** [`color_fallback_demo.lua`](../colorfallback/color_fallback_demo.lua) (in the parent repo at `scripts/colorfallback/`) — four colour zones with fallback, each pad cycles through brightness stages on press.
-If using this template standalone: [view on GitHub](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/colorfallback/color_fallback_demo.lua).
-
----
-
-### Single-colour tint — the simple case
-
-If you only want **one colour across the whole grid** (like all-amber, or all-cyan) and don't need different hues per pad, you don't need `spx()` at all. Just call `grid_color(r, g, b)` once and keep using plain `grid_led()`:
-
-```lua
--- Set the global tint once at startup — everything drawn with grid_led()
--- will come out in this colour, scaled by its brightness level (0–15).
-grid_color(255, 120, 20)   -- amber tint
-
--- Now draw exactly as you would for monochrome — no RGB tables, no spx():
-grid_led(1, 1, 15)   -- bright amber
-grid_led(2, 1, 8)    -- mid amber
-grid_led(3, 1, 4)    -- dim amber
-grid_led(4, 1, 0)    -- off
-grid_led_all(0)      -- clear (also respects tint, but 0 is always black)
-grid_refresh()
-```
-
-`grid_color` sets a **global tint** — it multiplies every `grid_led` luminance value by that colour. The default tint is white `(255, 255, 255)`, which is why plain `grid_led` looks white/grey without it.
-
-**Comparison at a glance:**
-
-| Approach | When to use | Code change needed |
-|----------|-------------|-------------------|
-| `grid_color(r, g, b)` + `grid_led` | One colour for the whole grid, varying brightness | One line at the top — nothing else changes |
-| `spx(x, y, r, g, b)` | Multiple colours on one grid (or RGB + monochrome fallback) | Replace every `grid_led` call with `spx()` |
-| `grid_led_rgb(x, y, r, g, b)` | Full per-pixel colour, RGB hardware only | Direct call, no fallback |
-
-> **Hardware note:** `grid_color` affects the emulator and the NeoTrellis (RGB hardware) identically — it shifts the tint before writing to the frame buffer. On an original monochrome Monome grid the tint has no effect because the hardware only receives a brightness byte, not RGB. If hardware compatibility matters and you want a tinted *look* on monochrome too, use `spx()` instead.
-
----
-
-### ⚠ Hardware edge case — dim mixed-colour pixels lose their hue
-
-On the physical NeoTrellis, each RGB sub-LED is driven by PWM. At very low duty cycles, individual channels can't sustain their colour: they effectively snap to off before the others do, because each sub-LED has a **minimum threshold** below which it produces no visible light.
-
-**The orange-goes-red problem** is the clearest example. Orange is roughly R=255, G=120, B=0. At dim levels the calculated values shrink proportionally:
-
-```
-full bright (lv=15): R=255  G=120  B=0   → looks orange ✓
-half bright (lv=8):  R=136  G=64   B=0   → still orange ✓
-dim        (lv=3):   R=51   G=24   B=0   → may look orange-ish
-very dim   (lv=1):   R=17   G=8    B=0   → G likely falls below LED threshold
-                                          → hardware shows red, not orange ✗
-```
-
-The green channel drops below the hardware's minimum drive level and disappears, leaving only red. The emulator looks correct because it has no such threshold — which is one of the ways the emulator and hardware can diverge.
-
-**Workaround options:**
-
-1. **Floor your minimum brightness** — don't go below lv 4–5 for mixed-colour pads. The `spx()` helper already does this for the luminance fallback; apply the same idea explicitly in your draw logic:
-
-   ```lua
-   -- Instead of drawing at lv=1 (which may shift hue on hardware),
-   -- use lv=0 (off) or jump straight to lv=5:
-   local function safe_lv(lv)
-     if lv <= 0 then return 0 end
-     return math.max(5, lv)   -- avoid the dim-but-hue-broken zone
-   end
-   ```
-
-2. **Use `grid_led_rgb` with pre-scaled values** — compute the dim colour yourself at a ratio that keeps all channels above their threshold:
-
-   ```lua
-   -- Dim orange that stays orange on hardware:
-   -- Scale down uniformly but keep green channel >= ~20
-   local function dim_orange(x, y, scale)   -- scale 0.0–1.0
-     local r = math.max(0, math.floor(255 * scale))
-     local g = math.max(0, math.floor(120 * scale))
-     -- if g would fall below ~20, either zero it (snap to red) or
-     -- keep a minimum to preserve the hue:
-     if g > 0 and g < 20 then g = 20 end
-     grid_led_rgb(x, y, r, g, 0)
-   end
-   ```
-
-3. **Accept it** — for many scripts the very-dim range is rarely seen and the snap-to-red is barely noticeable. It's worth knowing about rather than always working around.
-
-> The exact threshold varies between NeoTrellis hardware batches and the firmware's LED driver settings. Test on your device if colour accuracy at low brightness matters to your design.
-
----
-
-**Full colour API reference:**
-- [Emulator Walkthrough → Grid Rendering](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/walkthrough/) — look for the **"Grid Rendering"** heading and the `grid_led` / `grid_led_rgb` table.
-  > *If that URL has moved: open the project docs, navigate to **Emulator Usage → Walkthrough**, and search the page for `grid_led_rgb`.*
-- [Hardware & Compatibility info](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/) — look for **"Monome vs NeoTrellis (Color Setup)"**.
-  > *If that URL has moved: open the project docs **Home** page and search for `color setup`.*
+Dim tinted colours can change hue on NeoTrellis hardware, which the emulator doesn't show. The details, measured thresholds and test scripts are in [Colour and monochrome](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/colour/). Full example: [`color_fallback_demo.lua`](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/colorfallback/color_fallback_demo.lua).
 
 ---
 
@@ -315,6 +178,7 @@ Open the top-level `scripts/manifest.json` and add an entry:
 ```json
 {
   "name": "My Sequencer",
+  "group": "Music",
   "file": "mysequencer/mysequencer.lua",
   "readme": "mysequencer/README.md",
   "description": "What it does",
@@ -324,32 +188,22 @@ Open the top-level `scripts/manifest.json` and add an entry:
 }
 ```
 
-After saving, your script will appear in the emulator's script selector.
+After saving, your script appears in the emulator's script list, under its `group` (scripts with the same group are listed together, in file order). `gridSize` sets the grid when it loads; add `"orientation": "portrait"` for a script played with the grid turned 90°.
 
 ---
 
 ## Step 9 — Write your README.md
 
-The emulator renders certain H2 sections with special formatting:
-
-| Section        | How it renders |
-|----------------|----------------|
-| `## Usage`     | Getting-started block |
-| `## Controls`  | Reference table |
-| `## Settings`  | Inline settings docs |
-| `## Notes`     | Callout block |
-| `## Changelog` | Collapsed by default |
-
-Any other H2 is rendered as plain markdown.
+Fill in the template's `README.md`: it's the manual people read in the Guide tab. Usage, Controls, Settings, Notes and Changelog are a good order; the [script standard](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/script-standards/#3-readmemd-recommended-for-github-repos) has more.
 
 ---
 
 ## Quick reference
 
-- **Full standard:** [Script Standards](https://jonwaterschoot.github.io/diii-neotrellis-emulator/script-standards/) — hosted docs, always up to date
-  - Raw file (for offline use / LLMs): [`SCRIPT_STANDARD.md`](https://raw.githubusercontent.com/jonwaterschoot/diii-neotrellis-emulator/main/SCRIPT_STANDARD.md)
-- **Reference script:** [`serpentine_dev.lua`](../serpentineSeqr/serpentine_dev.lua) (parent repo) · [view on GitHub](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/serpentine_dev.lua)
-- **Reference README:** [`serpentineSeqr/README.md`](../serpentineSeqr/README.md) (parent repo) · [view on GitHub](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/README.md)
+- **Script standard:** [hosted docs](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/script-standards/), or the raw file for offline use and LLMs: [`SCRIPT_STANDARD.md`](https://raw.githubusercontent.com/jonwaterschoot/diii-neotrellis-emulator/main/SCRIPT_STANDARD.md)
+- **Before uploading to a grid:** [Hardware vs. emulator](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/hardware-vs-emulator/)
+- **Reference script:** [`serpentine_dev.lua`](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/serpentine_dev.lua)
+- **Reference README:** [`serpentineSeqr/README.md`](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/README.md)
 
 ---
 

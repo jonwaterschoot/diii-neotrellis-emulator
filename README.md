@@ -1,152 +1,41 @@
 # diii-neotrellis-emulator
 
-A browser-based emulator for loading Lua scripts designed for Monome and NeoTrellis grids. This project was born from my first tests of making an interactive manual for my serpentine script. I soon started implementing sound and thought i might as well build a full webapp to also emulate other scripts.
+A browser emulator for [monome iii](https://monome.org/docs/iii/) grid scripts. It runs the same Lua scripts as a NeoTrellis or monome grid, plays them through a built-in synth or MIDI, and shows each script's controls on the grid as a live manual.
 
-This is a vibecoded project, but none the less I have spent many hours building this and learning about the eco system.
+**[Open the emulator](https://jonwaterschoot.github.io/diii-neotrellis-emulator/)** · **[Documentation](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/)**
 
-I have a few diy projects from okyeron,  and it was through that discord server that I got intruiged by the new diii possibilities.
+![LeaveSeqr in the emulator, with the Live Manual showing its controls on two screens](docs/img/emulator_screenshot2.png)
 
-I built my own version of the firmware looking to create compatibility with og monome grid. I do not own any original monome geaar unfortunately.
+## What you can do
 
-I also hope I'm not breaking any licensing things, if so please let me know. I thought it be best if I also shared under the gpl license.
+- **Play scripts:** the bundled ones, scripts by others (loaded from their own repositories), any GitHub or Codeberg repository, or a file from your computer.
+- **Hear them:** a built-in synth with delay and reverb, MIDI out to a synth or DAW, and MIDI in for scripts that follow a clock or a keyboard.
+- **Read them:** each script's controls are drawn over the grid, its README shows in the Guide tab and its code in the Source tab.
+- **Write them:** edit and run a script in the browser, or in your own editor with live reload. **↓ Device** makes a smaller copy for uploading and warns about code the device won't load.
 
-## Scripting & Hardware Compatibility
+## Getting started
 
-![Color fallback demo on NeoTrellis after monochrome viii mode](docs/img/neotrellis_diii_color_fallback_viii.gif)
+- [Use it in the browser](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/getting-started/#use-it-in-the-browser), nothing to install.
+- [Run it on your computer](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/getting-started/#run-it-on-your-computer) to write scripts: `npm install`, then `npm start`.
+- [Put scripts on a NeoTrellis grid](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/getting-started/#put-scripts-on-a-neotrellis-grid): the firmware is on the [firmware release page](https://github.com/jonwaterschoot/neotrellis-monome/releases/latest).
 
-*Recording of `color_fallback_demo.lua` on NeoTrellis hardware, showing the device after using viii for the monochrome version of the test and then toggling pixels on the device.*
+## Documentation
 
-![Color fallback test on NeoTrellis device with pixel interaction](docs/img/neotrellis_diii_color.gif)
+- [Walkthrough](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/walkthrough/): the emulator's screen, part by part.
+- [Hardware vs. emulator](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/hardware-vs-emulator/): what behaves differently on the device, and what to check before uploading.
+- [Start a script](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/start-a-script/), the [script standard](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/script-standards/) and [colour and monochrome](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/colour/): writing scripts that work on both kinds of grid.
+- [Developer guide](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/developer-guide/): how the emulator works inside.
 
-*Recording of `color_fallback_demo.lua` on NeoTrellis hardware, showing the fallback test running on device with interactive pixel toggling.*
+## Scripts
 
-I wrote a quick [readme guide](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/uf2s/readme.md)in the uf2s directory with some quick tips to get the custom firmware for pico neotrellis up and running. The UF2 files themselves are on the [firmware release page](https://github.com/jonwaterschoot/neotrellis-monome/releases/latest).
+My scripts, as grouped in the emulator's script list:
 
-The emulator supports scripts written for both the original **Monome Grid** (monochrome) and the **Adafruit NeoTrellis** (RGB). To ensure your scripts are portable across different hardware targets, the following compatibility patterns are recommended.
+- **Music:** [LeaveSeqr](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/leaveseqr/README.md) (falling leaves become three sequencer tracks), [Sandman](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/sandman/README.md) (falling sand, leaves and water as music), [Serpentine](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/README.md) (a snake game sequencer).
+- **Colour demos:** [colour fallback demo](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/colorfallback/color_fallback_demo.lua), [monochrome fallback](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/colorfallback/monochrome_fallback.lua), [colour workaround demo](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/colorfallback/color-workaround-demo.lua), [text runner](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/displayfun/textrunner.lua).
+- **Tests:** [multiple screens](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/multiplescreen-test/README.md), [grid colour](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/colorfallback/test-grid-color.lua), [colour threshold](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/colorfallback/color-threshold-test.lua), [power](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/powertest/power_test.lua).
+- **Write your own:** the [script template](https://github.com/jonwaterschoot/diii-neotrellis-emulator/tree/main/scripts/template), with a step-by-step [guide](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/template/GUIDE.md) and [instructions to give an LLM](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/template/LLM_INSTRUCTIONS.md).
 
-### Monochrome Fallback Implementation
-
-When developing for RGB grids, it is best practice to include a fallback for monochrome devices. This allows your script to run on standard Monome hardware without modification.
-
-#### 1. Feature Detection
-Use the presence of `grid_led_rgb` to determine if the hardware supports per-pixel color.
-
-```lua
-if grid_led_rgb then
-    -- RGB Hardware logic
-    grid_led_rgb(x, y, 255, 120, 0) -- Orange
-else
-    -- Monochrome Fallback logic
-    grid_led(x, y, 15) -- Full Brightness
-end
-```
-
-#### 2. Global Tinting vs. Per-Pixel Color
-When firmware supports it, `grid_color(r, g, b)` sets a global tint for subsequent `grid_led()` / `grid_led_all()` output. This is useful when you want a single color theme across the grid without per-pixel overrides.
-
-- `grid_color(r, g, b)`: Sets the global tint for `grid_led()` and `grid_led_all()` output.
-- `grid_led_rgb(x, y, r, g, b)`: Sets true per-pixel RGB color.
-- `grid_color_intensity(level)`: Sets a master brightness multiplier for the rendered output.
-
-In practice, use `grid_color()` for tinted monochrome-style modes, and `grid_led_rgb()` when you need independent colors on the same grid.
-
-#### 3. Graceful Degradation
-Scripts like `monochrome_fallback.lua` demonstrate how to handle state transitions:
-- **Rainbow/Color Modes**: active only if `grid_led_rgb` is available.
-- **Intensity Modes**: fallback to `grid_led(x, y, 0-15)` when color is unavailable.
-- **Auto-Initialization**: Detect hardware on script load to set default animation modes.
-
-```lua
--- Example from monochrome_fallback.lua
-if not grid_led_rgb then 
-    anim_mode = 1 -- Force Monochrome mode
-    palette_rgb = false 
-end
-```
-
-## Hardware Limitations & Color Accuracy
-
-### NeoTrellis Color Rendering Issues
-
-**Low Brightness Color Shift**: At brightness levels 4-7, NeoTrellis LEDs exhibit inconsistent color rendering where cyan/blue tints may appear orange or reddish. This is due to physical LED characteristics and PWM limitations at low duty cycles.
-
-**Confirmed Thresholds** (based on hardware testing):
-- **Level 1-2**: Physically invisible on tinted `grid_led()` calls
-- **Level 3**: First visible level on tinted `grid_led()` calls, but colors may be inaccurate
-- **Level 4-7**: Visible but cyan/blue tints often render as orange/reddish
-- **Level 8+**: Generally accurate color reproduction
-- **RGB overrides**: `grid_led_rgb()` provides better color accuracy even at low brightness levels
-
-**Testing Results**: Using `color-threshold-test.lua` on NeoTrellis hardware shows that tinted `grid_led()` calls become invisible at levels 1-2 and show color shifts at levels 3-7, while `grid_led_rgb()` calls maintain better color fidelity throughout the range.
-
-![Color threshold test demonstration](docs/img/neotrellisEmulator_color_treshold_test_lua.gif)
-
-*Systematic testing of color accuracy across brightness levels. Left side: tinted grid_led() calls (may shift on hardware). Right side: RGB overrides (maintains color accuracy).*
-
-**Cross-Platform Testing**: Test scripts in both diii (color) and viii (monochrome) webapps:
-- **diii app**: Shows full color rendering with RGB overrides
-- **viii app**: Shows monochrome fallback (ignores RGB calls, shows only grid_led calls as white)
-
-**Testing Script**: Use `scripts/colorfallback/color-threshold-test.lua` to identify exact color accuracy thresholds on your specific hardware.
-
-**Workaround Demo**: `scripts/colorfallback/color-workaround-demo.lua` shows how to use `grid_led_rgb()` overrides for accurate low-brightness colors.
-
-**Recommendations**:
-- For reliable color reproduction, use brightness levels 8-15
-- At lower levels, consider using monochrome mode or RGB overrides instead of tinted `grid_led()`
-- Test your scripts on actual hardware, as the emulator may not perfectly replicate these physical limitations
-
-## Available Scripts
-
-- `serpentine_dev.lua`: A sophisticated snake-style sequencer with arpeggio support.
-- `monochrome_fallback.lua`: A reference implementation for cross-hardware compatibility.
-- `power_test.lua`: Diagnostic tool for grid power management.
-- `test-grid-color.lua`: Comprehensive color compatibility test (global tints, RGB overrides, monochrome fallback).
-- `color-threshold-test.lua`: Tests color accuracy at different brightness levels to identify hardware limitations.
-- `color-workaround-demo.lua`: Demonstrates workarounds for NeoTrellis color accuracy issues at low brightness.
-
-As okyeron started sharing news of the diii build for pico, i started trying to make a script that uses color.  
-I forked his repo and implemented this in my fork: [jonwaterschoot/neotrellis-monome](https://github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii) (`main` branch; the older `feature/colors` branch is superseded).
-
-The fork also uses my fork of iii, [codeberg.org/jonwaterschoot/iii](https://codeberg.org/jonwaterschoot/iii/src/branch/fix/streaming-upload) (branch `fix/streaming-upload`). It fixes uploads of scripts larger than ~32 KB, such as leaveseqr, which stock iii can't upload. The details are in the [upload failure investigation](https://github.com/jonwaterschoot/neotrellis-monome/blob/main/neotrellis_monome_picosdk_iii/doc/changestracker/leaveseqr-upload-failure-investigation.md).
-
-> Neotrellis repo by okyeron: https://github.com/okyeron/neotrellis-monome :
-> 
-> Code to use a set of Adafruit NeoTrellis boards as a monome grid clone using an off-the-shelf microcontroller.
-
-> [!IMPORTANT]  
-> I am not a C++ developer, and have made heavy use of **vibecoding** using Claude, Gemini in as plugins in VSCode and Google Antigravity to get this working.
-
-I actually first started making a webpage to make a manual for my serpentines script, as it became close to a working version of the script i decided to try and make a emulator for it, so that i could keep my documentation up to date with my script.
-
-So far my goal is to make an emulator that can be used as a manual guide for my scripts, and to make it easier to develop and test them.  
-
-![emulator V1 example](docs/img/emulatorV1example.png)
-
-The firmware is released in my fork of the firmware repo: [neotrellis-monome releases](https://github.com/jonwaterschoot/neotrellis-monome/releases/latest). The `uf2s/` directory keeps the setup notes and a copy of the readme that was created while building the neotrellis compatible firmware for the diii.  
-
-> [!NOTE]
-> **Nuke uf2** tool - Done some stupid thing like making a device crashing luascript the default to load on start? Bricking you out of using the webapp diii? Asking for friend 😉
-> [You'll need to nuke the Flash](https://github.com/Gadgetoid/pico-universal-flash-nuke/releases)
-
-## Official diii pages:
-
-- Webapp to upload lua files: https://monome.org/diii/ 
-    - Repo: https://github.com/monome/web-diii
-
-- Docs: https://monome.org/docs/iii/
-
-- Post on the monome forum about the release of iii by tehn (Brian Crabtree):
-https://llllllll.co/t/iii/74311
-
-    - Scripts shared by tehn on the forum:    
-        - [meadowphysics](https://monome.org/docs/iii/library/mp/) (full version, basically identical to the module )
-        - [intervals](https://monome.org/docs/iii/library/intervals) (a MIDI key map with linnstrument-like indication)
-        - [wake](https://monome.org/docs/iii/library/wake) (another polymodulated awake-style sequencer with an interesting scale builder)
-
-Okyeron's neotrellis repo: https://github.com/okyeron/neotrellis-monome
-
-## Scripts by others
+### Scripts by others
 
 The emulator's script list also offers scripts by other people. They are not my work and they are not part of this project or copied into this repo: [`scripts/external.json`](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/external.json) only holds their names and repository links, and the emulator fetches each script from its author's repository when you load it. All credit goes to the authors.
 
@@ -161,84 +50,27 @@ If you wrote one of these and would rather not be listed, please [open an issue]
 - [sluiiice](https://github.com/duncangeere/sluiiice) by duncangeere
 - [many-roads](https://github.com/boreal-ground/many-roads-grid) by boreal-ground
 
-The list also has my own [selector](https://github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii/doc/scripts/selector), which lives in the firmware repo.
+The list also has my own [selector](https://github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii/doc/scripts/selector), which lives in the firmware repo, and tehn's scripts from [monome's iii-scripts](https://codeberg.org/tehn/iii-scripts).
 
-## My scripts
+## Background
 
-- [serpentineseqr dev](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineseqr_dev.lua) - a snake game with color support for a 128 grid - my main reason to build this seq, and my main focus before i started building this emulator.  
-Its still not working as I envisioned it, but its getting there.  
+This started as an interactive manual for my Serpentine script. Once it could play the script, I kept going until it could run other scripts too.
 
-- [monochrome fallback test](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/colorfallback/monochrome_fallback.lua) - as i needed to test if the monochrome fallback was working
+I have a few DIY projects from okyeron, and it was through his Discord that I got curious about diii. I built my own version of [okyeron's NeoTrellis firmware](https://github.com/okyeron/neotrellis-monome) with iii and colour support: [jonwaterschoot/neotrellis-monome](https://github.com/jonwaterschoot/neotrellis-monome). It also uses [my fork of iii](https://codeberg.org/jonwaterschoot/iii/src/branch/fix/streaming-upload), which can upload scripts larger than about 32 KB, such as LeaveSeqr ([details](https://github.com/jonwaterschoot/neotrellis-monome/blob/main/neotrellis_monome_picosdk_iii/doc/changestracker/leaveseqr-upload-failure-investigation.md)).
 
-- [power test](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/power_test.lua) - as i needed to test if the power wasnt causing brownouts
+I don't own original monome gear, so the monochrome side is tested with the [viii](https://dessertplanet.github.io/viii/) web app on my NeoTrellis grid.
 
-> [!NOTE]  
-> It is my intention to try and make my scripts backwards compatible with a standard monome grid, so that they can be run on both a standard monome grid and a neotrellis grid.  
-> This is why i have included the `monochrome_fallback.lua` script. And i'm trying to use if grid.type == "neotrellis" to check for the grid type.
+> [!IMPORTANT]
+> This is a vibecoded project: I'm not a C++ developer, and I built it with Claude and Gemini in VS Code and Google Antigravity. I have still spent many hours on it and learned a lot about the ecosystem.
 
-## Features
+## Links
 
-- **Grid Emulation**: Simulate monome and neotrellis grids with interactive buttons.
-- **Lua Script Execution**: Run Lua scripts directly in the browser.
-- **Real-time Feedback**: See button presses and grid state updates in real-time.
-- **Multiple Grid Support**: Supports both standard monome grids and 16x16 neotrellis grids.
+- [monome iii documentation](https://monome.org/docs/iii/), and the [diii web app](https://monome.org/diii/) ([source](https://github.com/monome/web-diii)) to upload scripts to a grid
+- [iii release post](https://llllllll.co/t/iii/74311) on the lines forum, by tehn (Brian Crabtree), with scripts such as [meadowphysics](https://monome.org/docs/iii/library/mp/), [intervals](https://monome.org/docs/iii/library/intervals) and [wake](https://monome.org/docs/iii/library/wake)
+- [okyeron/neotrellis-monome](https://github.com/okyeron/neotrellis-monome): use Adafruit NeoTrellis boards as a monome grid
 
-## Getting Started
-
-### Prerequisites
-
-- A modern web browser (Chrome, Firefox, Safari, Edge).
-- [Node.js](https://nodejs.org/) (for running the development server).
-
-### Installation
-
-1.  Clone the repository:
-    ```bash
-    git clone <repository-url>
-    cd diii-neotrellis-emulator
-    ```
-
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-
-### Usage
-
-1.  Start the development server:
-    ```bash
-    npm start
-    ```
-
-2.  Open your browser and navigate to `http://localhost:3141`.
-
-3.  Select a Lua script to load and interact with the grid.
-
-## Development
-
-### Adding New Scripts
-
-To add a new Lua script, simply place it in the `scripts/` directory. The script will be automatically loaded by the emulator.
-
-### Development Server
-
-The development server includes hot-reload, so any changes to the Lua scripts or the emulator code will be reflected immediately in the browser.
-
-## Deployment (GitHub Pages)
-
-This project is compatible with GitHub Pages. To host it yourself:
-
-1.  Go to your repository **Settings** > **Pages**.
-2.  Under **Build and deployment**, set **Source** to `Deploy from a branch`.
-3.  Select the `main` branch and the `/ (root)` folder, then click **Save**.
-4.  Your emulator will be available at `https://<your-username>.github.io/diii-neotrellis-emulator/`.
-
-> [!TIP]
-> The application uses relative paths, so it will work correctly even in a repository subfolder.
+Please don't ask monome or the lines forum about the NeoTrellis colour features: they're mine, not monome's.
 
 ## License
 
-This project is currently under research regarding the various licenses that may apply to the third-party components and resources it integrates.
-
-For the original work contained within this repository, I have chosen the **GPL-3.0 License**. It is my personal intention to freely share anything I've made with the community.
-
+My own work in this repository is under the **GPL-3.0 License**: I want to share what I make freely with the community. I'm still looking into the licenses of the third-party parts it uses. If I've got something wrong, please let me know.

@@ -31,7 +31,7 @@ jobs:
       - name: Prepare Emulator Deployment 
         run: |
           # Copy emulator files to root (only if they exist)
-          for item in index.html engine scripts img uf2s LICENSE README.md; do
+          for item in index.html engine scripts img LICENSE README.md; do
             if [ -e "$item" ]; then
               cp -r "$item" dist/
             fi

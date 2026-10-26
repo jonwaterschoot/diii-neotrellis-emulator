@@ -1,72 +1,31 @@
-# NeoTrellis / Monome Script Emulator
+# diii-neotrellis-emulator
 
-Welcome to the browser-based emulator for loading and testing Lua scripts designed for Monome and NeoTrellis grids.
+A browser emulator for monome iii grid scripts. It runs the same Lua scripts as a NeoTrellis or monome grid, so you can play them, hear them, read their manuals and write your own before putting them on a grid.
 
----
+![A colour script on a NeoTrellis grid](img/neotrellis_diii_color.gif)
 
-## Quick Rundown
+## Start here
 
-### 🕹️ What is this app?
-This is a universal development tool that runs **real `.lua` scripts natively** in your browser using the Fengari Lua runtime. It serves as:
-- A handy way to create interactive, live manuals for your scripts.
-- A sandbox for quick testing.
-- A platform for users who don't own hardware to run and play MIDI Lua patches, allowing them to route the MIDI directly through their computer, phone, or tablet.
+- [Getting started](getting-started.md): use the emulator in the browser, run it on your computer, or put scripts on a NeoTrellis grid.
+- [Walkthrough](walkthrough.md): the emulator's screen, part by part.
 
-*Note: The hardware does not mirror the web app; scripts run locally either in the browser or entirely on the physical device. Additionally, routing MIDI out from the app generally requires a Chromium-based browser.*
+## Writing scripts
 
-![Color fallback test on NeoTrellis device with pixel interaction](img/neotrellis_diii_color.gif)
+- [Start a script](start-a-script.md): a new script from the template, step by step.
+- [Script standard](script-standards.md): the comments, README and manifest the emulator reads.
+- [Colour and monochrome](colour.md): one script for colour and monochrome grids.
+- [Hardware vs. emulator](hardware-vs-emulator.md): what behaves differently on the device, and what to check before uploading.
 
-### 💾 How to get this on my device?
-1. **Flash Custom Firmware**: Install the custom `.uf2` firmware to your device (see [Firmware Installation](firmware-installation.md)).
-2. **Upload Scripts**: Use the [official diii web app](https://monome.org/diii/) to push `.lua` files to your device's memory.
+## Inside the emulator
 
-   > [!WARNING]
-   > Do not leave a heavy script (like Serpentine) running while uploading files to the device! The processing load can cause the upload to timeout / crash the pico. Run a lightweight/blank script before initiating file transfers on the diii app.
+- [Developer guide](developer-guide.md): how the emulator works, and how to extend it.
 
-3. **App Minifying**: Use the `↓ Device` export option in this emulator to compress large patches so they fit on restricted memory devices.
+## Scripts
 
----
+- [LeaveSeqr](leaveseqr.md), [Sandman](sandman.md), [Serpentine](serpentine-sequencer.md) ([changelog](changelog.md)), [Multi-screen test](multi-screen-test.md)
 
-## Documentation Index
+## Project
 
-**Project Overview**
-- [Main README](main-readme.md) - Project description and features
-- [Roadmap](roadmap.md) - Development plans and TODO items
-
-**Emulator Usage**
-- [Walkthrough](walkthrough.md) - Detailed guide to using the emulator UI
-- [Hardware vs. Emulator](hardware-vs-emulator.md) - Where scripts behave differently on the device, and what to check before uploading
-- [Script Documentation Standard](script-standards.md) - How to write LDoc comments for the emulator
-
-**Hardware & Firmware**
-- [NeoTrellis Firmware Installation](firmware-installation.md)
-- [Building the Firmware](building-firmware.md)
-
-**Scripts**
-- [Sandman](sandman.md)
-- [Serpentine Sequencer](serpentine-sequencer.md)
-- [Multi-Screen Test](multi-screen-test.md)
-- [Serpentine Changelog](changelog.md)
-
----
-
-## Detailed Hardware & Compatibility Info
-
-### Monome vs NeoTrellis (Color Setup)
-This emulator supports both the original **Monome Grid** (monochrome) and **Adafruit NeoTrellis** (RGB). Scripts can be written once and run on both targets gracefully via hardware detection (`grid_led_rgb` versus standard `grid_led`). Considerable time has gone into building robust grayscale fallback compatibility.
-
-### Testing & Hardware Setup
-This has been extensively tested using my custom fork of [okyeron's NeoTrellis setup](https://github.com/jonwaterschoot/neotrellis-monome) running on a Pico 2040. (Specifically, the modifications enabling color sit in the [`neotrellis_monome_picosdk_iii`](https://github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii) directory). Backwards compatibility with standard Monome features has only been verified via the [monome viii app](https://dessertplanet.github.io/viii/), which serves as the official web-enabled monome grid emulator.
-
-### Known Challenges
-- **MIDI Timing**: Building stable MIDI handling has been tricky. Managing multiple timers and handling reliable MIDI Clock sync in a browser environment is currently one of the hardest aspects to perfect.
-- **Memory Limits**: The main patch, [Serpentine](serpentine-sequencer.md), pushes the sheer limits of what the Pico 2040 NeoTrellis can hold and run. Finding Lua memory optimizations remains an ongoing battle.
-
----
-
-## Important Links
-- **[jonwaterschoot / neotrellis-monome](https://github.com/jonwaterschoot/neotrellis-monome)**: My custom hardware driver fork enabling color support.
-- **[okyeron / neotrellis-monome](https://github.com/okyeron/neotrellis-monome)**: The original hardware driver repository.
-- **[monome.org](https://monome.org)**: The creators of the grid hardware.
-- **[diii app](https://monome.org/diii/)**: Web app to upload scripts to your grid.
-- **[iii docs (viii)](https://dessertplanet.github.io/viii/)**: Official documentation and the viii app.
+- [README](main-readme.md): what this is, the scripts, background and credits.
+- [To do](todo.md): the working plan.
+- Source code on [GitHub](https://github.com/jonwaterschoot/diii-neotrellis-emulator).

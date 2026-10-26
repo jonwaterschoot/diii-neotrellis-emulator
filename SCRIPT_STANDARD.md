@@ -8,15 +8,15 @@ scripts can be imported with minimal adaptation.
 
 ## Overview
 
-A "script package" can consist of either a single file or a folder with multiple files.
-The emulator resolves documentation in the following priority order:
+A script is a single `.lua` file, or a folder with the `.lua` file and more. The emulator reads its documentation from three places:
 
-1. `manifest.json` (explicit, structured — highest priority)
-2. `README.md` alongside the `.lua` file (human-readable, fetched from GitHub raw)
-3. LDoc-style comments inside the `.lua` file (always present, used for overlay)
+| Source | Used for |
+|---|---|
+| Comments in the `.lua` file | The Docs tab, the Live Manual overlay and the keyboard hints (sections 1, 2, 6 and 7) |
+| `README.md` next to the `.lua` file | The Guide tab (section 3) |
+| `manifest.json` in the folder | Which `.lua` file to load and where the README is, when importing from a repository (section 4) |
 
-A script does **not** need all three. A solo `.lua` with good inline comments is valid.
-A GitHub repo with a `.lua` + `README.md` is the recommended minimum.
+A script doesn't need all three. A `.lua` file with good comments works on its own; a repository with the `.lua` file and a `README.md` is the recommended minimum.
 
 ---
 
@@ -40,6 +40,7 @@ Rules:
 - A bare URL on its own line is parsed as the discussion/reference link
 - The first untagged line after `scriptname` becomes the short description
 - The header ends at the first non-comment line
+- Optional: `-- @orientation portrait` (or `portrait-cw`, `portrait-ccw`) in the first 30 lines rotates the grid when the script loads, for scripts meant to be played with the grid turned 90°
 
 This mirrors the norns script header convention used in the community catalog.
 
@@ -184,7 +185,8 @@ end
 **`display_screen(name)`** signals the emulator which screen is currently *active* — this
 controls the minimap highlight and switches the ghost grid in dual-view. Call it whenever
 the user navigates between screens. Guard with `if display_screen then` for hardware
-compatibility (the function does not exist on real NeoTrellis hardware):
+compatibility (the function only exists in the emulator; see
+[Hardware vs. emulator](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/hardware-vs-emulator/)):
 
 ```lua
 -- When navigating to a secondary screen:
@@ -254,31 +256,25 @@ Full example (from serpentine_dev.lua):
 
 ## 3. README.md (recommended for GitHub repos)
 
-A `README.md` in the same directory as the `.lua` file serves as the full human-readable guide,
-displayed in the documentation panel below the grid overlays.
+A `README.md` in the same folder as the `.lua` file is the script's full manual. The emulator shows it in the Guide tab, rendered as Markdown. Relative links and images resolve against the README's own folder, so `![](img/layout.png)` works.
 
-There is no required structure, but the following H2 sections are recognized and rendered
-with special formatting in the emulator UI:
+There's no required structure. These sections are a good order for a grid script:
 
 ```markdown
-## Controls        ← rendered as a controls reference table
-## Settings        ← rendered inline, often maps to ALT-menu docs
-## Usage           ← shown as a getting-started section
-## Notes           ← rendered as a callout block
-## Changelog       ← collapsed by default
+## Usage       ← how to start: what to press first
+## Controls    ← what each pad does, often as a table
+## Settings    ← the settings or ALT screens
+## Notes       ← limits, hardware notes, tips
+## Changelog
 ```
 
-Any other H2 sections are rendered as plain markdown.
-
-The `serpentineseqr_docs.md` file is the reference implementation of this format —
-it should be renamed to `README.md` when the script is packaged for external import.
+The reference is [`scripts/serpentineSeqr/README.md`](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/README.md).
 
 ---
 
-## 4. manifest.json (optional, for emulator discovery)
+## 4. manifest.json (optional, for importing)
 
-A `manifest.json` in the script folder enables the emulator to display rich metadata
-and supports future catalog-based browsing. The shape mirrors the norns community catalog:
+A `manifest.json` in the script's folder tells the emulator which file to load when someone imports the repository. The shape follows the norns community catalog:
 
 ```json
 {
@@ -293,36 +289,43 @@ and supports future catalog-based browsing. The shape mirrors the norns communit
 }
 ```
 
-Fields:
-- `project_name` — display name
-- `project_url` — GitHub repo root (used to derive raw file URLs if not overridden)
-- `author` — display name
-- `description` — one-liner, shown in the script selector
-- `discussion_url` — llllllll.co thread or forum link
-- `documentation_url` — direct URL to README.md (raw GitHub URL preferred)
-- `tags` — array of strings for future filtering
-- `lua_file` — filename of the main script (defaults to `index.lua` if omitted)
+The emulator uses two fields:
+
+- `lua_file`: the script to load. Without it, the emulator tries `<repository name>.lua`, then `index.lua`, then the first `.lua` file in the folder.
+- `documentation_url`: where the README is. Without it, the emulator uses `README.md` in the script's folder, then in the repository root.
+
+The other fields describe the script for people and for future catalogs.
+
+Scripts that come with the emulator are listed in `scripts/manifest.json` instead, which also sets their group in the script list, their README and their grid size: see [Start a script](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/start-a-script/).
 
 ---
 
-## 5. GitHub import flow (planned)
+## 5. Importing from GitHub or Codeberg
 
-When a user pastes a GitHub repo URL, the emulator will:
+**⇱ Import script repo** takes a repository address: `github.com/owner/repo`, `codeberg.org/owner/repo`, or `owner/repo` for GitHub. A folder inside a repository works too: `github.com/owner/repo/tree/main/path/to/script`. The emulator:
 
-1. Parse the URL to extract `owner/repo`
-2. Try to fetch `manifest.json` from the default branch root via:
-   `https://raw.githubusercontent.com/<owner>/<repo>/main/manifest.json`
-3. If no manifest: try `README.md` at the same path
-4. Fetch the `.lua` file (from `lua_file` in manifest, or by scanning for `*.lua`)
-5. Run `doc-extractor.js` on the `.lua` source → powers the grid overlay
-6. Render the README.md source → populates the docs panel below the grids
+1. Tries the `main` branch, then `master`, unless the address names a branch.
+2. Reads `manifest.json` if there is one, and finds the `.lua` file as in section 4.
+3. Runs the script, and reads its comments for the Docs tab and Live Manual.
+4. Shows the README in the Guide tab.
 
-CORS: `raw.githubusercontent.com` returns `Access-Control-Allow-Origin: *` for public repos,
-so no proxy is needed for the browser fetch.
+Files from public GitHub and Codeberg repositories can be fetched straight from the browser, so no server is needed.
 
 ---
 
-## 6. Keyboard shortcut hints (`@key`)
+## 6. Keyboard shortcuts
+
+In the emulator, a script can handle keys with `event_key(key)`. It's called once per key press (not on release, and not for a held key's repeats), with the key's name: `"space"`, `"tab"`, `"enter"`, `"up"`, `"down"`, `"left"`, `"right"`, or the character in lower case (`"a"`, `"1"`).
+
+```lua
+function event_key(key)
+  if key == "tab" then next_screen() end
+end
+```
+
+R always reloads the script and never reaches `event_key`. A script without `event_key` gets the emulator's fixed pad presses instead (Tab and Space press x1, y8, and so on; see the [walkthrough](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/walkthrough/#keyboard-shortcuts)). The device has no keyboard and never calls `event_key`, so keep every action reachable from the grid too.
+
+### Hints (`@key`)
 
 Scripts can declare their keyboard shortcuts using `@key` tags in the header block.
 The emulator reads these and populates the hints bar below the grid automatically.
@@ -351,11 +354,15 @@ The `R` key (Reload) is always shown as an app-level entry at the end; do not re
 
 | Tag | Usage | Example |
 |-----|-------|---------|
+| `-- scriptname: Name` | Script name (first header line) | `-- scriptname: Serpentine` |
+| `-- @author: name` | Author (header) | `-- @author: jonwaterschoot` |
+| `-- @orientation o` | Rotate the grid on load (header, first 30 lines) | `-- @orientation portrait` |
 | `--- description` | Triple-dash opens a doc block | `--- Updates the snake position` |
 | `-- @tparam type name desc` | Typed parameter | `-- @tparam number x Grid column (1-16)` |
-| `-- @treturn type desc` | Typed return value | `-- @treturn boolean True if alive` |
+| `-- @treturn type desc` | Typed return value (`@returns` also works) | `-- @treturn boolean True if alive` |
 | `-- @param name desc` | Untyped parameter | `-- @param x Column` |
 | `-- @section Name` | Groups following controls | `-- @section Spawner Engine` |
+| `-- @screen name` | Which screen the following controls are on | `-- @screen settings` |
 | `-- @group Name` | Starts a named group | `-- @group D-PAD` |
 | `-- @detail text` | Extended description for the current group (multi-line, accumulates) | `-- @detail Leaves drift slowly downward.` |
 | `-- @key KEYS: Label` | Keyboard shortcut hint | `-- @key ↑↓←→: Steer` |
@@ -374,6 +381,6 @@ These can be added to `doc-extractor.js` incrementally as needed.
 | File | Role |
 |------|------|
 | [scripts/serpentineSeqr/serpentine_dev.lua](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/serpentine_dev.lua) | Reference `.lua` — LDoc header, `@section`/`@screen`/`@group` control map |
-| [scripts/serpentineSeqr/serpentineseqr_docs.md](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/serpentineseqr_docs.md) | Reference README (rename to `README.md` when packaging for external import) |
+| [scripts/serpentineSeqr/README.md](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/serpentineSeqr/README.md) | Reference README |
 | [scripts/leaveseqr/leaveseqr.lua](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/leaveseqr/leaveseqr.lua) | Full example of `@detail` usage — multi-line group descriptions across all screens |
 | [engine/doc-extractor.js](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/engine/doc-extractor.js) | Parser — extracts header + control map from `.lua` source |

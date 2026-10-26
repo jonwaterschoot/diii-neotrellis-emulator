@@ -159,6 +159,16 @@ function event_grid(x, y, z)
 end
 ```
 
+## Keyboard (emulator only)
+
+`event_key(key)` is called on each key press in the emulator, with the key's name: `"space"`, `"tab"`, `"enter"`, `"up"`, `"down"`, `"left"`, `"right"`, or the character in lower case (`"a"`, `"1"`). R always reloads and never arrives. The device has no keyboard and never calls it, so every action must also be reachable from the grid. List the keys with `-- @key KEY: Label` header lines.
+
+```lua
+function event_key(key)
+  if key == "tab" then next_screen() end
+end
+```
+
 ---
 
 ## MIDI note hygiene (critical)
