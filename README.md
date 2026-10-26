@@ -20,7 +20,7 @@ I also hope I'm not breaking any licensing things, if so please let me know. I t
 
 *Recording of `color_fallback_demo.lua` on NeoTrellis hardware, showing the fallback test running on device with interactive pixel toggling.*
 
-I wrote a quick [readme guide](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/uf2s/readme.md)in the uf2s directory with some quick tips to get the custom firmware for pico neotrellis up and running.
+I wrote a quick [readme guide](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/uf2s/readme.md)in the uf2s directory with some quick tips to get the custom firmware for pico neotrellis up and running. The UF2 files themselves are on the [firmware release page](https://github.com/jonwaterschoot/neotrellis-monome/releases/latest).
 
 The emulator supports scripts written for both the original **Monome Grid** (monochrome) and the **Adafruit NeoTrellis** (RGB). To ensure your scripts are portable across different hardware targets, the following compatibility patterns are recommended.
 
@@ -123,7 +123,7 @@ So far my goal is to make an emulator that can be used as a manual guide for my 
 
 ![emulator V1 example](docs/img/emulatorV1example.png)
 
-I have put my uf2 files in the `uf2s/` directory. in that directory also: a copy of the readme's that were created while building the neotrellis compatible firmware for the diii.  
+The firmware is released in my fork of the firmware repo: [neotrellis-monome releases](https://github.com/jonwaterschoot/neotrellis-monome/releases/latest). The `uf2s/` directory keeps the setup notes and a copy of the readme that was created while building the neotrellis compatible firmware for the diii.  
 
 > [!NOTE]
 > **Nuke uf2** tool - Done some stupid thing like making a device crashing luascript the default to load on start? Bricking you out of using the webapp diii? Asking for friend 😉

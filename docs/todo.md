@@ -120,4 +120,5 @@ Error: selector.lua:52: attempt to call a nil value (global 'fs_list_files')
 
 ## UF2 versions 
 - delete here and only refer to the release of the og fork?
+  - done (2026-10-26): UF2 files removed from `uf2s/`; the docs link to [v2026.10](https://github.com/jonwaterschoot/neotrellis-monome/releases/tag/v2026.10) via releases/latest.
 
