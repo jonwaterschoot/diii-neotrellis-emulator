@@ -6,8 +6,7 @@
 -- A living portrait: falling sand, leaves and water that become music.
 -- Rotate device 90 degrees CCW (power cable at top). Portrait: 8 wide x 16 tall.
 --
--- @key Tab: Seq Settings
--- @key Space: Scale Settings
+-- @key Tab/Space: Next screen (Live → Seq → Scale)
 
 -- ---------------------------------------------------------------------------
 -- @section Global Controls

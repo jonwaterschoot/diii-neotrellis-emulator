@@ -21,6 +21,7 @@
  *   metro:stop()                   – stop the metro timer
  *   event_grid(x, y, z)           – called BY the emulator when a pad is clicked
  *   event_midi(d1, d2, d3)        – called BY the emulator for incoming MIDI, when the script defines it
+ *   event_key(key)                – called BY the emulator on a key press, when the script defines it (emulator only)
  */
 
 /** Incoming bytes that match something sent within this window count as our own output echoed back */
@@ -107,6 +108,7 @@ export class MonomeAPI {
     // Lua event functions – set once the script is loaded
     this._luaEventGrid = null;
     this._luaEventMidi = null;
+    this._luaEventKey = null;
     // Bytes of recently sent messages → time sent, to spot our own output coming back in
     this._recentOut = new Map();
     this._startTime = performance.now();
@@ -704,6 +706,20 @@ export class MonomeAPI {
     this._luaEventMidi = fn;
   }
 
+  /**
+   * A key press, by name ("space", "tab", "up", "a", "1"…). Goes to the script's event_key
+   * if it has one (a held key's repeats are swallowed, not passed on); returns false when the
+   * script has no event_key, so the caller can press its fixed pads instead.
+   */
+  handleKeyEvent(key, repeat = false) {
+    return this._luaEventKey ? this._luaEventKey(key, repeat) : false;
+  }
+
+  /** Register the event_key bridge (called by lua-loader after script init); fn returns true when handled */
+  setEventKeyHandler(fn) {
+    this._luaEventKey = fn;
+  }
+
   // ─── CLEANUP ──────────────────────────────────────────────────────────────
 
   /** Full cleanup before reloading a script */
@@ -718,6 +734,7 @@ export class MonomeAPI {
     this._currentScreen = 'live';
     this._luaEventGrid = null;
     this._luaEventMidi = null;
+    this._luaEventKey = null;
     this._recentOut.clear();
     this._startTime = performance.now();
     this._outOfBoundsWriteCount = 0;

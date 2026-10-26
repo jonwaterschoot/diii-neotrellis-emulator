@@ -98,7 +98,10 @@ function watchScripts() {
     return;
   }
 
-  fs.watch(SCRIPTS_DIR, { persistent: true }, (eventType, filename) => {
+  // Recursive: scripts live in subfolders (leaveseqr/leaveseqr.lua). The name is sent with
+  // forward slashes, as the emulator loads it, so it matches the running script.
+  fs.watch(SCRIPTS_DIR, { persistent: true, recursive: true }, (eventType, name) => {
+    const filename = name && name.split(path.sep).join('/');
     if (!filename || !filename.endsWith('.lua')) return;
     // Debounce rapid saves (editors write multiple times on save)
     clearTimeout(pending.get(filename));
@@ -109,7 +112,7 @@ function watchScripts() {
     }, DEBOUNCE_MS));
   });
 
-  console.log(`  Watching: scripts/*.lua`);
+  console.log(`  Watching: scripts/**/*.lua`);
 }
 
 // ─── START ───────────────────────────────────────────────────────────────────

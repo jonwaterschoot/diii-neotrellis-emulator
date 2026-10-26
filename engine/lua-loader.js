@@ -469,6 +469,17 @@ export class LuaLoader {
       return true;
     });
 
+    // ── event_key(key): emulator only. A script that defines it gets key presses by name
+    // instead of the emulator's fixed pad presses.
+    api.setEventKeyHandler((key, repeat) => {
+      lua.lua_getglobal(L, luaStr('event_key'));
+      if (!lua.lua_isfunction(L, -1)) { lua.lua_pop(L, 1); return false; }
+      if (repeat) { lua.lua_pop(L, 1); return true; }
+      lua.lua_pushstring(L, luaStr(key));
+      reportPcall(L, lua.lua_pcall(L, 1, 0, 0), 'event_key');
+      return true;
+    });
+
     this.onStatusChange(`✓ ${name} loaded`, 'success');
     this.onScriptLoad(name, docs);
     loaded = true;

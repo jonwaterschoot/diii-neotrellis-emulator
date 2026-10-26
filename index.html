@@ -2173,7 +2173,7 @@
           Live Manual
         </label>
         <button class="btn" id="btn-dual-view" title="Toggle secondary screen (dual view)">⊞ Dual View</button>
-        <button class="btn" id="btn-fullscreen" title="Toggle Fullscreen (F)">
+        <button class="btn" id="btn-fullscreen" title="Full view: only the grid (Esc leaves)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
           </svg>
@@ -3612,9 +3612,18 @@
       // Ensure audio is started on first keypress
       if (api._audioCtx && api._audioCtx.state === 'suspended') api._audioCtx.resume();
 
-      // Forward all keys to Lua's event_grid where applicable
-      // Also handle emulator-level shortcuts:
+      // R always reloads; keys with Ctrl/Cmd stay with the browser
       if (e.key === 'r' || e.key === 'R') { e.preventDefault(); loader.reload(BASE_URL); return; }
+      if (e.ctrlKey || e.metaKey) return;
+
+      // A script with event_key(key) gets every other key press by name (no repeats).
+      // Without it, the keys below press fixed pads.
+      const ARROWS = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
+      const keyName = ARROWS[e.key] || (e.key === ' ' ? 'space' : e.key.toLowerCase());
+      if (!['shift', 'control', 'alt', 'meta'].includes(keyName) && api.handleKeyEvent(keyName, e.repeat)) {
+        if (['tab', 'space', 'up', 'down', 'left', 'right'].includes(keyName)) e.preventDefault();
+        return;
+      }
 
       // Tab → column 1, row 8 press (ALT button)
       if (e.key === 'Tab') { e.preventDefault(); if (!tabDown) { tabDown = true; api.handlePadEvent(1, 8, 1); } return; }
@@ -3639,7 +3648,7 @@
 
     document.addEventListener('keyup', e => {
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
-      if (e.key === 'Tab') { tabDown = false; api.handlePadEvent(1, 8, 0); }
+      if (e.key === 'Tab' && tabDown) { tabDown = false; api.handlePadEvent(1, 8, 0); }
     });
 
     // ─── SIDE TABS ────────────────────────────────────────────────────────────
@@ -4818,8 +4827,10 @@
           };
 
           const button = screenButtonMap[screenName];
-          // Only apply this interactive fix for the script it's designed for.
-          if (loader.currentScriptName === 'multiplescreen-test.lua' && button) {
+          // Only apply this interactive fix for the script it's designed for
+          // (bundled scripts load as 'folder/name.lua', so match the file name).
+          const isMultiScreenTest = (loader.currentScriptName || '').split('/').pop() === 'multiplescreen-test.lua';
+          if (isMultiScreenTest && button) {
             // For this script, simulate a press-and-release to trigger its internal screen-switching logic.
             // This ensures the script's state stays in sync with the emulator view.
             loader.api.handlePadEvent(button.x, button.y, 1);
@@ -4827,7 +4838,7 @@
           } else {
             // Fallback for other scripts: just switch the view, no state change.
             // This may lead to the desync issue, but it's the previous behavior.
-            if (loader.currentScriptName !== 'multiplescreen-test.lua') {
+            if (!isMultiScreenTest) {
               console.warn(`Minimap: No screen switch button mapping for '${screenName}' in script '${loader.currentScriptName}'. Switching view only.`);
             }
             api.onDisplayScreen(screenName);
