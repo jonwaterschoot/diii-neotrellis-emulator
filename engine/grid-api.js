@@ -24,6 +24,8 @@
  *   event_key(key)                – called BY the emulator on a key press, when the script defines it (emulator only)
  */
 
+import { DrumKit } from './drums.js';
+
 /** Incoming bytes that match something sent within this window count as our own output echoed back */
 const MIDI_ECHO_WINDOW_MS = 20;
 
@@ -101,6 +103,9 @@ export class MonomeAPI {
     };
     this._filterNode = null;
     this._delayTimer = null;
+
+    // Drum kit: notes it takes (by channel and General MIDI note) play drums, not the synth
+    this.drums = new DrumKit();
 
     // Metro registry
     this._metros = [];
@@ -380,6 +385,14 @@ export class MonomeAPI {
     this._filterNode.connect(this._masterGain);
     this._filterNode.connect(this._reverbIn);
     this._filterNode.connect(this._delayIn);
+
+    // Drum kit: dry to the master, plus a send into the reverb (not the synth's filter or delay)
+    this._drumBus = this._audioCtx.createGain();
+    this._drumSend = this._audioCtx.createGain();
+    this._drumSend.gain.value = 0.35;
+    this._drumBus.connect(this._masterGain);
+    this._drumBus.connect(this._drumSend).connect(this._reverbIn);
+    this.drums.connect(this._audioCtx, this._drumBus);
   }
 
   /**
@@ -472,6 +485,8 @@ export class MonomeAPI {
     vel = vel & 0x7F;
     const status = 0x90 + ((ch - 1) & 0x0F);
     this._sendOut([status, note, vel]);
+    this._ensureAudio();
+    if (this.drums.noteOn(note, vel, ch)) return;
     this._synthOn(note, vel);
   }
 
@@ -489,6 +504,7 @@ export class MonomeAPI {
     note = note & 0x7F;
     const status = 0x80 + ((ch - 1) & 0x0F);
     this._sendOut([status, note, vel & 0x7F]);
+    if (this.drums.takes(note, ch)) return; // drums ring out
     this._synthOff(note);
   }
 

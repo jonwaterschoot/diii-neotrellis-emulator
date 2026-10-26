@@ -1207,10 +1207,10 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      padding: 10px 4px;
+      padding: 10px 3px;
       text-align: center;
-      font-size: 11px;
-      letter-spacing: 0.5px;
+      font-size: 10.5px;
+      letter-spacing: 0.3px;
       text-transform: uppercase;
       color: var(--muted);
       cursor: pointer;
@@ -1278,6 +1278,110 @@
 
     .doc-section {
       margin-bottom: 18px;
+    }
+
+    /* Sound tab: drum kit and synth. It can pop out into a floating window. */
+    .snd-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .snd-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 12px;
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .snd-controls label,
+    .snd-row label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .snd-controls select,
+    .snd-row select {
+      min-width: 0;
+      padding: 2px 4px;
+      font-size: 11px;
+    }
+    .snd-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 72px 64px auto;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+    }
+    .snd-row input[type=range] { width: 64px; }
+    .snd-voice {
+      justify-content: flex-start;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: background 0.08s, color 0.08s;
+    }
+    .snd-voice.flash { background: var(--accent); color: #000; }
+    .snd-notes {
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      white-space: nowrap;
+    }
+    .snd-help {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .float-window {
+      position: fixed;
+      z-index: 900;
+      top: 120px;
+      right: 40px;
+      width: 380px;
+      height: 520px;
+      min-width: 260px;
+      min-height: 160px;
+      resize: both;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    .float-window[hidden],
+    #panel-sound [hidden],
+    #sound-window [hidden] { display: none !important; }
+    .float-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: move;
+      user-select: none;
+      touch-action: none;
+    }
+    .float-body {
+      flex: 1;
+      overflow: auto;
+      padding: 12px;
+      font-size: 12px;
+    }
+    @media (max-width: 900px) {
+      #sound-popout { display: none; }
     }
 
     .doc-section-title {
@@ -2531,6 +2635,7 @@
         <div class="side-tab" data-tab="source" id="tab-source">Source</div>
         <div class="side-tab" data-tab="console" id="tab-console">Console</div>
         <div class="side-tab" data-tab="midi" id="tab-midi">MIDI</div>
+        <div class="side-tab" data-tab="sound" id="tab-sound">Sound</div>
       </div>
       <div class="side-content">
 
@@ -2584,6 +2689,37 @@
             <pre class="src-edit-layer src-edit-hl" id="src-edit-hl" aria-hidden="true"></pre>
             <textarea class="src-edit-layer src-editor" id="src-editor" spellcheck="false" autocomplete="off" wrap="off"></textarea>
             <div class="src-flags" id="src-flags"><div class="src-flags-inner" id="src-flags-inner"></div></div>
+          </div>
+        </div>
+
+        <!-- Sound panel: drum kit and synth; ⧉ moves the controls into a floating window -->
+        <div class="side-panel" id="panel-sound">
+          <div class="snd-head">
+            <span class="doc-section-title" style="border: 0; margin: 0; padding: 0;">Sound</span>
+            <button class="btn sm" id="sound-popout" title="Open in its own window, to move and resize">⧉ Pop out</button>
+          </div>
+          <div class="empty-state" id="sound-docked-note" hidden>
+            The sound controls are in their own window.<br><br>
+            <button class="btn sm" id="sound-dock-here">Bring them back here</button>
+          </div>
+          <div id="sound-ui">
+            <div class="doc-section">
+              <div class="doc-section-title">Drum kit</div>
+              <div class="snd-controls">
+                <label title="Notes the kit takes play drums instead of the synth"><input type="checkbox" id="drum-enabled"> On</label>
+                <label>Plays
+                  <select id="drum-mode">
+                    <option value="notes">drum notes</option>
+                    <option value="channels">a channel per drum</option>
+                  </select>
+                </label>
+                <label id="drum-channel-label" title="The channel the kit listens on">on channel <select id="drum-channel"></select></label>
+                <label>Level <input type="range" id="drum-level" min="0" max="100" style="width: 70px;"></label>
+                <button class="btn sm" id="drum-reroll-all" title="New takes of all drums">⚄ All</button>
+              </div>
+              <div id="drum-voices"></div>
+              <p class="snd-help" id="drum-help"></p>
+            </div>
           </div>
         </div>
 
@@ -4444,6 +4580,132 @@
     btnGithubImport.addEventListener('click', runGithubImport);
     githubInput.addEventListener('keydown', e => { if (e.key === 'Enter') runGithubImport(); });
 
+    // ─── SOUND TAB: drum kit ──────────────────────────────────────────────────
+    const kit = api.drums;
+    try { kit.load(JSON.parse(localStorage.getItem('diii.drums'))); } catch (e) { /* defaults */ }
+    const saveKit = () => { try { localStorage.setItem('diii.drums', JSON.stringify(kit)); } catch (e) { /* not kept */ } };
+    const channelOptions = (any) => (any ? '<option value="0">any</option>' : '') +
+      Array.from({ length: 16 }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join('');
+    const drumVoicesEl = document.getElementById('drum-voices');
+    document.getElementById('drum-channel').innerHTML = channelOptions(true);
+
+    function renderDrumKit() {
+      document.getElementById('drum-enabled').checked = kit.enabled;
+      document.getElementById('drum-mode').value = kit.mode;
+      document.getElementById('drum-channel').value = String(kit.channel);
+      document.getElementById('drum-channel-label').hidden = kit.mode !== 'notes';
+      document.getElementById('drum-level').value = Math.round(kit.level * 100);
+      drumVoicesEl.innerHTML = kit.voices.map((v, i) => `
+        <div class="snd-row" data-voice="${i}">
+          <button class="btn sm snd-voice" data-act="play" title="Play ${v.name}">▶ ${v.name}</button>
+          ${kit.mode === 'notes'
+            ? `<span class="snd-notes" title="MIDI notes: ${v.notes.join(', ')}">${v.notes.slice(0, 3).join(' ')}${v.notes.length > 3 ? ' …' : ''}</span>`
+            : `<label class="snd-notes">ch <select data-act="channel">${channelOptions(false)}</select></label>`}
+          <input type="range" min="0" max="100" value="${Math.round(v.level * 100)}" data-act="level" title="Level">
+          <button class="btn sm" data-act="reroll" title="A new take of this drum">⚄</button>
+        </div>`).join('');
+      if (kit.mode === 'channels') drumVoicesEl.querySelectorAll('[data-act=channel]').forEach((sel, i) => { sel.value = String(kit.voices[i].channel); });
+      const where = kit.channel ? `channel ${kit.channel}` : 'any channel';
+      document.getElementById('drum-help').textContent = kit.mode === 'notes'
+        ? `Notes on ${where} play drums by General MIDI number (36 kick, 38 snare, 42 closed hat, …: the usual 4×4 pad layout), not the synth.`
+        : 'Each drum plays on any note on its own channel; those channels don\u2019t reach the synth.';
+    }
+
+    function auditionDrum(i) {
+      api._ensureAudio();
+      if (api._audioCtx.state === 'suspended') api._audioCtx.resume();
+      if (api.muted) setStatus('Sound is muted: click the speaker to hear it', 'warn');
+      kit.play(i, 110);
+    }
+
+    // The ▶ button flashes when its drum plays, from the script or here
+    kit.onTrigger = (i) => {
+      const b = drumVoicesEl.querySelector(`[data-voice="${i}"] .snd-voice`);
+      if (!b) return;
+      b.classList.add('flash');
+      clearTimeout(b._flash);
+      b._flash = setTimeout(() => b.classList.remove('flash'), 120);
+    };
+
+    drumVoicesEl.addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      const i = +b.closest('[data-voice]').dataset.voice;
+      if (b.dataset.act === 'reroll') { kit.reroll(i); saveKit(); }
+      auditionDrum(i);
+    });
+    drumVoicesEl.addEventListener('input', e => {
+      if (e.target.dataset.act !== 'level') return;
+      kit.voices[+e.target.closest('[data-voice]').dataset.voice].level = e.target.value / 100;
+      saveKit();
+    });
+    drumVoicesEl.addEventListener('change', e => {
+      if (e.target.dataset.act !== 'channel') return;
+      kit.voices[+e.target.closest('[data-voice]').dataset.voice].channel = +e.target.value;
+      saveKit();
+    });
+    document.getElementById('drum-enabled').addEventListener('change', e => { kit.enabled = e.target.checked; saveKit(); });
+    document.getElementById('drum-mode').addEventListener('change', e => { kit.mode = e.target.value; saveKit(); renderDrumKit(); });
+    document.getElementById('drum-channel').addEventListener('change', e => { kit.channel = +e.target.value; saveKit(); renderDrumKit(); });
+    document.getElementById('drum-level').addEventListener('input', e => { kit.setLevel(e.target.value / 100); saveKit(); });
+    document.getElementById('drum-reroll-all').addEventListener('click', () => { kit.rerollAll(); saveKit(); auditionDrum(0); });
+    renderDrumKit();
+
+    // ─── SOUND WINDOW: the Sound tab's controls, popped out ──────────────────
+    const soundUI = document.getElementById('sound-ui');
+    const soundWin = document.getElementById('sound-window');
+    const soundWinHead = document.getElementById('sound-window-head');
+    const soundDockedNote = document.getElementById('sound-docked-note');
+    const soundPopoutBtn = document.getElementById('sound-popout');
+
+    function popOutSound(out) {
+      if (out) document.getElementById('sound-window-body').appendChild(soundUI);
+      else document.getElementById('panel-sound').appendChild(soundUI);
+      soundWin.hidden = !out;
+      soundDockedNote.hidden = !out;
+      soundPopoutBtn.hidden = out;
+      try { localStorage.setItem('diii.soundWindow', out ? '1' : '0'); } catch (e) { /* not kept */ }
+    }
+    soundPopoutBtn.addEventListener('click', () => popOutSound(true));
+    document.getElementById('sound-dock').addEventListener('click', () => popOutSound(false));
+    document.getElementById('sound-dock-here').addEventListener('click', () => popOutSound(false));
+
+    // Position and size are kept; the window always stays on screen
+    function placeSoundWindow(r) {
+      const w = Math.min(r.width, innerWidth - 16), h = Math.min(r.height, innerHeight - 16);
+      soundWin.style.width = `${w}px`;
+      soundWin.style.height = `${h}px`;
+      soundWin.style.left = `${Math.max(8, Math.min(r.left, innerWidth - w - 8))}px`;
+      soundWin.style.top = `${Math.max(8, Math.min(r.top, innerHeight - 40))}px`;
+      soundWin.style.right = 'auto';
+    }
+    const saveSoundRect = () => {
+      if (soundWin.hidden) return;
+      const r = soundWin.getBoundingClientRect();
+      try { localStorage.setItem('diii.soundWindowRect', JSON.stringify({ left: r.left, top: r.top, width: r.width, height: r.height })); } catch (e) { /* not kept */ }
+    };
+    try {
+      const r = JSON.parse(localStorage.getItem('diii.soundWindowRect'));
+      if (r) placeSoundWindow(r);
+    } catch (e) { /* default place */ }
+    new ResizeObserver(saveSoundRect).observe(soundWin);
+
+    soundWinHead.addEventListener('pointerdown', e => {
+      if (e.target.closest('button')) return;
+      const r = soundWin.getBoundingClientRect();
+      const dx = e.clientX - r.left, dy = e.clientY - r.top;
+      soundWinHead.setPointerCapture(e.pointerId);
+      const move = ev => placeSoundWindow({ left: ev.clientX - dx, top: ev.clientY - dy, width: r.width, height: r.height });
+      const up = () => {
+        soundWinHead.removeEventListener('pointermove', move);
+        soundWinHead.removeEventListener('pointerup', up);
+        saveSoundRect();
+      };
+      soundWinHead.addEventListener('pointermove', move);
+      soundWinHead.addEventListener('pointerup', up);
+    });
+    try { if (localStorage.getItem('diii.soundWindow') === '1' && innerWidth > 900) popOutSound(true); } catch (e) { /* docked */ }
+
     // ─── INIT ────────────────────────────────────────────────────────────────
     // Grid mode from ◐ View: monochrome hides the colour functions from scripts
     function setGridMode(mode) {
@@ -5791,6 +6053,15 @@
         <p style="margin-top:10px; color:var(--muted);">Those pads are silently ignored. Use the <strong>Grid</strong> selector in the toolbar to switch to a larger preset, or check if the script declares a <code>gridSize</code> in its manifest.</p>
       </div>
     </div>
+  </div>
+
+  <!-- The sound controls, popped out of the side panel -->
+  <div id="sound-window" class="float-window" hidden>
+    <div class="float-head" id="sound-window-head">
+      <span>Sound</span>
+      <button class="btn sm" id="sound-dock" title="Back into the side panel">Dock</button>
+    </div>
+    <div class="float-body" id="sound-window-body"></div>
   </div>
 
   <div id="about-modal" class="modal-overlay">
