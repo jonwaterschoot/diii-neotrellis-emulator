@@ -2861,7 +2861,7 @@
           `*From the official monome iii-scripts repository. All credit to tehn.*`;
         _pendingImportedOrientation = _inferImportedOrientation(source, _pendingReadme);
         loader._currentScriptName = scriptName;
-        await loader._execute(source, scriptName);
+        await loader._execute(source, scriptName, rawUrl.replace(/[^/]*$/, ''));
         document.querySelectorAll('.side-tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.side-panel').forEach(p => p.classList.remove('active'));
         document.getElementById('tab-guide').classList.add('active');
@@ -3565,7 +3565,7 @@
         _customScriptActive = true;
         // Load as if it came from a file (no server path — use source directly)
         loader._currentScriptName = result.name;
-        await loader._execute(result.source, result.name);
+        await loader._execute(result.source, result.name, result.rawDir);
         // If the script errored, onScriptLoad never fired so renderReadme was never called.
         // _pendingReadme is consumed (set to null) by onScriptLoad on success.
         if (_pendingReadme !== null) {

@@ -91,7 +91,7 @@ export class ScriptImporter {
    * Import a script from a repo URL or owner/repo string.
    * @param {string} input
    * @param {function} onProgress – optional (message: string) => void
-   * @returns {{ source, name, readme, repoUrl, branch, host }}
+   * @returns {{ source, name, readme, repoUrl, rawDir, branch, host }}  rawDir: raw URL of the script's folder
    */
   async import(input, onProgress = () => {}) {
     const parsed = this.parseRepo(input);
@@ -190,6 +190,7 @@ export class ScriptImporter {
       name,
       readme,
       repoUrl: h.repoUrl(owner, repo),
+      rawDir: h.raw(owner, repo, resolvedBranch, prefix),
       branch: resolvedBranch,
       host,
     };
