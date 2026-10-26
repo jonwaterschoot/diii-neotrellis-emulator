@@ -75,6 +75,7 @@ Target nav: Home · Getting started · Using the emulator (Walkthrough, Hardware
 - [x] One place for sound (2026-10-26): the sound module under the grid is now volume, mute and ⚙ Sound; everything else is in the Sound tab (or its window). Engine in `engine/sound.js`.
 - [x] Several synths at once, each a tab with its own channel, preset (built-in or saved), model, envelope, drift, movement, filter (+ CC), level and sends to reverb, delay and chorus. The drum kit has level and sends too.
 - [x] Envelope editor: drag the points.
+- [x] Karplus–Strong strings (String, Nylon): computed per note into a buffer (a DelayNode feedback loop can't go above ~375 Hz); in tune within 0.4 cents from 82 to 1760 Hz.
 - [x] Chorus; reverb types Large room / hall and Plate / spring.
 - [x] Quality: Auto / Full / Light (light on phones: 6 voices per synth, short mono reverb, no chorus, no drift or movement).
 - [ ] Listen to all of it in the dev server: drum levels against the synths, the models and presets, both reverbs, the chorus.

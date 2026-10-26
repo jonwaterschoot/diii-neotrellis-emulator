@@ -91,8 +91,8 @@ Along the top: a tab for each synth, **Drums**, **+** to add a synth, and **Effe
 **A synth** plays the notes on its channel (or on any channel) that the drum kit doesn't take. Synths on the same channel play together, so two can be layered.
 
 - **Name** and **channel**, **▶ Try** to hear it, **✕** to remove it.
-- **Preset:** a starting point (Soft keys, Warm pad, Glass bell, Pluck, Drifting lead, Hollow bass), or one you saved with **Save as…** (kept in this browser).
-- **Sound:** Triangle, Sine, Soft saw, Hollow square, Wide pad, Pluck or FM bell.
+- **Preset:** a starting point (Soft keys, Warm pad, Glass bell, Pluck, Drifting lead, Plucked string, Hollow bass), or one you saved with **Save as…** (kept in this browser).
+- **Sound:** Triangle, Sine, Soft saw, Hollow square, Wide pad, Pluck, FM bell, or a plucked string: **String** (bright, long) or **Nylon** (darker, shorter). The strings are Karplus–Strong: every note starts from a fresh burst of noise in a delay line tuned to the note, so no two plucks sound the same; harder notes (higher velocity) sound brighter.
 - **Envelope:** drag the points. The first sets the attack, the second the decay and sustain level, the line after it the sustain level, the last the release.
 - **Drift** puts each note a little out of tune and lets it wander slowly; **Movement** sweeps each note's filter slowly.
 - **Filter:** a low-pass filter, which also follows a CC (74 to start with) on the synth's channel, from the script or from MIDI in.

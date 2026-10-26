@@ -33,6 +33,7 @@ export const SYNTH_PRESETS = {
   'Glass bell':    { model: 'fm', drift: 0, movement: 0, adsr: { attack: 0.002, decay: 1.2, sustain: 0.2, release: 1.2 }, cutoff: 1, sends: { reverb: 0.35, delay: 0.2, chorus: 0 } },
   'Pluck':         { model: 'pluck', drift: 0.1, movement: 0, adsr: { attack: 0.002, decay: 0.25, sustain: 0, release: 0.25 }, cutoff: 1, sends: { reverb: 0.2, delay: 0.3, chorus: 0 } },
   'Drifting lead': { model: 'saw', drift: 0.6, movement: 0.2, adsr: { attack: 0.01, decay: 0.2, sustain: 0.7, release: 0.3 }, cutoff: 0.9, sends: { reverb: 0.2, delay: 0.2, chorus: 0.4 } },
+  'Plucked string': { model: 'string', drift: 0.05, movement: 0, adsr: { attack: 0.001, decay: 3, sustain: 1, release: 0.6 }, cutoff: 1, sends: { reverb: 0.3, delay: 0.1, chorus: 0.15 } },
   'Hollow bass':   { model: 'square', drift: 0.1, movement: 0, adsr: { attack: 0.005, decay: 0.15, sustain: 0.6, release: 0.15 }, cutoff: 0.55, sends: { reverb: 0.05, delay: 0, chorus: 0 } },
 };
 
@@ -201,7 +202,7 @@ export class SoundEngine {
     const ctx = this.ctx;
     const now = ctx.currentTime;
     const freq = 440 * Math.pow(2, (note - 69) / 12);
-    const voice = buildVoice(ctx, part.model, freq, now, this.light ? {} : part);
+    const voice = buildVoice(ctx, part.model, freq, now, this.light ? { vel } : { ...part, vel });
     const env = ctx.createGain();
     const { attack, decay, sustain } = part.adsr;
     const peak = (vel / 127) * 0.4;
