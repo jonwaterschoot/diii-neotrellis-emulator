@@ -1,0 +1,76 @@
+{
+  "about": "Scripts by other people. They are not part of this project and not copied here: this file only lists their names and repository links, and the emulator fetches each script from its author's repository when it is loaded. All credit goes to the authors. Authors who would rather not be listed: please open an issue and the entry will be removed.",
+  "contact": "https://github.com/jonwaterschoot/diii-neotrellis-emulator/issues",
+  "scripts": [
+    {
+      "name": "kria iii",
+      "author": "aktsom",
+      "repo": "github.com/aktsom/kria_iii",
+      "description": "4-track MIDI step sequencer (kria lite). Play/stop: row 7, step 15.",
+      "gridSize": [16, 8]
+    },
+    {
+      "name": "stepiii",
+      "author": "nolliegray",
+      "repo": "github.com/nolliegray/stepiii",
+      "description": "A performance step sequencer. Sends MIDI clock; can follow external clock.",
+      "gridSize": [16, 8]
+    },
+    {
+      "name": "arpiii",
+      "author": "nolliegray",
+      "repo": "github.com/nolliegray/arpiii",
+      "description": "An arpeggiator and sequencer. Takes notes from a MIDI keyboard; can follow external clock.",
+      "gridSize": [16, 8]
+    },
+    {
+      "name": "fugace",
+      "author": "behindkeyframes",
+      "repo": "github.com/behindkeyframes/fugace",
+      "description": "A sequencer with 4 playheads on one piano roll. Play/stop: row 7, x5.",
+      "gridSize": [16, 8]
+    },
+    {
+      "name": "iiinvert",
+      "author": "liamelliot",
+      "repo": "github.com/liamelliot/iiinvert",
+      "description": "4-track live sequencer, geared towards drums.",
+      "gridSize": [16, 8]
+    },
+    {
+      "name": "fell",
+      "author": "liamelliot",
+      "repo": "github.com/liamelliot/fell",
+      "docs": "https://llllllll.co/t/fell/72593",
+      "description": "Notes play when they fall across a pressed key. Made for grid zero (16×16).",
+      "gridSize": [16, 16]
+    },
+    {
+      "name": "sluiiice",
+      "author": "duncangeere",
+      "repo": "github.com/duncangeere/sluiiice",
+      "description": "A waterfall. Turn the grid so the USB port faces up.",
+      "gridSize": [16, 8],
+      "orientation": "portrait-ccw"
+    },
+    {
+      "name": "selector",
+      "author": "jonwaterschoot",
+      "repo": "github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii/doc/scripts/selector",
+      "file": "selector.lua",
+      "loader": true,
+      "description": "Script picker: every script on the device gets a slot. Here it lists the bundled scripts.",
+      "gridSize": [16, 8],
+      "own": true
+    },
+    {
+      "name": "many-roads",
+      "author": "boreal-ground",
+      "repo": "github.com/boreal-ground/many-roads-grid",
+      "file": "many-roads.lua",
+      "loader": true,
+      "description": "A script switcher / menu. Here it lists the bundled scripts.",
+      "gridSize": [16, 8]
+    }
+  ]
+}

@@ -2,6 +2,8 @@
 
 This folder is a starter template. Copy it, rename things, and build from here.
 
+Working with an LLM? Give it [`LLM_INSTRUCTIONS.md`](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/template/LLM_INSTRUCTIONS.md) together with [`myscript.lua`](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/template/myscript.lua). All template files: [`scripts/template/`](https://github.com/jonwaterschoot/diii-neotrellis-emulator/tree/main/scripts/template).
+
 ---
 
 ## Step 1 — Copy and rename the folder

@@ -1089,10 +1089,14 @@
 
     .side-tab {
       flex: 1;
-      padding: 10px 6px;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding: 10px 4px;
       text-align: center;
       font-size: 11px;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
       color: var(--muted);
       cursor: pointer;
@@ -1305,6 +1309,221 @@
       color: var(--muted);
       font-size: 12px;
       line-height: 1.8;
+    }
+
+    /* Source panel: Lua source with line numbers and colours, or an editor.
+       It fills the panel height and scrolls by itself, so its scrollbars stay in view. */
+    #panel-source.active {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .src-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 10px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .src-info {
+      flex: 1 1 100%;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .src-toolbar label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .src-err-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      font: inherit;
+      color: var(--red);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .src-code,
+    .src-edit-wrap {
+      flex: 1;
+      min-height: 0;
+      background: #060d14;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+
+    .src-code,
+    .src-edit-layer {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.6;
+      tab-size: 2;
+      font-variant-ligatures: none;
+    }
+
+    .src-code {
+      position: relative;
+      padding: 8px 0;
+      overflow: auto;
+    }
+
+    /* Editor: a transparent textarea over a coloured copy of its text. Both layers
+       have the same box, font and scrollbars, so the text lines up. */
+    .src-edit-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .src-edit-wrap:focus-within {
+      border-color: var(--cyan);
+    }
+
+    .src-edit-layer {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      border: 0;
+      overflow: scroll;
+      white-space: pre;
+      overflow-wrap: normal;
+    }
+
+    .src-edit-wrap.wrap .src-edit-layer {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    /* Coloured copy with line numbers. Extra padding at the end means it can always
+       scroll as far as the textarea, so the two never come apart at the edges. */
+    .src-edit-hl {
+      padding: 8px 0 48px;
+      color: var(--text);
+      pointer-events: none;
+      scrollbar-color: transparent transparent; /* keeps the space, hides the bars */
+    }
+
+    .src-edit-wrap:not(.wrap) .src-edit-hl .src-lines {
+      padding-right: 48px;
+    }
+
+    /* Text starts right of the line-number gutter, as in .src-line */
+    .src-editor {
+      padding: 8px 10px 8px calc(4ch + 24px);
+      color: transparent;
+      background: transparent;
+      caret-color: var(--text);
+      resize: none;
+      outline: none;
+    }
+
+    /* Change flags over the gutter: click one to restore that change */
+    .src-flags {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 7px;
+      overflow: hidden;
+      z-index: 1;
+      pointer-events: none; /* only the flags take clicks; the rest goes to the editor */
+    }
+
+    .src-flags-inner {
+      position: relative;
+    }
+
+    .src-flag {
+      pointer-events: auto;
+      position: absolute;
+      left: 1px;
+      width: 4px;
+      min-height: 4px;
+      padding: 0;
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .src-flag:hover {
+      width: 6px;
+    }
+
+    .src-flag.chg { background: var(--amber); }
+    .src-flag.add { background: var(--green); }
+    .src-flag.del { background: var(--red); height: 4px; }
+
+    .src-changes {
+      color: var(--amber);
+    }
+
+    .src-editor::selection {
+      color: transparent;
+      background: rgba(6, 182, 212, 0.3);
+    }
+
+    .src-lines {
+      width: max-content;
+      min-width: 100%;
+      white-space: pre;
+    }
+
+    .src-code.wrap .src-lines,
+    .src-edit-wrap.wrap .src-lines {
+      width: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    /* Gutter: 4ch + 24px = number box (7px flag space, 4ch digits, 6px, 1px border) + 10px.
+       Wrapped lines continue right of it, where the textarea's text starts too. */
+    .src-line {
+      padding: 0 10px 0 calc(4ch + 24px);
+      text-indent: calc(-4ch - 24px);
+    }
+
+    .src-line::before {
+      content: attr(data-n);
+      display: inline-block;
+      width: calc(4ch + 14px);
+      margin-right: 10px;
+      padding: 0 6px 0 7px;
+      text-indent: 0;
+      text-align: right;
+      color: var(--muted);
+      border-right: 1px solid var(--border);
+      user-select: none;
+    }
+
+    /* Lines changed from the loaded script (view mode; the editor has clickable flags) */
+    .src-line.chg::before { box-shadow: inset 4px 0 0 var(--amber); }
+    .src-line.add::before { box-shadow: inset 4px 0 0 var(--green); }
+    .src-line.del::before { box-shadow: inset 0 2px 0 var(--red); }
+
+    #panel-source [hidden] { display: none !important; }
+
+    .tok-c { color: #6b7f99; font-style: italic; }
+    .tok-s { color: #8fc98a; }
+    .tok-n { color: var(--amber); }
+    .tok-k { color: #c49cf0; }
+    .tok-a { color: var(--cyan); }
+
+    .src-line.err {
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    .src-line.err::before {
+      color: var(--red);
     }
 
     .empty-state strong {
@@ -2177,6 +2396,7 @@
         <div class="side-tab active" data-tab="docs" id="tab-docs">Docs</div>
         <div class="side-tab" data-tab="guide" id="tab-guide">Guide</div>
         <div class="side-tab" data-tab="state" id="tab-state">State</div>
+        <div class="side-tab" data-tab="source" id="tab-source">Source</div>
         <div class="side-tab" data-tab="console" id="tab-console">Console</div>
         <div class="side-tab" data-tab="midi" id="tab-midi">MIDI</div>
       </div>
@@ -2197,6 +2417,8 @@
             Select a script from the dropdown above, or open a <code>.lua</code> file from disk.
             <br><br>
             Documentation will be extracted automatically from<br>LDoc-style comments in the source.
+            <br><br>
+            Writing your own script? Pick <strong>Write your own → Script template</strong> in the dropdown.
           </div>
         </div>
 
@@ -2205,6 +2427,31 @@
           <div class="empty-state">
             <strong>No State Data</strong>
             Load a script to see extracted state variable defaults.
+          </div>
+        </div>
+
+        <!-- Source panel: the loaded Lua source, which can be edited and run -->
+        <div class="side-panel" id="panel-source">
+          <div class="src-toolbar">
+            <span class="src-info" id="src-info">No script loaded</span>
+            <span class="src-changes" id="src-changes" hidden></span>
+            <button type="button" class="src-err-btn" id="src-err" hidden></button>
+            <label title="Wrap long lines"><input type="checkbox" id="src-wrap"> Wrap</label>
+            <button class="btn sm" id="src-edit" title="Edit the script here and run it">✎ Edit</button>
+            <button class="btn sm primary" id="src-run" title="Run the edited script (Ctrl+Enter)" hidden>▶ Run</button>
+            <label id="src-auto-label" title="Run again 1 s after you stop typing" hidden><input type="checkbox" id="src-auto"> Auto-run</label>
+            <button class="btn sm" id="src-restore-all" title="Put back the script as it was loaded (Ctrl+Z undoes)" hidden>↺ Restore all</button>
+          </div>
+          <div class="src-code" id="src-view">
+            <div class="empty-state">
+              <strong>No Script Loaded</strong>
+              The Lua source of the loaded script shows here.
+            </div>
+          </div>
+          <div class="src-edit-wrap" id="src-edit-wrap" hidden>
+            <pre class="src-edit-layer src-edit-hl" id="src-edit-hl" aria-hidden="true"></pre>
+            <textarea class="src-edit-layer src-editor" id="src-editor" spellcheck="false" autocomplete="off" wrap="off"></textarea>
+            <div class="src-flags" id="src-flags"><div class="src-flags-inner" id="src-flags-inner"></div></div>
           </div>
         </div>
 
@@ -2283,9 +2530,13 @@
 
     // ─── STATE ─────────────────────────────────────────────────────────────────
     let _pendingReadme = null;      // set before _execute so onScriptLoad can pick it up
+    let _pendingReadmeBase = null;  // URL that relative links and images in _pendingReadme resolve against
+    let _readmeFor = null;          // script whose Guide is showing; a re-run of it keeps the Guide
     let _pendingImportedOrientation = null; // inferred from external repo source/README before _execute
     let _customScriptActive = false; // true when loaded from disk or external repo (not bundled)
     const _manifestMap = new Map(); // file → manifest entry (for readme lookup)
+    let _externalScripts = [];      // scripts/external.json: scripts loaded from their own repos
+    let _externalContact = null;    // where authors can ask to be removed from that list
 
     // ─── EXTERNAL SCRIPTS — tehn (monome) ──────────────────────────────────────
     const TEHN_RAW_BASE = 'https://codeberg.org/tehn/iii-scripts/raw/branch/main/';
@@ -2728,8 +2979,12 @@
         renderDocs(docs);
         renderState(docs);
         renderHints(docs);
-        renderReadme(_pendingReadme);
+        // ↻ Reload, hot reload and running edited source re-run the same script: keep its Guide
+        if (_pendingReadme !== null || name !== _readmeFor) renderReadme(_pendingReadme, _pendingReadmeBase);
+        _readmeFor = name;
         _pendingReadme = null;
+        _pendingReadmeBase = null;
+        renderSource(loader.currentSource, name);
         setStatus(`✓ ${name} running`, 'success');
         _buildMapGroups(docs);
         _singleViewScreen = 'live'; // reset to live whenever a new script loads
@@ -2759,6 +3014,7 @@
       },
       onScriptError: (msg) => {
         setStatus(`Error: ${msg}`, 'error');
+        renderSource(loader.currentSource, loader.currentScriptName, msg);
       }
     });
 
@@ -2794,6 +3050,31 @@
         setDownloadEnabled(true);
       }
 
+      // External scripts from scripts/external.json: only names and links, each script is
+      // fetched from its author's repo when loaded
+      try {
+        const res = await fetch(`${BASE_URL}/scripts/external.json`);
+        if (res.ok) {
+          const data = await res.json();
+          _externalScripts = data.scripts || [];
+          _externalContact = data.contact || null;
+        }
+      } catch { _externalScripts = []; }
+      if (_externalScripts.length) {
+        const extGroup = document.createElement('optgroup');
+        extGroup.label = 'External scripts — by their authors, loaded from their repos';
+        _externalScripts.forEach((entry, i) => {
+          const opt = document.createElement('option');
+          opt.value = `ext:${i}`;
+          opt.textContent = `${entry.name} — ${entry.author}${entry.loader ? ' · loader' : ''}`;
+          opt.title = `${entry.description || ''} (by ${entry.author})`;
+          extGroup.appendChild(opt);
+        });
+        scriptSelect.appendChild(extGroup);
+      }
+
+      renderRecentGroup();
+
       // External scripts — tehn (monome) — fetched live from Codeberg
       const group = document.createElement('optgroup');
       group.label = 'external scripts — tehn (monome)';
@@ -2820,10 +3101,12 @@
           setStatus(`Grid set to ${mCols}×${mRows}${rotStr} from script manifest`, 'info');
         }
       }
+      _pendingReadmeBase = null;
       if (entry?.readme) {
         try {
           const res = await fetch(`${BASE_URL}/scripts/${entry.readme}`);
           if (res.ok) _pendingReadme = await res.text();
+          _pendingReadmeBase = new URL(`${BASE_URL}/scripts/${entry.readme}`, location.href).href;
         } catch { _pendingReadme = null; }
       } else {
         _pendingReadme = null;
@@ -2880,6 +3163,8 @@
       const val = scriptSelect.value;
       if (!val) return;
       if (val.startsWith('https://')) loadExternalScript(val);
+      else if (val.startsWith('ext:')) loadRegistryScript(_externalScripts[+val.slice(4)]);
+      else if (val.startsWith('recent:')) loadRecentScript(+val.slice(7));
       else loadBundledScript(val);
     });
 
@@ -2895,6 +3180,13 @@
 
     scriptSelect.addEventListener('change', () => {
       const v = scriptSelect.value;
+      if (v === 'recent:clear') {
+        _writeRecent([]);
+        renderRecentGroup();
+        scriptSelect.value = '';
+        setStatus('Recent scripts cleared', 'info');
+        return;
+      }
       if (v !== '__custom__') {
         const customOpt = document.getElementById('__custom_opt__');
         if (customOpt) scriptSelect.removeChild(customOpt);
@@ -2902,7 +3194,7 @@
         _customScriptActive = false;
       }
       // External scripts: disable source download (no local file), device download works after load
-      const isExternal = v.startsWith('https://');
+      const isExternal = v.startsWith('https://') || v.startsWith('ext:') || v.startsWith('recent:');
       btnDownloadSrc.disabled = !v || v === '__custom__' || isExternal;
       btnDownloadDev.disabled = !v || v === '__custom__';
     });
@@ -2954,7 +3246,14 @@
     // File picker
     document.getElementById('file-input').addEventListener('change', e => {
       const file = e.target.files[0];
-      if (file) { _customScriptActive = true; loader.loadFromFile(file); }
+      if (file) {
+        _customScriptActive = true;
+        loader.loadFromFile(file).then(() => {
+          if (loader.currentScriptName === file.name && loader.currentSource) {
+            rememberScript({ kind: 'file', name: file.name, source: loader.currentSource });
+          }
+        });
+      }
       e.target.value = ''; // Reset so same file can be reloaded
     });
 
@@ -3309,7 +3608,7 @@
     // ─── KEYBOARD ──────────────────────────────────────────────────────────────
     let tabDown = false;
     document.addEventListener('keydown', e => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
       // Ensure audio is started on first keypress
       if (api._audioCtx && api._audioCtx.state === 'suspended') api._audioCtx.resume();
 
@@ -3339,6 +3638,7 @@
     });
 
     document.addEventListener('keyup', e => {
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
       if (e.key === 'Tab') { tabDown = false; api.handlePadEvent(1, 8, 0); }
     });
 
@@ -3484,14 +3784,30 @@
     // ─── README / GUIDE RENDERER ─────────────────────────────────────────────
 
     /** Post-process marked HTML: embed YouTube links as iframes inline */
-    function _processReadmeHtml(html) {
+    /** Point relative links and images at `base` (the README's own URL), not at the emulator page */
+    function _resolveReadmeUrls(html, base) {
+      if (!base) return html;
+      const tpl = document.createElement('template');
+      tpl.innerHTML = html;
+      for (const [sel, attr] of [['a[href]', 'href'], ['img[src]', 'src']]) {
+        tpl.content.querySelectorAll(sel).forEach(el => {
+          const v = el.getAttribute(attr);
+          if (/^([a-z][a-z0-9+.-]*:|#|\/)/i.test(v)) return; // absolute, anchor or site-root
+          try { el.setAttribute(attr, new URL(v, base).href); } catch { /* leave as is */ }
+        });
+      }
+      return tpl.innerHTML;
+    }
+
+    function _processReadmeHtml(html, base = null) {
+      html = _resolveReadmeUrls(html, base);
       return html.replace(
         /<a\s[^>]*href="https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?(?:[^"&]*&)?v=|youtu\.be\/)([\w-]+)[^"]*"[^>]*>[^<]*<\/a>/gi,
         (match, vid) => `${match}<div class="yt-embed"><iframe src="https://www.youtube-nocookie.com/embed/${vid}" allowfullscreen loading="lazy"></iframe></div>`
       );
     }
 
-    function renderReadme(markdown) {
+    function renderReadme(markdown, base = null) {
       const panel = document.getElementById('panel-guide');
       const tab   = document.getElementById('tab-guide');
       const mapBody  = document.getElementById('map-readme-body');
@@ -3508,7 +3824,7 @@
         return;
       }
       const rawHtml = window.marked ? window.marked.parse(markdown) : `<pre>${markdown}</pre>`;
-      const html = _processReadmeHtml(rawHtml);
+      const html = _processReadmeHtml(rawHtml, base);
       panel.innerHTML = `<div class="guide-content">${html}</div>`;
       tab.style.color = 'var(--cyan)';
 
@@ -3541,14 +3857,27 @@
       if (active) githubInput.focus();
     });
 
-    async function runGithubImport() {
-      const val = githubInput.value.trim();
-      if (!val) return;
-      btnGithubImport.disabled = true;
+    /**
+     * Import a script from a repo and run it.
+     * @param {string} input – repo URL or owner/repo
+     * @param {Object} entry – optional registry entry: file, gridSize, orientation, name, author, docs
+     * @returns {Promise<Object|null>} the import result, or null when the import failed
+     */
+    async function importAndRun(input, entry = null) {
       try {
-        const result = await importer.import(val, msg => setStatus(msg, 'info'));
-        _pendingReadme = result.readme;
-        _pendingImportedOrientation = _inferImportedOrientation(result.source, result.readme);
+        const result = await importer.import(input, msg => setStatus(msg, 'info'), { file: entry?.file });
+        _pendingReadme = result.readme || (entry ? _registryReadme(entry) : null);
+        if (entry && !entry.own) _pendingReadme = _registryNotice(entry) + _pendingReadme;
+        _pendingReadmeBase = result.readme ? result.rawDir : null;
+        _pendingImportedOrientation = null;
+        if (Array.isArray(entry?.gridSize)) {
+          // The registry knows the grid; no need to guess from the README
+          const [eCols, eRows] = entry.gridSize;
+          const eRot = _orientationToRotation(entry.orientation, eCols, eRows);
+          if (eCols !== COLS || eRows !== ROWS || eRot !== gridRotation) applyGridPreset(eCols, eRows, true, eRot);
+        } else {
+          _pendingImportedOrientation = _inferImportedOrientation(result.source, result.readme);
+        }
         _customScriptActive = true;
         // Load as if it came from a file (no server path — use source directly)
         loader._currentScriptName = result.name;
@@ -3556,25 +3885,422 @@
         // If the script errored, onScriptLoad never fired so renderReadme was never called.
         // _pendingReadme is consumed (set to null) by onScriptLoad on success.
         if (_pendingReadme !== null) {
-          renderReadme(_pendingReadme);
+          renderReadme(_pendingReadme, _pendingReadmeBase);
           _pendingReadme = null;
+          _pendingReadmeBase = null;
         }
-        // Activate Guide tab automatically if README was found
-        if (result.readme) {
+        // Activate Guide tab automatically if there's a README
+        if (result.readme || entry) {
           document.querySelectorAll('.side-tab').forEach(t => t.classList.remove('active'));
           document.querySelectorAll('.side-panel').forEach(p => p.classList.remove('active'));
           document.getElementById('tab-guide').classList.add('active');
           document.getElementById('panel-guide').classList.add('active');
         }
-        importRow.classList.remove('active');
-        githubInput.value = '';
+        return result;
       } catch (e) {
         _pendingImportedOrientation = null;
         setStatus(`Import failed: ${e.message}`, 'error');
-      } finally {
-        btnGithubImport.disabled = false;
+        return null;
       }
     }
+
+    /** Credit line above the Guide of a script by someone else */
+    function _registryNotice(entry) {
+      const optOut = _externalContact ? ` Authors: if you'd rather not be listed, [open an issue](${_externalContact}).` : '';
+      return `> **Not part of this emulator.** *${entry.name}* is by **${entry.author}**. It's loaded straight from ` +
+        `[their repository](https://${entry.repo}) each time; this project only keeps its name and link.${optOut}\n\n`;
+    }
+
+    /** Guide text for a registry script whose repo has no README */
+    function _registryReadme(entry) {
+      const links = [`[Repository](https://${entry.repo})`];
+      if (entry.docs) links.push(`[Discussion / docs](${entry.docs})`);
+      return `# ${entry.name}\n\nBy **${entry.author}** · ${links.join(' · ')}\n\n${entry.description || ''}\n\n` +
+        `*Loaded live from the author's repository; this repo has no README.*`;
+    }
+
+    async function runGithubImport() {
+      const val = githubInput.value.trim();
+      if (!val) return;
+      btnGithubImport.disabled = true;
+      const result = await importAndRun(val);
+      if (result) {
+        rememberScript({ kind: 'repo', input: val, name: result.name });
+        importRow.classList.remove('active');
+        githubInput.value = '';
+      }
+      btnGithubImport.disabled = false;
+    }
+
+    /** A script from scripts/external.json */
+    async function loadRegistryScript(entry) {
+      if (!entry) return;
+      const result = await importAndRun(entry.repo, entry);
+      if (result && entry.loader) {
+        setStatus(`${entry.name} is a loader: it lists the bundled scripts, as if they were on the device`, 'info');
+      }
+    }
+
+    // ─── RECENT SCRIPTS (browser storage) ─────────────────────────────────────
+    // Repos imported with ⇱ and files opened from disk. Repos are stored by address and
+    // fetched fresh; files keep their source, since there's no way to reopen them.
+    const RECENT_KEY = 'diii.recentScripts';
+    const RECENT_MAX = 8;
+    const RECENT_MAX_SOURCE = 200000; // characters; bigger files aren't kept
+
+    function _readRecent() {
+      try { return JSON.parse(localStorage.getItem(RECENT_KEY)) || []; } catch { return []; }
+    }
+
+    function _writeRecent(list) {
+      try { localStorage.setItem(RECENT_KEY, JSON.stringify(list)); } catch (e) { console.warn('[recent scripts]', e); }
+    }
+
+    function rememberScript(item) {
+      if (item.kind === 'file' && item.source.length > RECENT_MAX_SOURCE) return;
+      const key = it => it.kind === 'repo' ? `repo:${it.input}` : `file:${it.name}`;
+      const list = _readRecent().filter(it => key(it) !== key(item));
+      list.unshift(item);
+      _writeRecent(list.slice(0, RECENT_MAX));
+      renderRecentGroup();
+    }
+
+    /** "Recent" optgroup right below the placeholder option */
+    function renderRecentGroup() {
+      document.getElementById('recent-group')?.remove();
+      const list = _readRecent();
+      if (!list.length) return;
+      const group = document.createElement('optgroup');
+      group.id = 'recent-group';
+      group.label = 'Recent';
+      list.forEach((it, i) => {
+        const opt = document.createElement('option');
+        opt.value = `recent:${i}`;
+        opt.textContent = it.kind === 'repo' ? `${it.name} — ${it.input}` : `${it.name} — ${it.edited ? 'edited' : 'opened file'}`;
+        group.appendChild(opt);
+      });
+      const clear = document.createElement('option');
+      clear.value = 'recent:clear';
+      clear.textContent = '✕ Clear recent';
+      group.appendChild(clear);
+      const placeholder = scriptSelect.querySelector('option[value=""]');
+      scriptSelect.insertBefore(group, placeholder ? placeholder.nextSibling : scriptSelect.firstChild);
+    }
+
+    async function loadRecentScript(i) {
+      const it = _readRecent()[i];
+      if (!it) return;
+      if (it.kind === 'repo') {
+        if (await importAndRun(it.input)) rememberScript(it);
+        return;
+      }
+      _customScriptActive = true;
+      _pendingReadme = null;
+      _pendingReadmeBase = null;
+      loader._currentScriptName = it.name;
+      await loader._execute(it.source, it.name);
+      rememberScript(it);
+    }
+
+    // ─── SOURCE VIEWER / EDITOR ───────────────────────────────────────────────
+    const LUA_KEYWORDS = new Set(['and', 'break', 'do', 'else', 'elseif', 'end', 'false', 'for', 'function', 'goto',
+      'if', 'in', 'local', 'nil', 'not', 'or', 'repeat', 'return', 'then', 'true', 'until', 'while']);
+    const LUA_API = /^(grid_\w+|midi_\w+|fs_\w+|pset_\w+|event_\w+|metro|slew|get_time|wrap|clamp|round|linlin|ps|pt|print|require)$/;
+    // comments (long and short), strings (long and quoted), numbers, names
+    const LUA_TOKEN = /--\[(=*)\[[\s\S]*?(?:\]\1\]|$)|--[^\n]*|\[(=*)\[[\s\S]*?(?:\]\2\]|$)|"(?:\\[\s\S]|[^"\\\n])*"?|'(?:\\[\s\S]|[^'\\\n])*'?|0[xX][\da-fA-F]+|\d+(?:\.\d*)?(?:[eE][+-]?\d+)?|[A-Za-z_]\w*/g;
+    const escHtml = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    /** Lua source → one HTML string per line, with spans for comments, strings, numbers, keywords and the iii API */
+    function highlightLua(source) {
+      const lines = [''];
+      const add = (text, cls) => {
+        text.split('\n').forEach((piece, i) => {
+          if (i > 0) lines.push('');
+          if (piece) lines[lines.length - 1] += cls ? `<span class="${cls}">${escHtml(piece)}</span>` : escHtml(piece);
+        });
+      };
+      let last = 0;
+      for (const m of source.matchAll(LUA_TOKEN)) {
+        add(source.slice(last, m.index), null);
+        const t = m[0];
+        const cls = t.startsWith('--') ? 'tok-c'
+          : (t[0] === '"' || t[0] === "'" || t[0] === '[') ? 'tok-s'
+          : /\d/.test(t[0]) ? 'tok-n'
+          : LUA_KEYWORDS.has(t) ? 'tok-k'
+          : LUA_API.test(t) ? 'tok-a' : null;
+        add(t, cls);
+        last = m.index + t.length;
+      }
+      add(source.slice(last), null);
+      return lines;
+    }
+
+    /**
+     * Line diff of a → b as hunks {aStart, aEnd, bStart, bEnd}. Lines shared at the start and
+     * end are skipped first, so typing only compares the few lines around the change.
+     */
+    function diffLines(a, b) {
+      let pre = 0;
+      while (pre < a.length && pre < b.length && a[pre] === b[pre]) pre++;
+      let suf = 0;
+      while (suf < a.length - pre && suf < b.length - pre && a[a.length - 1 - suf] === b[b.length - 1 - suf]) suf++;
+      const A = a.slice(pre, a.length - suf);
+      const B = b.slice(pre, b.length - suf);
+      const n = A.length, m = B.length;
+      if (!n && !m) return [];
+      // Too large to align line by line (e.g. a whole new file pasted): one hunk
+      if (n * m > 4e6) return [{ aStart: pre, aEnd: pre + n, bStart: pre, bEnd: pre + m }];
+      const L = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1)); // longest common subsequence
+      for (let i = n - 1; i >= 0; i--) {
+        for (let j = m - 1; j >= 0; j--) L[i][j] = A[i] === B[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+      }
+      const hunks = [];
+      let h = null;
+      for (let i = 0, j = 0; i < n || j < m;) {
+        if (i < n && j < m && A[i] === B[j]) { if (h) { hunks.push(h); h = null; } i++; j++; continue; }
+        if (!h) h = { aStart: pre + i, aEnd: pre + i, bStart: pre + j, bEnd: pre + j };
+        if (j < m && (i >= n || L[i][j + 1] >= L[i + 1][j])) { j++; h.bEnd++; } else { i++; h.aEnd++; }
+      }
+      if (h) hunks.push(h);
+      return hunks;
+    }
+
+    /** Per line of b: 'chg' (changed), 'add' (added) or 'del' (lines removed above it) */
+    function hunkLineClasses(hunks, count) {
+      const cls = new Array(count).fill('');
+      for (const h of hunks) {
+        if (h.bEnd > h.bStart) cls.fill(h.aEnd > h.aStart ? 'chg' : 'add', h.bStart, h.bEnd);
+        else cls[Math.min(h.bStart, count - 1)] ||= 'del';
+      }
+      return cls;
+    }
+
+    const srcView = document.getElementById('src-view');
+    const srcEditor = document.getElementById('src-editor');
+    const srcEditWrap = document.getElementById('src-edit-wrap');
+    const srcEditHl = document.getElementById('src-edit-hl');
+    const srcFlags = document.getElementById('src-flags-inner');
+    const srcInfo = document.getElementById('src-info');
+    const srcChanges = document.getElementById('src-changes');
+    const srcErr = document.getElementById('src-err');
+    const srcWrap = document.getElementById('src-wrap');
+    const srcEdit = document.getElementById('src-edit');
+    const srcRun = document.getElementById('src-run');
+    const srcAuto = document.getElementById('src-auto');
+    const srcAutoLabel = document.getElementById('src-auto-label');
+    const srcRestoreAll = document.getElementById('src-restore-all');
+    let _srcEditing = false;
+    let _srcDirty = false;     // editor holds changes that haven't been run
+    let _srcRanText = null;    // the text last run from the editor
+    let _srcBaseline = null;   // the script as it was loaded: what changes are flagged against
+    let _srcHunks = [];        // editor text vs _srcBaseline
+    let _srcErrLine = 0;
+    let _srcAutoTimer = null;
+    let _srcHlFrame = 0;
+
+    const lineDivs = (lines, classes) => `<div class="src-lines">` +
+      lines.map((h, i) => {
+        const cls = [classes[i], i + 1 === _srcErrLine ? 'err' : ''].filter(Boolean).join(' ');
+        return `<div class="src-line${cls ? ' ' + cls : ''}" data-n="${i + 1}">${h || ' '}</div>`;
+      }).join('') + `</div>`;
+
+    function showChangeCount(hunks) {
+      const n = hunks.reduce((sum, h) => sum + Math.max(h.bEnd - h.bStart, h.aEnd - h.aStart), 0);
+      srcChanges.hidden = !n;
+      srcChanges.textContent = `${n} line${n === 1 ? '' : 's'} changed`;
+      srcRestoreAll.hidden = !n || !_srcEditing;
+    }
+
+    /**
+     * Redraw the editor's layer: colours, line numbers, and a flag per change, placed
+     * at the lines the coloured layer laid out. At most once per frame.
+     */
+    function syncEditorHighlight() {
+      cancelAnimationFrame(_srcHlFrame);
+      _srcHlFrame = requestAnimationFrame(() => {
+        const text = srcEditor.value;
+        const lines = highlightLua(text);
+        _srcHunks = _srcBaseline === null ? [] : diffLines(_srcBaseline.split('\n'), text.split('\n'));
+        srcEditHl.innerHTML = lineDivs(lines, []);
+        const rows = srcEditHl.querySelectorAll('.src-line');
+        srcFlags.innerHTML = _srcHunks.map((h, i) => {
+          const first = rows[Math.min(h.bStart, rows.length - 1)];
+          const removed = h.aEnd - h.aStart, added = h.bEnd - h.bStart;
+          let top, height, kind, title;
+          if (added) {
+            const last = rows[h.bEnd - 1];
+            top = first.offsetTop;
+            height = last.offsetTop + last.offsetHeight - top;
+            kind = removed ? 'chg' : 'add';
+            title = removed
+              ? (removed === 1 && added === 1 ? `Restore line ${h.bStart + 1}` : `Restore lines ${h.bStart + 1}–${h.bEnd} (${removed} original)`)
+              : `Remove ${added} added line${added === 1 ? '' : 's'}`;
+          } else {
+            top = h.bStart < rows.length ? first.offsetTop - 2 : first.offsetTop + first.offsetHeight - 2;
+            height = 4;
+            kind = 'del';
+            title = `Restore ${removed} removed line${removed === 1 ? '' : 's'}`;
+          }
+          return `<button type="button" class="src-flag ${kind}" data-h="${i}" style="top:${top}px;height:${height}px" title="${title} (Ctrl+Z undoes)"></button>`;
+        }).join('');
+        showChangeCount(_srcHunks);
+        syncEditorScroll();
+      });
+    }
+
+    function syncEditorScroll() {
+      srcEditHl.scrollTop = srcEditor.scrollTop;
+      srcEditHl.scrollLeft = srcEditor.scrollLeft;
+      srcFlags.style.transform = `translateY(${-srcEditor.scrollTop}px)`;
+    }
+    srcEditor.addEventListener('scroll', syncEditorScroll);
+
+    /** Replace the editor's text through the browser's editing, so Ctrl+Z can undo it */
+    function setEditorText(next) {
+      const old = srcEditor.value;
+      let a = 0;
+      while (a < old.length && a < next.length && old[a] === next[a]) a++;
+      let b = 0;
+      while (b < old.length - a && b < next.length - a && old[old.length - 1 - b] === next[next.length - 1 - b]) b++;
+      const insert = next.slice(a, next.length - b);
+      const scroll = srcEditor.scrollTop;
+      srcEditor.focus();
+      srcEditor.setSelectionRange(a, old.length - b);
+      const done = insert ? document.execCommand('insertText', false, insert) : document.execCommand('delete');
+      if (!done) {
+        srcEditor.setRangeText(insert, a, old.length - b, 'end');
+        srcEditor.dispatchEvent(new Event('input'));
+      }
+      srcEditor.scrollTop = scroll;
+    }
+
+    srcFlags.addEventListener('click', e => {
+      const h = _srcHunks[+e.target.dataset.h];
+      if (!h || _srcBaseline === null) return;
+      const cur = srcEditor.value.split('\n');
+      const orig = _srcBaseline.split('\n');
+      cur.splice(h.bStart, h.bEnd - h.bStart, ...orig.slice(h.aStart, h.aEnd));
+      setEditorText(cur.join('\n'));
+    });
+
+    srcRestoreAll.addEventListener('click', () => {
+      if (_srcBaseline !== null) setEditorText(_srcBaseline);
+    });
+
+    /** Show the script's source; a Lua error "name.lua:12: …" marks line 12 */
+    function renderSource(source, name, error = null) {
+      const m = error && name ? error.match(new RegExp(`${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}:(\\d+):`)) : null;
+      _srcErrLine = m ? +m[1] : 0;
+      srcErr.hidden = !_srcErrLine;
+      srcErr.textContent = `error on line ${_srcErrLine}`;
+      if (!source) {
+        srcInfo.textContent = 'No script loaded';
+        srcView.innerHTML = `<div class="empty-state"><strong>No Script Loaded</strong>The Lua source of the loaded script shows here.</div>`;
+        _srcBaseline = null;
+        showChangeCount([]);
+        return;
+      }
+      const text = source.replace(/\r\n?/g, '\n');
+      // Text that didn't come from the editor is a new starting point: another script,
+      // a recent entry, or the file changed on disk (hot reload). It replaces the editor's text.
+      if (text !== _srcRanText && text !== _srcBaseline) {
+        _srcBaseline = text;
+        _srcRanText = null;
+        if (_srcEditing) {
+          srcEditor.value = text;
+          _srcDirty = false;
+        }
+      }
+      srcInfo.textContent = `${name || ''} · ${text.split('\n').length} lines`;
+      srcInfo.title = name || '';
+      const hunks = diffLines(_srcBaseline.split('\n'), text.split('\n'));
+      const lines = highlightLua(text);
+      srcView.innerHTML = lineDivs(lines, hunkLineClasses(hunks, lines.length));
+      if (_srcEditing) syncEditorHighlight();
+      else showChangeCount(hunks);
+    }
+
+    srcErr.addEventListener('click', () => {
+      const box = _srcEditing ? srcEditor : srcView;
+      const rows = (_srcEditing ? srcEditHl : srcView).querySelectorAll('.src-line');
+      const row = rows[Math.min(_srcErrLine, rows.length) - 1];
+      if (!row) return;
+      box.scrollTop = Math.max(0, row.offsetTop - box.clientHeight / 2);
+      if (_srcEditing) {
+        const lines = srcEditor.value.split('\n');
+        const n = Math.min(_srcErrLine, lines.length);
+        const start = lines.slice(0, n - 1).reduce((sum, l) => sum + l.length + 1, 0);
+        const scroll = srcEditor.scrollTop;
+        srcEditor.focus();
+        srcEditor.setSelectionRange(start, start + lines[n - 1].length);
+        srcEditor.scrollTop = scroll;
+      }
+    });
+
+    // Wrap and auto-run are remembered per browser
+    const _srcPref = (key, fallback) => { try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; } };
+    const _srcSetPref = (key, value) => { try { localStorage.setItem(key, value); } catch { /* not kept */ } };
+
+    function applySrcWrap() {
+      srcView.classList.toggle('wrap', srcWrap.checked);
+      srcEditWrap.classList.toggle('wrap', srcWrap.checked);
+      srcEditor.wrap = srcWrap.checked ? 'soft' : 'off';
+      if (_srcEditing) syncEditorHighlight(); // wrapping moves the flags
+    }
+    srcWrap.checked = _srcPref('diii.srcWrap', '0') === '1';
+    srcAuto.checked = _srcPref('diii.srcAutoRun', '0') === '1';
+    applySrcWrap();
+    srcWrap.addEventListener('change', () => { applySrcWrap(); _srcSetPref('diii.srcWrap', srcWrap.checked ? '1' : '0'); });
+    srcAuto.addEventListener('change', () => _srcSetPref('diii.srcAutoRun', srcAuto.checked ? '1' : '0'));
+    // A narrower or wider panel rewraps lines, which moves the flags
+    new ResizeObserver(() => { if (_srcEditing && srcWrap.checked) syncEditorHighlight(); }).observe(srcEditWrap);
+
+    srcEdit.addEventListener('click', () => {
+      _srcEditing = !_srcEditing;
+      if (_srcEditing && !_srcDirty) srcEditor.value = (loader.currentSource || '').replace(/\r\n?/g, '\n');
+      srcEditWrap.hidden = !_srcEditing;
+      srcView.hidden = _srcEditing;
+      srcRun.hidden = srcAutoLabel.hidden = !_srcEditing;
+      srcEdit.textContent = _srcEditing ? 'View' : '✎ Edit';
+      srcEdit.title = _srcEditing ? 'Back to the coloured view (edits that weren’t run are kept)' : 'Edit the script here and run it';
+      if (_srcEditing) {
+        syncEditorHighlight();
+        srcEditor.focus();
+      } else {
+        renderSource(loader.currentSource, loader.currentScriptName);
+      }
+    });
+
+    /** Run the editor's text as the current script, and keep it under Recent */
+    async function runEditedSource() {
+      clearTimeout(_srcAutoTimer);
+      const name = loader.currentScriptName || 'edited.lua';
+      _srcRanText = srcEditor.value;
+      _srcDirty = false;
+      await loader.runSource(_srcRanText);
+      rememberScript({ kind: 'file', name, source: _srcRanText, edited: true });
+    }
+
+    srcRun.addEventListener('click', runEditedSource);
+    srcEditor.addEventListener('input', () => {
+      _srcDirty = true;
+      syncEditorHighlight();
+      if (srcAuto.checked) {
+        clearTimeout(_srcAutoTimer);
+        _srcAutoTimer = setTimeout(runEditedSource, 1000);
+      }
+    });
+    srcEditor.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); runEditedSource(); return; }
+      if (e.key === 'Tab' && !e.shiftKey) {
+        e.preventDefault();
+        // through execCommand so Ctrl+Z can undo it
+        if (!document.execCommand('insertText', false, '  ')) {
+          srcEditor.setRangeText('  ', srcEditor.selectionStart, srcEditor.selectionEnd, 'end');
+          srcEditor.dispatchEvent(new Event('input'));
+        }
+      }
+    });
 
     btnGithubImport.addEventListener('click', runGithubImport);
     githubInput.addEventListener('keydown', e => { if (e.key === 'Enter') runGithubImport(); });

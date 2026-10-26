@@ -28,14 +28,19 @@ Done in `grid-api.js` (2026-10-26), checked with a mocked Web Audio in node; con
 - [x] Smooth reverb setting changes. Amount ramps. Decay applies on slider release: new sound goes to a new reverb while the old tail rings out. Decay 0 no longer throws.
 
 ### Step 3 — Script list and loader
-- [ ] JSON registry of external scripts that links to the originals (no copies), shown in the dropdown or a modal. See "Scripts dedicated list / modal?".
-- [ ] Remember loaded scripts in browser storage.
-- [ ] Show the Lua source in the inspector (fell has no README), maybe with editable parameters later.
-- [ ] Clear link to the (llm) example: `scripts/template/`.
+Done 2026-10-26; the UI part is not yet tried in a browser.
+- [x] JSON registry of external scripts that links to the originals (no copies): `scripts/external.json`, shown as "External scripts (from their repos)" in the dropdown. Entries can set `file`, `gridSize`, `orientation` (sluiiice: USB up), `docs` and `loader` (selector, many-roads). Repos without a README (fell) get a generated Guide page. The scripts are credited to their authors and aren't copied: the file's `about` note, the dropdown label, a notice above each one's Guide and a "Scripts by others" section in the README say so, with an issue link for authors who'd rather not be listed.
+- [x] Remember loaded scripts in browser storage: a "Recent" group with the last 8 repos imported with ⇱ (fetched fresh) and files opened from disk (source kept, up to 200 KB). "✕ Clear recent" empties it.
+- [x] Show the Lua source in the inspector: a Source tab with line numbers and Lua colouring; a Lua error marks its line. It scrolls by itself, so the horizontal scrollbar stays in view; "Wrap" wraps long lines.
+- [x] Edit and run: "✎ Edit" opens the source in an editor that keeps the colours and line numbers (a transparent textarea over a coloured copy). Lines changed from the loaded script are flagged (amber changed, green added, red tick where lines were removed); click a flag to restore that change, or "↺ Restore all"; Ctrl+Z undoes a restore. The view flags changed lines too. "▶ Run" (Ctrl+Enter) runs it as the current script, "Auto-run" runs 1 s after you stop typing. Edited scripts are kept under Recent. Editable parameters (sliders for values): later.
+- [x] ↻ Reload and hot reload no longer blank the Guide tab.
+- [x] Clear link to the (llm) example: "Write your own → Script template" in the dropdown loads `template/myscript.lua` with `GUIDE.md` in the Guide tab, which now links `LLM_INSTRUCTIONS.md`. The Docs tab's empty state points there too.
+- [x] README links and images now resolve against the script's own folder instead of the emulator page.
 
 ### Step 4 — Docs (the four tasks below)
 - [ ] Hardware vs. Emulation Differences: start from "Open compatibility issues" plus what step 1 settles.
 - [ ] Consolidate Getting Started: firmware now comes from the release; `building-firmware.md` (a copy of the firmware README) can become a link to the firmware repo.
+- [ ] README script list: list all bundled scripts by group (Music / Color demos / Tests, from `scripts/manifest.json`) and point to the template (`scripts/template/`, "Write your own" in the dropdown). "Available Scripts" and "My scripts" are out of date (e.g. the `serpentineseqr_dev.lua` link is broken).
 - [ ] Restructure the Walkthrough: UI only, developer content to a developer guide.
 - [ ] MIDI Documentation: last, needs my screenshots once the UI is stable.
 
@@ -63,6 +68,8 @@ Done in `grid-api.js` (2026-10-26), checked with a mocked Web Audio in node; con
 - clear link to the (llm) example
 
 ### Scripts dedicated list / modal?
+
+Done (2026-10-26): `scripts/external.json` plus a "Recent" list in browser storage, both in the dropdown (see Step 3).
 
 In general: perhaps we make a json file that can be used to add other scripts from which we can load into our repo, still linking to the originals not copying. 
 A more elaborate list to load scripts that remembers / stores the scripts locally in browser memory   

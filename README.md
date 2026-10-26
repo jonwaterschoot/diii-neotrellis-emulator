@@ -146,7 +146,22 @@ https://llllllll.co/t/iii/74311
 
 Okyeron's neotrellis repo: https://github.com/okyeron/neotrellis-monome
 
+## Scripts by others
 
+The emulator's script list also offers scripts by other people. They are not my work and they are not part of this project or copied into this repo: [`scripts/external.json`](scripts/external.json) only holds their names and repository links, and the emulator fetches each script from its author's repository when you load it. All credit goes to the authors.
+
+If you wrote one of these and would rather not be listed, please [open an issue](https://github.com/jonwaterschoot/diii-neotrellis-emulator/issues) and I'll take it out.
+
+- [kria iii](https://github.com/aktsom/kria_iii) by aktsom
+- [stepiii](https://github.com/nolliegray/stepiii) by nolliegray
+- [arpiii](https://github.com/nolliegray/arpiii) by nolliegray
+- [fugace](https://github.com/behindkeyframes/fugace) by behindkeyframes
+- [iiinvert](https://github.com/liamelliot/iiinvert) by liamelliot
+- [fell](https://github.com/liamelliot/fell) by liamelliot
+- [sluiiice](https://github.com/duncangeere/sluiiice) by duncangeere
+- [many-roads](https://github.com/boreal-ground/many-roads-grid) by boreal-ground
+
+The list also has my own [selector](https://github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii/doc/scripts/selector), which lives in the firmware repo.
 
 ## My scripts
 

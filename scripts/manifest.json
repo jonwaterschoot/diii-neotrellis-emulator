@@ -111,5 +111,15 @@
     "author": "jonwaterschoot",
     "version": "",
     "gridSize": [16, 8]
+  },
+  {
+    "name": "Script template",
+    "group": "Write your own",
+    "file": "template/myscript.lua",
+    "readme": "template/GUIDE.md",
+    "description": "Starting point for your own script. The Guide tab walks you through it; LLM_INSTRUCTIONS.md is the version to give to an LLM.",
+    "author": "jonwaterschoot",
+    "version": "",
+    "gridSize": [16, 8]
   }
 ]

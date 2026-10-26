@@ -130,6 +130,12 @@ export class LuaLoader {
     }
   }
 
+  /** Run edited source in place of the current script, under the same name and folder */
+  async runSource(source) {
+    this._currentScriptName = this._currentScriptName || 'edited.lua';
+    await this._execute(source, this._currentScriptName, this._scriptDir);
+  }
+
   // ─── WEBSOCKET HOT-RELOAD ─────────────────────────────────────────────────
 
   /**
