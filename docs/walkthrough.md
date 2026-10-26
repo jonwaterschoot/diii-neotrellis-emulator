@@ -88,12 +88,16 @@ The synth also plays when a MIDI output is selected. Mute it to hear only your o
 
 ## MIDI
 
-Pick a **MIDI In** and **MIDI Out** at the top (Chrome or Edge); **↻** looks for new devices.
+Pick a **MIDI In** and **MIDI Out** at the top (Chrome or Edge); **↻** looks for new devices. The first time, the browser asks whether the page may use MIDI devices: allow it, or the lists stay empty.
+
+The lists show the MIDI devices your computer knows. To reach a DAW or another program on the same computer, most systems need a virtual MIDI port; how to make one depends on your system.
 
 - **Out** sends the script's notes, CCs and clock.
 - **In** goes to the script's `event_midi`, for scripts that follow an external clock or a keyboard. For a script without `event_midi`, incoming notes press pads instead.
 
-If the same device is both input and output, a script can hear its own messages; the status bar warns when that happens. More in [Hardware vs. emulator](hardware-vs-emulator.md#midi).
+If the same device is both input and output, a script can hear its own messages; the status bar warns when that happens.
+
+**Timing.** The emulator keeps tempo, but each note or clock tick can be a few milliseconds early or late, and more when the tab is in the background. That's fine for playing along; for tight sync with other gear, let the script follow an external clock (MIDI In), or run it on the grid. More in [Hardware vs. emulator](hardware-vs-emulator.md#midi).
 
 ## Keyboard shortcuts
 

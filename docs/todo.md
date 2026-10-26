@@ -47,7 +47,7 @@ Done 2026-10-26; the UI part is not yet tried in a browser.
 - [x] Found during the audit: live reload didn't work for scripts in subfolders (`fs.watch` wasn't recursive), and the multi-screen test's thumbnail clicks no longer matched its name. Both fixed.
 - [x] New screenshots (2026-10-26): `emulator_screenshot2.png` (Live Manual, README and walkthrough) and `emulator_screenshot_editor.png` (Source editor, walkthrough).
 - [x] **`event_key` was never called** (Sandman, LeaveSeqr and the template defined it). Now the emulator calls `event_key(key)` on each key press when a script defines it, instead of its fixed pad presses (2026-10-26). LeaveSeqr's handles Tab now (it relied on the Tab → x1, y8 pad), and Sandman's hints match its handler. Documented in the walkthrough, script standard, guide, template and LLM instructions.
-- [ ] MIDI Documentation: last, needs my screenshots once the UI is stable.
+- [x] MIDI Documentation: kept general (2026-10-26), since MIDI ports and connections differ per system. The walkthrough's MIDI section covers the browser permission, virtual ports and timing; Hardware vs. emulator covers the differences. No screenshots.
 
 #### Docs audit (2026-10-26)
 
@@ -77,7 +77,7 @@ Target nav: Home · Getting started · Using the emulator (Walkthrough, Hardware
 - [ ] Rounded-corner toggle, other UI options (monochrome, invert, light mode; dark stays default).
 
 ## Tasks
-Moved into Step 4 above (2026-10-26). Left: **MIDI Documentation**: screenshots and diagrams of MIDI connections, and of the timing and clock-sync limits, so script writers understand them.
+Moved into Step 4 above (2026-10-26); all done.
 
 --
 
