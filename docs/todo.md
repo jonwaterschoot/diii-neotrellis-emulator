@@ -2,6 +2,49 @@
 
 As the project has grown, the documentation has become slightly repetitive across multiple files. The next phase of documentation should focus on creating a clear, linear structure without repeating concepts.
 
+## Plan (2026-10-26)
+
+Work through the steps in order: fix what's broken first, document once behavior is stable, add features last. Each step points to the notes further down in this file.
+
+**Context for a new session**
+- Engine: `engine/lua-loader.js` registers the Lua globals and the metro table; `engine/grid-api.js` holds the grid, MIDI, synth and metro timing. `index.html` holds the UI (script dropdown, MIDI monitor, FX).
+- iii reference: the firmware repo at `../neotrellis-monome` has the real API. `neotrellis_monome_picosdk_iii/src/iii/lua/lib.lua` (metro, midi helpers, pset), `src/iii/vm.c` (built-ins such as `midi_tx`, `fs_*`), `src/device_lua.c` (grid functions). Match those when adding to the emulator.
+- Testing without a browser: run the real engine in node with the `fengari` npm package. Set `globalThis.window = { fengari: require('fengari') }` and a `localStorage` stub, import `grid-api.js` and `lua-loader.js`, override `api.midi_note_on/off` to count notes, call `loader._execute(source, name)`, then drive keys with `api._luaEventGrid(x, y, z)` on timers. Run all scripts in `scripts/manifest.json` after engine changes to catch regressions. Confirm sound changes in the dev server (`npm start`).
+- External scripts can be fetched with `gh api repos/<owner>/<repo>/contents/<file>.lua --jq .content | base64 -d`.
+
+### Step 1 — Compatibility, round 2
+- [ ] **`event_midi`**: when the script defines `event_midi(d1, d2, d3)`, send incoming MIDI there and skip the note→pad mapping in `grid-api.js` `_handleMidiInput`. Fixes external clock (stepiii/arpiii clock source 2) and arpiii's MIDI keyboard. Confirm the approach with me first.
+- [ ] **sandman**: `midi_note_off(note, ch)` → `midi_note_off(note, 0, ch)` (5 calls in `scripts/sandman/sandman.lua`), then regenerate `sandman_min.lua` with `minify_lines()` from `scripts/minify.py`.
+- [ ] **`grid_led_get(x, y)`**: returns the 0–15 level, as on the firmware.
+- [ ] **Metro limit**: iii has 12 metros. Warn in the status bar when a script creates more.
+- [ ] **selector in the emulator**: provide `fs_list_files()` and `fs_run_file(name)` from `scripts/manifest.json`, and mark selector (and many-roads) as loader scripts.
+- [ ] **Re-test the external list** below (kria_iii playback, fell, sluiiice, iiinvert, fugace, arpiii by ear) and update the notes.
+
+### Step 2 — Sound glitches
+- [ ] Short fade on play/pause to remove clicks.
+- [ ] Smooth delay-time changes (no crackles).
+- [ ] Smooth reverb setting changes.
+
+### Step 3 — Script list and loader
+- [ ] JSON registry of external scripts that links to the originals (no copies), shown in the dropdown or a modal. See "Scripts dedicated list / modal?".
+- [ ] Remember loaded scripts in browser storage.
+- [ ] Show the Lua source in the inspector (fell has no README), maybe with editable parameters later.
+- [ ] Clear link to the (llm) example: `scripts/template/`.
+
+### Step 4 — Docs (the four tasks below)
+- [ ] Hardware vs. Emulation Differences: start from "Open compatibility issues" plus what step 1 settles.
+- [ ] Consolidate Getting Started: firmware now comes from the release; `building-firmware.md` (a copy of the firmware README) can become a link to the firmware repo.
+- [ ] Restructure the Walkthrough: UI only, developer content to a developer guide.
+- [ ] MIDI Documentation: last, needs my screenshots once the UI is stable.
+
+### Step 5 — New sound features
+- [ ] Drum sounds (up to seven, channel per sound, randomizer; helps iiinvert).
+- [ ] More synth models, reverb models.
+
+### Step 6 — Design
+- [ ] Favicon (grid icon) and pure-gray backgrounds: quick wins, can be slotted in anytime.
+- [ ] Rounded-corner toggle, other UI options (monochrome, invert, light mode; dark stays default).
+
 ## Tasks
 - [ ] **Consolidate 'Getting Started'**: Combine firmware flashing (`firmware-installation.md`), building (`building-firmware.md`), and general setup into a single, cohesive setup guide.
 - [ ] **Restructure the Walkthrough**: Extract the detailed Lua execution logic and LDoc API reference out of `walkthrough.md` and move it to a dedicated developer-focused `script-standards.md` or `developer-guide.md`. Keep `walkthrough.md` solely for navigating the emulator UI.
