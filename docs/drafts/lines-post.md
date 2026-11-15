@@ -4,7 +4,7 @@ Not posted yet: lines doesn't allow New and Basic Users (Trust Level 0 and 1) to
 
 Before posting:
 
-- Use a monochrome screenshot (◐ View → Monochrome), for example of kria iii. The YouTube short can go in as a second item: https://youtube.com/shorts/uC-vHQKUrx8
+- Use a monochrome screenshot (◐ View → Monochrome), for example of one of my own scripts. The YouTube short can go in as a second item: https://youtube.com/shorts/uC-vHQKUrx8
 - Check the version and download link. Better: tag a release on this repo and link to that instead of `main`.
 - Update the roadmap and the list of scripts by others.
 
@@ -28,7 +28,7 @@ Things that might be useful if you write iii scripts:
 - **Live Manual:** each script's controls drawn over the grid.
 - **MIDI in and out:** clock-following and keyboard-driven scripts work too.
 
-Scripts by others load straight from their authors' repos, and nothing is copied into mine: kria iii (aktsom), stepiii and arpiii (nolliegray), fugace (behindkeyframes), iiinvert and fell (liamelliot), sluiiice (duncangeere), many-roads (boreal-ground), and tehn's iii-scripts. All credit goes to them. If you're one of these authors and would rather not be listed, let me know and I'll take it out.
+It can load any iii script straight from its GitHub or Codeberg repo, and nothing is copied into mine. If you've written a script and would like it in the emulator's list, let me know.
 
 A caveat: I don't own a monome grid. I built this around a NeoTrellis clone running okyeron's firmware with iii, and I test the monochrome side with viii. So if you notice something behaving differently from your real grid, I'd really like to hear about it. The [Hardware vs. emulator](https://jonwaterschoot.github.io/diii-neotrellis-emulator/docs/hardware-vs-emulator/) page lists the differences I know of.
 

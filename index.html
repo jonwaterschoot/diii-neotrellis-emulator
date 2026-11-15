@@ -2798,7 +2798,7 @@
     let _externalScripts = [];      // scripts/external.json: scripts loaded from their own repos
     let _externalContact = null;    // where authors can ask to be removed from that list
 
-    // ─── EXTERNAL SCRIPTS — tehn (monome) ──────────────────────────────────────
+    // ─── iii EXAMPLE SCRIPTS — tehn (monome) ──────────────────────────────────────
     const TEHN_RAW_BASE = 'https://codeberg.org/tehn/iii-scripts/raw/branch/main/';
     const TEHN_REPO_URL = 'https://codeberg.org/tehn/iii-scripts';
     const TEHN_SCRIPTS = [
@@ -3231,9 +3231,9 @@
 
       renderRecentGroup();
 
-      // External scripts — tehn (monome) — fetched live from Codeberg
+      // iii example scripts — tehn (monome) — fetched live from Codeberg
       const group = document.createElement('optgroup');
-      group.label = 'external scripts — tehn (monome)';
+      group.label = 'iii example scripts — monome';
       TEHN_SCRIPTS.forEach(entry => {
         const opt = document.createElement('option');
         opt.value = TEHN_RAW_BASE + entry.path;
