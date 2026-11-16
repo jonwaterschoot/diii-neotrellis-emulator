@@ -1,7 +1,7 @@
 -- scriptname: My Script Name
 -- v1.0.0
 -- @author: Your Name
--- https://llllllll.co/t/your-thread  (replace or remove)
+-- https://github.com/your-username/your-repo/issues  (discussion link: replace or remove)
 --
 -- One sentence: what does this script do?
 -- Add a second line here if you need a bit more context.

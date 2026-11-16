@@ -1,7 +1,7 @@
 -- scriptname: Sandman
 -- v0.1.2
 -- @author: jonwaterschoot
--- https://llllllll.co/t/sandman
+-- https://github.com/jonwaterschoot/neotrellis-monome/issues
 --
 -- A living portrait: falling sand, leaves and water that become music.
 -- Rotate device 90 degrees CCW (power cable at top). Portrait: 8 wide x 16 tall.

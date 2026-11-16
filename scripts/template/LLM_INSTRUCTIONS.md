@@ -222,7 +222,7 @@ local function my_func(x, y)
   "project_url":  "https://github.com/user/repo",
   "author":       "Your Name",
   "description":  "One-sentence summary for the script selector",
-  "discussion_url": "https://llllllll.co/t/thread/12345",
+  "discussion_url": "https://github.com/user/repo/issues",
   "documentation_url": "https://raw.githubusercontent.com/user/repo/main/README.md",
   "tags": ["neotrellis", "sequencer"],
   "lua_file": "myscript.lua"
