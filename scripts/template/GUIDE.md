@@ -24,7 +24,7 @@ Fill in every field:
 -- scriptname: My Sequencer         ← required, shown in the UI
 -- v0.1.0                           ← semver, update as you go
 -- @author: Your Name               ← optional but encouraged
--- https://llllllll.co/t/...        ← your forum thread URL (add when you have one)
+-- https://github.com/...           ← discussion link, e.g. your repo's issues (add when you have one)
 --
 -- What the script does in one line. ← required, becomes the short description
 ```
@@ -164,7 +164,7 @@ Open `manifest.json` and fill in every field:
 | `project_url`  | Your GitHub repo URL |
 | `author`       | Your display name |
 | `description`  | Same one-liner as the Lua header |
-| `discussion_url` | llllllll.co thread (add when ready) |
+| `discussion_url` | Where people can ask about the script, e.g. your repo's issues (add when ready) |
 | `documentation_url` | Raw GitHub URL to your README.md |
 | `tags`         | Relevant tags: e.g. `["sequencer", "neotrellis"]` |
 | `lua_file`     | Your `.lua` filename |

@@ -8,7 +8,7 @@
  *     -- scriptname: description
  *     -- v1.0.0
  *     -- @author: name
- *     -- llllllll.co/t/thread-link
+ *     -- https://github.com/user/repo/issues
  *
  *   Section headers:
  *     -- @section Section Name

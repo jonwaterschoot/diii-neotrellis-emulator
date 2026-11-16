@@ -28,7 +28,7 @@ The top of every script should have an uninterrupted block of `--` comments:
 -- scriptname: Human Readable Script Name
 -- v1.0.0
 -- @author: Your Name
--- llllllll.co/t/your-thread  (or any URL)
+-- https://github.com/user/repo/issues  (or any URL)
 --
 -- One-line description of what the script does.
 ```
@@ -282,7 +282,7 @@ A `manifest.json` in the script's folder tells the emulator which file to load w
   "project_url": "https://github.com/user/repo",
   "author": "your-name",
   "description": "Snake sequencer with arpeggiator for NeoTrellis 16x8",
-  "discussion_url": "https://llllllll.co/t/your-thread/12345",
+  "discussion_url": "https://github.com/user/repo/issues",
   "documentation_url": "https://raw.githubusercontent.com/user/repo/main/README.md",
   "tags": ["sequencer", "generative", "neotrellis", "rgb"],
   "lua_file": "myscript.lua"
