@@ -57,7 +57,7 @@ I have a few DIY projects from okyeron, and it was through his Discord that I go
 I don't own original monome gear, so the monochrome side is tested with the [viii](https://dessertplanet.github.io/viii/) web app on my NeoTrellis grid.
 
 > [!IMPORTANT]
-> This is a vibecoded project: I'm not a C++ developer, and I built it with Claude and Gemini in VS Code and Google Antigravity. I have still spent many hours on it and learned a lot about the ecosystem.
+> This is a vibecoded project: built with Claude and Gemini in VS Code and Google Antigravity.
 
 ## Links
 
