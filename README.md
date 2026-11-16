@@ -40,20 +40,13 @@ My scripts, as grouped in the emulator's script list:
 
 ### Scripts by others
 
-The emulator's script list also offers scripts by other people. They are not my work and they are not part of this project or copied into this repo: [`scripts/external.json`](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/external.json) only holds their names and repository links, and the emulator fetches each script from its author's repository when you load it. All credit goes to the authors.
+For scripts by the iii community, see [lines](https://llllllll.co). The emulator can load any iii script from a GitHub or Codeberg repo, but scripts by other people are only listed here with their author's permission. If you wrote one and would like it listed, [open an issue](https://github.com/jonwaterschoot/diii-neotrellis-emulator/issues) or a pull request adding it to [`scripts/external.json`](https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/external.json).
 
-If you wrote one of these and would rather not be listed, please [open an issue](https://github.com/jonwaterschoot/diii-neotrellis-emulator/issues) and I'll take it out.
+The list has my own [selector](https://github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii/doc/scripts/selector), which lives in the firmware repo.
 
-- [kria iii](https://github.com/aktsom/kria_iii) by aktsom
-- [stepiii](https://github.com/nolliegray/stepiii) by nolliegray
-- [arpiii](https://github.com/nolliegray/arpiii) by nolliegray
-- [fugace](https://github.com/behindkeyframes/fugace) by behindkeyframes
-- [iiinvert](https://github.com/liamelliot/iiinvert) by liamelliot
-- [fell](https://github.com/liamelliot/fell) by liamelliot
-- [sluiiice](https://github.com/duncangeere/sluiiice) by duncangeere
-- [many-roads](https://github.com/boreal-ground/many-roads-grid) by boreal-ground
+### iii example scripts
 
-The list also has my own [selector](https://github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii/doc/scripts/selector), which lives in the firmware repo, and tehn's scripts from [monome's iii-scripts](https://codeberg.org/tehn/iii-scripts).
+The emulator also loads tehn's [iii-scripts](https://codeberg.org/tehn/iii-scripts), monome's official examples for iii. They're the reference the emulator is tested against: if they run the same here as on a grid, the emulator is doing its job. They load straight from Codeberg each time, and nothing is copied into this repo.
 
 ## Background
 

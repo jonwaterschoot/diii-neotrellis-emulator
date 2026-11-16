@@ -634,8 +634,8 @@ export class LuaLoader {
   /**
    * The device's flat filesystem, read-only: fs_list_files() lists the bundled scripts by
    * file name, and fs_run_file(name) runs one in the current Lua state, which is how loader
-   * scripts such as selector and many-roads start another script. Names that aren't bundled
-   * scripts are looked up next to the running script (many-roads keeps its data file there).
+   * loader scripts such as selector start another script. Names that aren't bundled
+   * scripts are looked up next to the running script.
    */
   _injectFs(L, lua, lauxlib, reportPcall) {
     const { to_luastring } = window.fengari;

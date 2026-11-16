@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../img/favicon.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -1066,6 +1066,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#iii-example-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iii example scripts
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1200,19 +1211,10 @@
 <li><strong>Write your own:</strong> the <a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/tree/main/scripts/template">script template</a>, with a step-by-step <a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/template/GUIDE.md">guide</a> and <a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/template/LLM_INSTRUCTIONS.md">instructions to give an LLM</a>.</li>
 </ul>
 <h3 id="scripts-by-others">Scripts by others<a class="headerlink" href="#scripts-by-others" title="Permanent link">&para;</a></h3>
-<p>The emulator's script list also offers scripts by other people. They are not my work and they are not part of this project or copied into this repo: <a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/external.json"><code>scripts/external.json</code></a> only holds their names and repository links, and the emulator fetches each script from its author's repository when you load it. All credit goes to the authors.</p>
-<p>If you wrote one of these and would rather not be listed, please <a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/issues">open an issue</a> and I'll take it out.</p>
-<ul>
-<li><a href="https://github.com/aktsom/kria_iii">kria iii</a> by aktsom</li>
-<li><a href="https://github.com/nolliegray/stepiii">stepiii</a> by nolliegray</li>
-<li><a href="https://github.com/nolliegray/arpiii">arpiii</a> by nolliegray</li>
-<li><a href="https://github.com/behindkeyframes/fugace">fugace</a> by behindkeyframes</li>
-<li><a href="https://github.com/liamelliot/iiinvert">iiinvert</a> by liamelliot</li>
-<li><a href="https://github.com/liamelliot/fell">fell</a> by liamelliot</li>
-<li><a href="https://github.com/duncangeere/sluiiice">sluiiice</a> by duncangeere</li>
-<li><a href="https://github.com/boreal-ground/many-roads-grid">many-roads</a> by boreal-ground</li>
-</ul>
-<p>The list also has my own <a href="https://github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii/doc/scripts/selector">selector</a>, which lives in the firmware repo, and tehn's scripts from <a href="https://codeberg.org/tehn/iii-scripts">monome's iii-scripts</a>.</p>
+<p>For scripts by the iii community, see <a href="https://llllllll.co">lines</a>. The emulator can load any iii script from a GitHub or Codeberg repo, but scripts by other people are only listed here with their author's permission. If you wrote one and would like it listed, <a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/issues">open an issue</a> or a pull request adding it to <a href="https://github.com/jonwaterschoot/diii-neotrellis-emulator/blob/main/scripts/external.json"><code>scripts/external.json</code></a>.</p>
+<p>The list has my own <a href="https://github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii/doc/scripts/selector">selector</a>, which lives in the firmware repo.</p>
+<h3 id="iii-example-scripts">iii example scripts<a class="headerlink" href="#iii-example-scripts" title="Permanent link">&para;</a></h3>
+<p>The emulator also loads tehn's <a href="https://codeberg.org/tehn/iii-scripts">iii-scripts</a>, monome's official examples for iii. They're the reference the emulator is tested against: if they run the same here as on a grid, the emulator is doing its job. They load straight from Codeberg each time, and nothing is copied into this repo.</p>
 <h2 id="background">Background<a class="headerlink" href="#background" title="Permanent link">&para;</a></h2>
 <p>This started as an interactive manual for my Serpentine script. Once it could play the script, I kept going until it could run other scripts too.</p>
 <p>I have a few DIY projects from okyeron, and it was through his Discord that I got curious about diii. I built my own version of <a href="https://github.com/okyeron/neotrellis-monome">okyeron's NeoTrellis firmware</a> with iii and colour support: <a href="https://github.com/jonwaterschoot/neotrellis-monome">jonwaterschoot/neotrellis-monome</a>. It also uses <a href="https://codeberg.org/jonwaterschoot/iii/src/branch/fix/streaming-upload">my fork of iii</a>, which can upload scripts larger than about 32 KB, such as LeaveSeqr (<a href="https://github.com/jonwaterschoot/neotrellis-monome/blob/main/neotrellis_monome_picosdk_iii/doc/changestracker/leaveseqr-upload-failure-investigation.md">details</a>).</p>
@@ -1282,7 +1284,7 @@ This is a vibecoded project: I'm not a C++ developer, and I built it with Claude
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
+      <script src="../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>

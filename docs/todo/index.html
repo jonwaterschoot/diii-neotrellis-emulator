@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../img/favicon.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -1176,17 +1176,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#testing-scripts" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Testing scripts:
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#open-compatibility-issues-found-2026-10-25" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1281,17 +1270,15 @@
 <p><strong>Context for a new session</strong>
 - Engine: <code>engine/lua-loader.js</code> registers the Lua globals and the metro table; <code>engine/grid-api.js</code> holds the grid, MIDI, synth and metro timing. <code>index.html</code> holds the UI (script dropdown, MIDI monitor, FX).
 - iii reference: the firmware repo at <code>../neotrellis-monome</code> has the real API. <code>neotrellis_monome_picosdk_iii/src/iii/lua/lib.lua</code> (metro, midi helpers, pset), <code>src/iii/vm.c</code> (built-ins such as <code>midi_tx</code>, <code>fs_*</code>), <code>src/device_lua.c</code> (grid functions). Match those when adding to the emulator.
-- Testing without a browser: run the real engine in node with the <code>fengari</code> npm package. Set <code>globalThis.window = { fengari: require('fengari') }</code> and a <code>localStorage</code> stub, import <code>grid-api.js</code> and <code>lua-loader.js</code>, override <code>api.midi_note_on/off</code> to count notes, call <code>loader._execute(source, name)</code>, then drive keys with <code>api._luaEventGrid(x, y, z)</code> on timers. Run all scripts in <code>scripts/manifest.json</code> after engine changes to catch regressions. Confirm sound changes in the dev server (<code>npm start</code>).
-- External scripts can be fetched with <code>gh api repos/&lt;owner&gt;/&lt;repo&gt;/contents/&lt;file&gt;.lua --jq .content | base64 -d</code>.</p>
+- Testing without a browser: run the real engine in node with the <code>fengari</code> npm package. Set <code>globalThis.window = { fengari: require('fengari') }</code> and a <code>localStorage</code> stub, import <code>grid-api.js</code> and <code>lua-loader.js</code>, override <code>api.midi_note_on/off</code> to count notes, call <code>loader._execute(source, name)</code>, then drive keys with <code>api._luaEventGrid(x, y, z)</code> on timers. Run all scripts in <code>scripts/manifest.json</code> after engine changes to catch regressions. Confirm sound changes in the dev server (<code>npm start</code>).</p>
 <h3 id="step-1-compatibility-round-2">Step 1 — Compatibility, round 2<a class="headerlink" href="#step-1-compatibility-round-2" title="Permanent link">&para;</a></h3>
 <ul>
-<li>[x] <strong><code>event_midi</code></strong>: when the script defines <code>event_midi(d1, d2, d3)</code>, send incoming MIDI there and skip the note→pad mapping in <code>grid-api.js</code> <code>_handleMidiInput</code>. The filter CC keeps working. The status bar warns once when the script receives its own output (same bytes sent within 20 ms). Node test: stepiii and arpiii follow external clock, arpiii arpeggiates a chord from MIDI in. Still to try with a real MIDI device.</li>
+<li>[x] <strong><code>event_midi</code></strong>: when the script defines <code>event_midi(d1, d2, d3)</code>, send incoming MIDI there and skip the note→pad mapping in <code>grid-api.js</code> <code>_handleMidiInput</code>. The filter CC keeps working. The status bar warns once when the script receives its own output (same bytes sent within 20 ms). Node test: clock-following and keyboard-driven scripts work. Still to try with a real MIDI device.</li>
 <li>[x] <strong>sandman</strong>: <code>midi_note_off(note, ch)</code> → <code>midi_note_off(note, 0, ch)</code> (5 calls in <code>scripts/sandman/sandman.lua</code>), then regenerate <code>sandman_min.lua</code> with <code>minify_lines()</code> from <code>scripts/minify.py</code>.</li>
 <li>[x] <strong><code>grid_led_get(x, y)</code></strong>: returns the 0–15 level, as on the firmware. Also added the firmware's <code>rel</code> flag: <code>grid_led(x, y, z, rel)</code> and <code>grid_led_all(z, rel)</code> add to the current level.</li>
 <li>[x] <strong>Metro limit</strong>: iii has 12 metros. Warn in the status bar when a script creates more. Added <code>metro.free(id)</code> and <code>metro.free_all()</code> too.</li>
-<li>[x] <strong>selector in the emulator</strong>: provide <code>fs_list_files()</code> and <code>fs_run_file(name)</code> from <code>scripts/manifest.json</code>. Selector and many-roads both work (node test). Marking them as loader scripts moves to the Step 3 registry.</li>
-<li>[x] <strong>lib.lua helpers</strong> (found while re-testing kria_iii): <code>engine/iii-lib.js</code> runs the firmware's lib.lua helpers before every script: <code>midi_out</code>, <code>midi_to_msg</code>, <code>ps</code>, <code>pt</code>, <code>round</code>, <code>linlin</code>, <code>wrap</code>, <code>clamp</code>, <code>_quote</code>, <code>slew</code>. <code>require</code> is <code>fs_run_file</code>, as on the device.</li>
-<li>[x] <strong>Re-test the external list</strong> below and update the notes. Done in node; arpiii and fell also checked by ear in the dev server (2026-10-26).</li>
+<li>[x] <strong>selector in the emulator</strong>: provide <code>fs_list_files()</code> and <code>fs_run_file(name)</code> from <code>scripts/manifest.json</code>. Selector works (node test). Marking them as loader scripts moves to the Step 3 registry.</li>
+<li>[x] <strong>lib.lua helpers</strong>: <code>engine/iii-lib.js</code> runs the firmware's lib.lua helpers before every script: <code>midi_out</code>, <code>midi_to_msg</code>, <code>ps</code>, <code>pt</code>, <code>round</code>, <code>linlin</code>, <code>wrap</code>, <code>clamp</code>, <code>_quote</code>, <code>slew</code>. <code>require</code> is <code>fs_run_file</code>, as on the device.</li>
 </ul>
 <h3 id="step-2-sound-glitches">Step 2 — Sound glitches<a class="headerlink" href="#step-2-sound-glitches" title="Permanent link">&para;</a></h3>
 <p>Done in <code>grid-api.js</code> (2026-10-26), checked with a mocked Web Audio in node; confirm by ear in the dev server.
@@ -1300,7 +1287,7 @@
 - [x] Smooth reverb setting changes. Amount ramps. Decay applies on slider release: new sound goes to a new reverb while the old tail rings out. Decay 0 no longer throws.</p>
 <h3 id="step-3-script-list-and-loader">Step 3 — Script list and loader<a class="headerlink" href="#step-3-script-list-and-loader" title="Permanent link">&para;</a></h3>
 <p>Done 2026-10-26; the UI part is not yet tried in a browser.
-- [x] JSON registry of external scripts that links to the originals (no copies): <code>scripts/external.json</code>, shown as "External scripts (from their repos)" in the dropdown. Entries can set <code>file</code>, <code>gridSize</code>, <code>orientation</code> (sluiiice: USB up), <code>docs</code> and <code>loader</code> (selector, many-roads). Repos without a README (fell) get a generated Guide page. The scripts are credited to their authors and aren't copied: the file's <code>about</code> note, the dropdown label, a notice above each one's Guide and a "Scripts by others" section in the README say so, with an issue link for authors who'd rather not be listed.
+- [x] JSON registry of external scripts that links to the originals (no copies): <code>scripts/external.json</code>, shown as "External scripts (from their repos)" in the dropdown. Entries can set <code>file</code>, <code>gridSize</code>, <code>orientation</code> (e.g. USB up), <code>docs</code> and <code>loader</code> (selector). Repos without a README get a generated Guide page. The scripts are credited to their authors and aren't copied: the file's <code>about</code> note, the dropdown label, a notice above each one's Guide and a "Scripts by others" section in the README say so, with an issue link for authors who'd rather not be listed.
 - [x] Remember loaded scripts in browser storage: a "Recent" group with the last 8 repos imported with ⇱ (fetched fresh) and files opened from disk (source kept, up to 200 KB). "✕ Clear recent" empties it.
 - [x] Show the Lua source in the inspector: a Source tab with line numbers and Lua colouring; a Lua error marks its line. It scrolls by itself, so the horizontal scrollbar stays in view; "Wrap" wraps long lines.
 - [x] Edit and run: "✎ Edit" opens the source in an editor that keeps the colours and line numbers (a transparent textarea over a coloured copy). Lines changed from the loaded script are flagged (amber changed, green added, red tick where lines were removed); click a flag to restore that change, or "↺ Restore all"; Ctrl+Z undoes a restore. The view flags changed lines too. "▶ Run" (Ctrl+Enter) runs it as the current script, "Auto-run" runs 1 s after you stop typing. Edited scripts are kept under Recent. Editable parameters (sliders for values): later.
@@ -1422,89 +1409,16 @@
 <p>Done (2026-10-26): <code>scripts/external.json</code> plus a "Recent" list in browser storage, both in the dropdown (see Step 3).</p>
 <p>In general: perhaps we make a json file that can be used to add other scripts from which we can load into our repo, still linking to the originals not copying. 
 A more elaborate list to load scripts that remembers / stores the scripts locally in browser memory   </p>
-<h2 id="testing-scripts">Testing scripts:<a class="headerlink" href="#testing-scripts" title="Permanent link">&para;</a></h2>
-<p>https://github.com/nolliegray/stepiii</p>
-<ul>
-<li>loads but doesn't seem to play, or respond beyond initial loading. Is it a clock issue?</li>
-<li>fixed (2026-10-25): it calls <code>midi_tx</code> for MIDI clock, which the emulator didn't have. Every failing metro tick left its error on the Lua stack, and after ~20 errors every metro and key press failed. The emulator now has <code>midi_tx</code>, clears errors and shows each one once. Checked in the dev server: works.</li>
-</ul>
-<p>https://github.com/duncangeere/sluiiice</p>
-<ul>
-<li>ok it's a 90° script, but we cannot know this from any settings file, so it's ok</li>
-<li>script bug, shows on the device: <code>strum()</code> calls <code>metro.free(strumclock)</code> with the metro instead of its id (<code>strumclock.id</code>). On iii that throws, so every strum leaks a metro, and after about 10 strums <code>metro.init</code> returns nil. The emulator now throws the same error ("pass m.id, not the metro"). Worth reporting upstream.</li>
-</ul>
-<p>https://github.com/aktsom/kria_iii</p>
-<ul>
-<li>Fails to load with error: 
-    <code>Connecting to github:aktsom/kria_iii…
-    Trying kria_iii.lua…
-    Fetching README…
-    Lua runtime error: kria_iii.lua:2: lua_gc not implemented
-    Error: kria_iii.lua:2: lua_gc not implemented</code></li>
-<li>fixed (2026-10-25): fengari has no garbage collector API, so <code>collectgarbage()</code> now gets a stand-in that returns 0. Loads; playback not tested yet.</li>
-<li>uses 11 metros. iii has 12, and lib.lua's slew takes one at boot, so kria fits exactly.</li>
-<li>fixed (2026-10-26): play (row 7, step 15) failed with <code>attempt to call a nil value (global 'midi_out')</code>. The emulator now runs the lib.lua helpers. Plays notes and MIDI clock in a node test.</li>
-</ul>
-<p>https://github.com/nolliegray/arpiii</p>
-<ul>
-<li>loads but doesn't seem to play, or respond beyond initial loading. Is it a clock issue?</li>
-<li>fixed (2026-10-25): same stack problem, caused by <code>collectgarbage("step")</code> every 0.1 s. It also relies on metro counts (one-shot gate-off) and <code>m.time = x</code> (swing); emulator metros now follow iii for both. Plays in a node test.</li>
-<li>MIDI keyboard input still won't work: see "Open compatibility issues" below.</li>
-<li>re-tested (2026-10-26): no errors, sends clock and notes; sounds right in the dev server.</li>
-<li>fixed (2026-10-26): MIDI keyboard and external clock now reach <code>event_midi</code> (node test).</li>
-</ul>
-<p>https://github.com/liamelliot/iiinvert/</p>
-<ul>
-<li>works (re-tested 2026-10-26, node: plays, no errors)</li>
-<li>uses <code>metro.free_all()</code>, which the emulator now has. On the device this also stops slew's metro.</li>
-<li>geared towards drums, perhaps the emulator should include a few drum options (e.g. take the models I used in WAV.builder Mangler)</li>
-</ul>
-<p>https://github.com/liamelliot/fell</p>
-<ul>
-<li>works, first one i fiind that uses 16 x 16 grid, and first proven use case!</li>
-<li>
-<p>only lua file, no readme for docs → https://llllllll.co/t/fell/72593</p>
-</li>
-<li>
-<p>This makes a good case for also allowing to view the content of lua files inside the inspector (even allowing to change parameters!)</p>
-</li>
-<li>re-tested (2026-10-26): no errors, and its 5 ms metro sounds right in the dev server (node on Windows can't time below ~15 ms, so node tests undercount its notes).</li>
-</ul>
-<p>https://github.com/behindkeyframes/fugace</p>
-<ul>
-<li>works (re-tested 2026-10-26, node: piano roll + play on row 7 x5 plays notes)</li>
-<li>uses <code>ps()</code> a lot; the emulator now prints it to the console instead of dropping it.</li>
-</ul>
-<p>https://github.com/boreal-ground/many-roads-grid</p>
-<ul>
-<li>stays empty, but that's logical since it's needing those lua's in place, we could mark it as a script loader</li>
-<li>I made my own version: selector</li>
-<li>works (2026-10-26, node): it runs <code>many-roads-data.lua</code> from its own repo, lists the bundled scripts and <code>require</code>s the one you press. Files that aren't bundled scripts are looked up next to the running script.</li>
-</ul>
-<p>C:\Users\jonwa\Documents\GitHub\neotrellis-monome\neotrellis_monome_picosdk_iii\doc\scripts\selector\selector.lua  </p>
-<ul>
-<li>logical error:</li>
-</ul>
-<div class="codehilite"><pre><span></span><code><span class="n">Loading selector.lua…</span>
-<span class="n">Lua runtime error: selector.lua:52: attempt to call a nil value (global 'fs_list_files')</span>
-<span class="n">Error: selector.lua:52: attempt to call a nil value (global 'fs_list_files')</span>
-</code></pre></div>
-
-<ul>
-<li>also mark as a selecting script and use the scripts in the the loader</li>
-<li>done (2026-10-26): <code>fs_list_files()</code> lists the bundled scripts by file name and <code>fs_run_file()</code> runs one. Load selector with the file picker or the GitHub import (<code>github.com/jonwaterschoot/neotrellis-monome/tree/main/neotrellis_monome_picosdk_iii/doc/scripts/selector</code>).</li>
-</ul>
 <h2 id="open-compatibility-issues-found-2026-10-25">Open compatibility issues (found 2026-10-25)<a class="headerlink" href="#open-compatibility-issues-found-2026-10-25" title="Permanent link">&para;</a></h2>
 <p>Settled in Step 1; what's left for script writers is on the <a href="../hardware-vs-emulator/">Hardware vs. Emulator</a> page.</p>
 <ul>
 <li><strong>Firmware bug</strong> (for the firmware fork): lib.lua's <code>slew.deinit()</code> calls <code>metro.free(slew.id)</code>, but <code>slew.id</code> is the metro, not its number, so it throws on the device and in the emulator. Fix: <code>metro.free(slew.id.id)</code>, or store the number.</li>
-<li><strong>sluiiice</strong> calls <code>metro.free(strumclock)</code> with the metro; worth reporting to its author (see its note above).</li>
 </ul>
 <h2 id="ideas-from-the-old-roadmapmd-2026-10-26">Ideas (from the old roadmap.md, 2026-10-26)<a class="headerlink" href="#ideas-from-the-old-roadmapmd-2026-10-26" title="Permanent link">&para;</a></h2>
 <p><strong>Serpentine</strong>
 - Make the death animation faster, or speed it up over the last 2–3 bars.
 - The panic button doesn't (fully) work.
-- BPM sync in or out (earlier attempts failed; <code>event_midi</code> now gets clock, see stepiii for an example).
+- BPM sync in or out (earlier attempts failed; <code>event_midi</code> now gets clock).
 - Docs: the spawn quantity control needs a title.</p>
 <p><strong>Emulator</strong>
 - Show which pads are held (right-click hold); the yellow border is hard to see on Serpentine's yellow.
@@ -1588,7 +1502,7 @@ A more elaborate list to load scripts that remembers / stores the scripts locall
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
+      <script src="../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>

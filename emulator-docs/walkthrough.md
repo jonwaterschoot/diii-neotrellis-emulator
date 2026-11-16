@@ -11,7 +11,7 @@ The script list at the top has these groups:
 - **Recent:** scripts you imported or opened, and scripts you edited, kept in this browser. **✕ Clear recent** empties it.
 - **Music, Colour demos, Tests, Write your own:** the scripts that come with the emulator.
 - **External scripts:** scripts by other people, loaded from their own repositories each time.
-- **tehn:** scripts from monome's iii-scripts.
+- **iii example scripts:** monome's official examples by tehn, loaded from Codeberg.
 
 Pick one and press **▶ Load**. Other ways to load a script:
 
@@ -107,7 +107,7 @@ Along the top: a tab for each synth, **Drums**, **+** to add a synth, and **Effe
 - **▶** plays a drum, and flashes whenever the script plays it. **⚄** makes a new version of that drum; **⚄ All** does all of them.
 - The closed hat cuts off the open hat, as on a real kit. The kit has its own level and effect sends.
 
-A script such as iiinvert sends its drums on channel 1: set the kit to channel 1 to hear them as drums.
+If a script sends its drums on another channel, say channel 1, set the kit to that channel to hear them as drums.
 
 **Effects**, shared by all synths and the kit:
 
